@@ -254,7 +254,6 @@ function productCard(product) {
         <div class="product-card__price-row">
           <div class="product-card__price">
             <strong>${audLabel(aud(product.jpy))}</strong>
-            <small>${jpyLabel(product.jpy)} per box</small>
           </div>
           <button class="add-button" type="button" data-add="${product.id}" aria-label="Add ${product.title} to cart">+</button>
         </div>
