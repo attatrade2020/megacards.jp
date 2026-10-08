@@ -259,8 +259,8 @@ const heroSlides = [
   {
     category: "pokemon",
     eyebrow: "Japanese Pokémon · shipped from Japan",
-    title: "Japan’s latest Pokémon boxes, ready for Australia.",
-    lead: "Discover current Japanese Pokémon releases with clear AUD estimates and tracked international delivery direct from Japan.",
+    title: "Japan’s latest Pokémon boxes, without the guesswork.",
+    lead: "Discover current Japanese Pokémon releases with clear price estimates and tracked international delivery direct from Japan.",
     action: "Shop Pokémon boxes",
     badge: "Latest Pokémon",
     front: "m6a-30th-celebration",
@@ -272,7 +272,7 @@ const heroSlides = [
     category: "onepiece",
     eyebrow: "ONE PIECE Card Game · Japanese edition",
     title: "Build your ONE PIECE collection from Japan.",
-    lead: "Shop Japanese ONE PIECE booster boxes, packed in Japan and sent to Australia with live tracked shipping options.",
+    lead: "Shop Japanese ONE PIECE booster boxes, packed in Japan with live tracked shipping options at checkout.",
     action: "Shop ONE PIECE boxes",
     badge: "ONE PIECE pick",
     front: "op13-carrying-on-his-will",
@@ -283,8 +283,8 @@ const heroSlides = [
   {
     category: "yugioh",
     eyebrow: "Yu-Gi-Oh! OCG · direct from Japan",
-    title: "Japanese Yu-Gi-Oh! OCG boxes for Australian collectors.",
-    lead: "Explore Japanese OCG releases with AUD estimates, secure checkout, and tracked shipping from Japan to Australia.",
+    title: "Japanese Yu-Gi-Oh! OCG boxes for collectors.",
+    lead: "Explore Japanese OCG releases with clear price estimates, secure checkout, and tracked shipping from Japan.",
     action: "Shop Yu-Gi-Oh! boxes",
     badge: "Yu-Gi-Oh! OCG",
     front: "yac1-original-artwork",
@@ -296,7 +296,7 @@ const heroSlides = [
     category: "pokemon",
     eyebrow: "Japanese Pokémon · collector rotation",
     title: "More Japanese Pokémon sets, always in motion.",
-    lead: "Move through high-class and expansion boxes, compare clear Australian-dollar estimates, and build your shipment from Japan.",
+    lead: "Move through high-class and expansion boxes, compare clear price estimates, and build your shipment from Japan.",
     action: "Explore Pokémon boxes",
     badge: "Collector rotation",
     front: "m2-inferno-x",
@@ -308,7 +308,7 @@ const heroSlides = [
     category: "onepiece",
     eyebrow: "ONE PIECE Card Game · rotating picks",
     title: "Fresh ONE PIECE picks from the Japanese lineup.",
-    lead: "Browse booster and extra-booster boxes with a live view of the collection and tracked delivery choices for Australia.",
+    lead: "Browse booster and extra-booster boxes with a live view of the collection and tracked delivery choices for your postcode.",
     action: "Explore ONE PIECE boxes",
     badge: "Extra booster pick",
     front: "eb04-egghead-crisis",
@@ -320,7 +320,7 @@ const heroSlides = [
     category: "yugioh",
     eyebrow: "Yu-Gi-Oh! OCG · rotating picks",
     title: "Limited and value OCG boxes, direct from Japan.",
-    lead: "Discover current Japanese Yu-Gi-Oh! releases as the lineup rotates, with AUD estimates and tracked express shipping.",
+    lead: "Discover current Japanese Yu-Gi-Oh! releases as the lineup rotates, with clear price estimates and tracked express shipping.",
     action: "Explore Yu-Gi-Oh! boxes",
     badge: "Value OCG pick",
     front: "dbgv-glorious-victors",
@@ -556,7 +556,7 @@ async function calculateShipping() {
   if (!/^\d{4}$/.test(postcode)) {
     resetShippingQuote();
     shippingStatus.classList.add("error");
-    shippingStatus.textContent = "Enter a valid 4-digit Australian postcode.";
+    shippingStatus.textContent = "Enter a valid 4-digit postcode.";
     return;
   }
   if (!Object.values(state.cart).some((quantity) => quantity > 0)) {
@@ -714,7 +714,7 @@ async function submitOrder(event) {
     paypal_fee: amounts.fee,
     total_jpy: amounts.total,
     invoice_currency: "JPY",
-    notes: "Australian storefront order",
+    notes: "MegaCards storefront order",
     timestamp: now.toISOString(),
     status: "Pending_Payment"
   };
