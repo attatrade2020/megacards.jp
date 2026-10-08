@@ -1,0 +1,20 @@
+{
+  "packaging_weight_g": 250,
+  "padding_cm": 4,
+  "products": {
+    "m6a-30th-celebration": { "weight_g": 450, "width_cm": 14, "depth_cm": 14, "height_cm": 5 },
+    "m6-storm-emeralda": { "weight_g": 350, "width_cm": 14, "depth_cm": 14, "height_cm": 4 },
+    "m5-abyss-eye": { "weight_g": 350, "width_cm": 14, "depth_cm": 14, "height_cm": 4 },
+    "m4-ninja-spinner": { "weight_g": 350, "width_cm": 14, "depth_cm": 14, "height_cm": 4 },
+    "m2a-mega-dream-ex": { "weight_g": 300, "width_cm": 14, "depth_cm": 8, "height_cm": 7 },
+    "m2-inferno-x": { "weight_g": 350, "width_cm": 14, "depth_cm": 14, "height_cm": 4 },
+    "op13-carrying-on-his-will": { "weight_g": 420, "width_cm": 14, "depth_cm": 14, "height_cm": 5 },
+    "op14-azure-seas-seven": { "weight_g": 420, "width_cm": 14, "depth_cm": 14, "height_cm": 5 },
+    "eb04-egghead-crisis": { "weight_g": 420, "width_cm": 14, "depth_cm": 14, "height_cm": 5 },
+    "op11-fist-divine-speed": { "weight_g": 420, "width_cm": 14, "depth_cm": 14, "height_cm": 5 },
+    "yac1-original-artwork": { "weight_g": 300, "width_cm": 14, "depth_cm": 8, "height_cm": 6 },
+    "dbgv-glorious-victors": { "weight_g": 220, "width_cm": 14, "depth_cm": 8, "height_cm": 4 },
+    "26lp-world-championship": { "weight_g": 220, "width_cm": 14, "depth_cm": 8, "height_cm": 4 },
+    "lpg2-ra-yellow": { "weight_g": 220, "width_cm": 14, "depth_cm": 8, "height_cm": 4 }
+  }
+}

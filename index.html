@@ -142,8 +142,23 @@
     <div class="cart-items" id="cartItems"></div>
     <div class="cart-panel__footer">
       <div class="cart-total"><span>Market-price subtotal</span><strong id="cartTotal">A$0</strong></div>
+      <div class="shipping-calculator" id="shippingCalculator">
+        <div class="shipping-calculator__heading">
+          <strong>Shipping to Australia</strong>
+          <span>Live carrier rates</span>
+        </div>
+        <div class="shipping-calculator__fields">
+          <label><span>Postcode</span><input id="shippingPostcode" type="text" inputmode="numeric" maxlength="4" placeholder="2000" autocomplete="postal-code"></label>
+          <label><span>State</span><select id="shippingState" autocomplete="address-level1"><option value="NSW">NSW</option><option value="VIC">VIC</option><option value="QLD">QLD</option><option value="WA">WA</option><option value="SA">SA</option><option value="TAS">TAS</option><option value="ACT">ACT</option><option value="NT">NT</option></select></label>
+          <button class="shipping-calculator__button" id="calculateShipping" type="button">Calculate</button>
+        </div>
+        <div class="shipping-calculator__status" id="shippingStatus" aria-live="polite"></div>
+        <div class="shipping-rates" id="shippingRates"></div>
+      </div>
+      <div class="cart-total cart-total--shipping" id="shippingTotalRow" hidden><span>Shipping</span><strong id="shippingTotal">A$0</strong></div>
+      <div class="cart-total cart-total--grand" id="grandTotalRow" hidden><span>Estimated total</span><strong id="grandTotal">A$0</strong></div>
       <button class="button button--primary button--wide" type="button" disabled>Checkout coming next</button>
-      <small>Shipping and taxes are calculated separately.</small>
+      <small>Shipping is calculated from packed weight and dimensions. Taxes and import charges are not included.</small>
     </div>
   </aside>
   <button class="cart-scrim" id="cartScrim" type="button" aria-label="Close cart" hidden></button>

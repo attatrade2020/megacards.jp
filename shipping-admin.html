@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>商品サイズ・重量設定 | MegaCards 管理画面</title>
+  <style>
+    :root { --ink:#0b1428; --muted:#667085; --line:#e2e8f0; --paper:#f5f7fb; --blue:#1162eb; --yellow:#ffd339; }
+    * { box-sizing:border-box; }
+    body { margin:0; color:var(--ink); background:var(--paper); font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; }
+    button,input { font:inherit; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:16px; min-height:64px; padding:12px clamp(16px,4vw,48px); color:#fff; background:var(--ink); }
+    .brand { display:flex; align-items:center; gap:10px; font-weight:800; }
+    .mark { display:grid; place-items:center; width:32px; height:32px; border-radius:9px; color:var(--ink); background:var(--yellow); }
+    .topbar a { color:#fff; font-size:.85rem; }
+    main { width:min(1180px,calc(100% - 28px)); margin:36px auto 70px; }
+    h1 { margin:0 0 8px; font-size:clamp(1.6rem,4vw,2.4rem); }
+    .lead { margin:0 0 28px; color:var(--muted); }
+    .panel { padding:24px; border:1px solid var(--line); border-radius:16px; background:#fff; box-shadow:0 14px 40px rgba(11,20,40,.06); }
+    .login { max-width:420px; margin:12vh auto; }
+    .login input { width:100%; margin:16px 0 10px; }
+    input { min-height:40px; padding:8px 10px; border:1px solid var(--line); border-radius:8px; }
+    button { min-height:40px; padding:8px 16px; border:0; border-radius:8px; font-weight:700; cursor:pointer; }
+    .primary { color:#fff; background:var(--blue); }
+    .secondary { color:var(--ink); background:#eef2f7; }
+    .error { color:#a52a2a; }
+    .success { color:#087443; }
+    .toolbar { display:flex; justify-content:space-between; align-items:end; gap:18px; margin-bottom:20px; }
+    .package-fields { display:flex; gap:12px; flex-wrap:wrap; }
+    label span { display:block; margin-bottom:5px; color:var(--muted); font-size:.72rem; font-weight:700; }
+    .package-fields input { width:150px; }
+    .table-wrap { overflow:auto; border:1px solid var(--line); border-radius:12px; }
+    table { width:100%; min-width:880px; border-collapse:collapse; }
+    th,td { padding:12px; border-bottom:1px solid var(--line); text-align:left; }
+    th { color:var(--muted); background:#f8fafc; font-size:.75rem; text-transform:uppercase; letter-spacing:.04em; }
+    td:first-child { font-weight:700; }
+    td small { display:block; margin-top:3px; color:var(--muted); font-weight:400; }
+    td input { width:92px; text-align:right; }
+    .actions { display:flex; justify-content:flex-end; align-items:center; gap:14px; margin-top:20px; }
+    [hidden] { display:none !important; }
+    @media(max-width:700px){ .toolbar { align-items:stretch; flex-direction:column; } .actions { align-items:stretch; flex-direction:column-reverse; } .actions button { width:100%; } }
+  </style>
+</head>
+<body>
+  <header class="topbar"><div class="brand"><span class="mark">M</span>MegaCards 管理画面</div><a href="admin.html#shipping">管理画面へ戻る</a></header>
+  <main>
+    <section class="panel login" id="loginPanel">
+      <h1>送料用の商品情報</h1>
+      <p class="lead">管理画面のパスワードを入力してください。</p>
+      <input id="password" type="password" autocomplete="current-password" placeholder="Password">
+      <button class="primary" id="loginButton" type="button">ログイン</button>
+      <p id="loginStatus" class="error" aria-live="polite"></p>
+    </section>
+
+    <section id="editor" hidden>
+      <h1>商品サイズ・重量設定</h1>
+      <p class="lead">ここで設定した値を使って、カートの商品数量からオーストラリア向け送料を計算します。数値は梱包前の商品単体です。</p>
+      <div class="panel">
+        <div class="toolbar">
+          <div class="package-fields">
+            <label><span>梱包材重量 (g)</span><input id="packagingWeight" type="number" min="0" max="5000" step="10"></label>
+            <label><span>外箱余白 (cm)</span><input id="paddingCm" type="number" min="0" max="30" step="1"></label>
+          </div>
+          <button class="secondary" id="reloadButton" type="button">再読み込み</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>商品</th><th>重量 (g)</th><th>幅 (cm)</th><th>奥行 (cm)</th><th>高さ (cm)</th></tr></thead>
+            <tbody id="productRows"></tbody>
+          </table>
+        </div>
+        <div class="actions"><span id="saveStatus" aria-live="polite"></span><button class="primary" id="saveButton" type="button">すべて保存</button></div>
+      </div>
+    </section>
+  </main>
+  <script>
+    const products = [
+      ['m6a-30th-celebration','Pokémon','30th CELEBRATION'],['m6-storm-emeralda','Pokémon','Storm Emeralda'],['m5-abyss-eye','Pokémon','Abyss Eye'],['m4-ninja-spinner','Pokémon','Ninja Spinner'],['m2a-mega-dream-ex','Pokémon','MEGA Dream ex'],['m2-inferno-x','Pokémon','Inferno X'],
+      ['op13-carrying-on-his-will','ONE PIECE','CARRYING ON HIS WILL'],['op14-azure-seas-seven','ONE PIECE',"THE AZURE SEA'S SEVEN"],['eb04-egghead-crisis','ONE PIECE','EGGHEAD CRISIS'],['op11-fist-divine-speed','ONE PIECE','A Fist of Divine Speed'],
+      ['yac1-original-artwork','Yu-Gi-Oh!','ORIGINAL ARTWORK COLLECTION'],['dbgv-glorious-victors','Yu-Gi-Oh!','Glorious Victors'],['26lp-world-championship','Yu-Gi-Oh!','WORLD CHAMPIONSHIP 2026'],['lpg2-ra-yellow','Yu-Gi-Oh!','Ra Yellow']
+    ];
+    let adminPassword = '';
+    let currentData = null;
+    const $ = (id) => document.getElementById(id);
+
+    async function api(action, extra = {}) {
+      const response = await fetch('shipping_products.php', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action,password:adminPassword,...extra}) });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || '通信に失敗しました');
+      return data;
+    }
+    function render(data) {
+      currentData = data;
+      $('packagingWeight').value = data.packaging_weight_g ?? 250;
+      $('paddingCm').value = data.padding_cm ?? 4;
+      $('productRows').innerHTML = products.map(([id,category,name]) => {
+        const p = data.products[id] || {};
+        const field = (key,value) => `<input type="number" min="1" max="30000" step="1" data-id="${id}" data-key="${key}" value="${value ?? ''}" required>`;
+        return `<tr><td>${name}<small>${category} · ${id}</small></td><td>${field('weight_g',p.weight_g)}</td><td>${field('width_cm',p.width_cm)}</td><td>${field('depth_cm',p.depth_cm)}</td><td>${field('height_cm',p.height_cm)}</td></tr>`;
+      }).join('');
+    }
+    async function login() {
+      adminPassword = $('password').value;
+      $('loginStatus').textContent = '確認中…';
+      try {
+        const result = await api('load_admin');
+        render(result.data);
+        $('loginPanel').hidden = true;
+        $('editor').hidden = false;
+      } catch (error) { $('loginStatus').textContent = error.message; }
+    }
+    async function reload() {
+      const result = await api('load_admin');
+      render(result.data);
+      $('saveStatus').className = '';
+      $('saveStatus').textContent = '再読み込みしました';
+    }
+    async function save() {
+      const data = { packaging_weight_g:Number($('packagingWeight').value), padding_cm:Number($('paddingCm').value), products:{} };
+      document.querySelectorAll('[data-id]').forEach((input) => {
+        data.products[input.dataset.id] ||= {};
+        data.products[input.dataset.id][input.dataset.key] = Number(input.value);
+      });
+      if ([...document.querySelectorAll('[data-id]')].some((input) => !input.value || Number(input.value) < 1)) {
+        $('saveStatus').className = 'error'; $('saveStatus').textContent = 'すべての値を1以上で入力してください'; return;
+      }
+      $('saveButton').disabled = true;
+      $('saveStatus').className = ''; $('saveStatus').textContent = '保存中…';
+      try {
+        await api('save',{data});
+        $('saveStatus').className = 'success'; $('saveStatus').textContent = '保存しました';
+      } catch (error) { $('saveStatus').className = 'error'; $('saveStatus').textContent = error.message; }
+      finally { $('saveButton').disabled = false; }
+    }
+    $('loginButton').addEventListener('click',login);
+    $('password').addEventListener('keydown',(event) => { if (event.key === 'Enter') login(); });
+    $('reloadButton').addEventListener('click',reload);
+    $('saveButton').addEventListener('click',save);
+  </script>
+</body>
+</html>

@@ -172,7 +172,27 @@ const products = [
 ];
 
 const categoryNames = { all: "All booster boxes", pokemon: "Pokémon boxes", onepiece: "ONE PIECE boxes", yugioh: "Yu-Gi-Oh! boxes" };
-const state = { query: "", sort: "featured", category: "all", cart: {} };
+const fallbackShippingProfiles = {
+  packaging_weight_g: 250,
+  padding_cm: 4,
+  products: {
+    "m6a-30th-celebration": { weight_g: 450, width_cm: 14, depth_cm: 14, height_cm: 5 },
+    "m6-storm-emeralda": { weight_g: 350, width_cm: 14, depth_cm: 14, height_cm: 4 },
+    "m5-abyss-eye": { weight_g: 350, width_cm: 14, depth_cm: 14, height_cm: 4 },
+    "m4-ninja-spinner": { weight_g: 350, width_cm: 14, depth_cm: 14, height_cm: 4 },
+    "m2a-mega-dream-ex": { weight_g: 300, width_cm: 14, depth_cm: 8, height_cm: 7 },
+    "m2-inferno-x": { weight_g: 350, width_cm: 14, depth_cm: 14, height_cm: 4 },
+    "op13-carrying-on-his-will": { weight_g: 420, width_cm: 14, depth_cm: 14, height_cm: 5 },
+    "op14-azure-seas-seven": { weight_g: 420, width_cm: 14, depth_cm: 14, height_cm: 5 },
+    "eb04-egghead-crisis": { weight_g: 420, width_cm: 14, depth_cm: 14, height_cm: 5 },
+    "op11-fist-divine-speed": { weight_g: 420, width_cm: 14, depth_cm: 14, height_cm: 5 },
+    "yac1-original-artwork": { weight_g: 300, width_cm: 14, depth_cm: 8, height_cm: 6 },
+    "dbgv-glorious-victors": { weight_g: 220, width_cm: 14, depth_cm: 8, height_cm: 4 },
+    "26lp-world-championship": { weight_g: 220, width_cm: 14, depth_cm: 8, height_cm: 4 },
+    "lpg2-ra-yellow": { weight_g: 220, width_cm: 14, depth_cm: 8, height_cm: 4 }
+  }
+};
+const state = { query: "", sort: "featured", category: "all", cart: {}, shippingProfiles: fallbackShippingProfiles, shippingQuote: null };
 
 const aud = (jpy) => Math.round(jpy / AUD_JPY_RATE);
 const audLabel = (value) => new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(value);
@@ -190,6 +210,15 @@ const closeCartButton = document.getElementById("closeCart");
 const cartItems = document.getElementById("cartItems");
 const cartCount = document.getElementById("cartCount");
 const cartTotal = document.getElementById("cartTotal");
+const shippingPostcode = document.getElementById("shippingPostcode");
+const shippingState = document.getElementById("shippingState");
+const calculateShippingButton = document.getElementById("calculateShipping");
+const shippingStatus = document.getElementById("shippingStatus");
+const shippingRates = document.getElementById("shippingRates");
+const shippingTotalRow = document.getElementById("shippingTotalRow");
+const shippingTotal = document.getElementById("shippingTotal");
+const grandTotalRow = document.getElementById("grandTotalRow");
+const grandTotal = document.getElementById("grandTotal");
 
 function productCard(product) {
   return `
@@ -226,13 +255,157 @@ function renderProducts() {
   productGrid.innerHTML = filtered.length ? filtered.map(productCard).join("") : '<div class="empty-state">No boxes match your search.</div>';
 }
 
-function renderCart() {
-  const entries = Object.entries(state.cart).filter(([, quantity]) => quantity > 0);
-  const count = entries.reduce((sum, [, quantity]) => sum + quantity, 0);
-  const total = entries.reduce((sum, [id, quantity]) => {
+function cartSubtotalAud() {
+  return Object.entries(state.cart).reduce((sum, [id, quantity]) => {
     const product = products.find((item) => item.id === id);
     return sum + (product ? aud(product.jpy) * quantity : 0);
   }, 0);
+}
+
+function resetShippingQuote(message = "") {
+  state.shippingQuote = null;
+  shippingRates.innerHTML = "";
+  shippingTotalRow.hidden = true;
+  grandTotalRow.hidden = true;
+  shippingStatus.classList.remove("error");
+  shippingStatus.textContent = message;
+}
+
+function buildShipment() {
+  const entries = Object.entries(state.cart).filter(([, quantity]) => quantity > 0);
+  const padding = Number(state.shippingProfiles.padding_cm) || 4;
+  let weight = Number(state.shippingProfiles.packaging_weight_g) || 250;
+  let width = 1;
+  let depth = 1;
+  let stackedHeight = 0;
+  const items = [];
+
+  entries.forEach(([id, quantity]) => {
+    const product = products.find((item) => item.id === id);
+    const profile = state.shippingProfiles.products[id] || fallbackShippingProfiles.products[id];
+    if (!product || !profile) return;
+    weight += profile.weight_g * quantity;
+    width = Math.max(width, profile.width_cm);
+    depth = Math.max(depth, profile.depth_cm);
+    stackedHeight += profile.height_cm * quantity;
+    items.push({ name: product.title, price: product.jpy, quantity, weight: profile.weight_g });
+  });
+
+  return {
+    weight: Math.ceil(weight),
+    width: Math.ceil(width + padding),
+    depth: Math.ceil(depth + padding),
+    height: Math.ceil(stackedHeight + padding),
+    items,
+    totalValue: entries.reduce((sum, [id, quantity]) => {
+      const product = products.find((item) => item.id === id);
+      return sum + (product ? product.jpy * quantity : 0);
+    }, 0)
+  };
+}
+
+const carrierLabels = { fedex: "FedEx", japanpost: "Japan Post", ups: "UPS", dhl: "DHL" };
+const serviceLabels = {
+  fedex_international_priority_express: "International Priority Express",
+  fedex_international_priority_eod: "International Priority",
+  fedex_international_connect_plus: "International Connect Plus",
+  fedex_international_economy: "International Economy",
+  japanpost_ems: "EMS",
+  japanpost_parcel_air: "International Parcel Air",
+  japanpost_parcel_sea: "International Parcel Sea",
+  japanpost_air_packet: "Air Small Packet",
+  ups_worldwide_express_plus: "Worldwide Express Plus",
+  ups_worldwide_express: "Worldwide Express",
+  ups_saver: "Worldwide Saver",
+  ups_worldwide_expedited: "Worldwide Expedited",
+  dhl_express_worldwide: "Express Worldwide"
+};
+
+function selectShippingRate(index) {
+  if (!state.shippingQuote?.rates[index]) return;
+  state.shippingQuote.selected = index;
+  const rate = state.shippingQuote.rates[index];
+  const shippingAud = aud(rate.price);
+  shippingTotal.textContent = audLabel(shippingAud);
+  grandTotal.textContent = audLabel(cartSubtotalAud() + shippingAud);
+  shippingTotalRow.hidden = false;
+  grandTotalRow.hidden = false;
+}
+
+function renderShippingRates(rates, shipment) {
+  const allowed = rates
+    .filter((rate) => Number(rate.price) > 0 && serviceLabels[rate.service])
+    .sort((a, b) => Number(a.price) - Number(b.price));
+  if (!allowed.length) throw new Error("No shipping services are available for this postcode.");
+  state.shippingQuote = { rates: allowed, selected: 0 };
+  shippingStatus.textContent = `${shipment.weight.toLocaleString()} g · ${shipment.width} × ${shipment.depth} × ${shipment.height} cm packed`;
+  shippingRates.innerHTML = allowed.map((rate, index) => `
+    <label class="shipping-rate">
+      <input type="radio" name="shippingRate" value="${index}" ${index === 0 ? "checked" : ""}>
+      <span class="shipping-rate__name"><strong>${carrierLabels[rate.carrier] || rate.carrier}</strong><small>${serviceLabels[rate.service] || rate.service}</small></span>
+      <span class="shipping-rate__price">${audLabel(aud(Number(rate.price)))}</span>
+    </label>`).join("");
+  selectShippingRate(0);
+}
+
+async function calculateShipping() {
+  const postcode = shippingPostcode.value.trim();
+  if (!/^\d{4}$/.test(postcode)) {
+    resetShippingQuote();
+    shippingStatus.classList.add("error");
+    shippingStatus.textContent = "Enter a valid 4-digit Australian postcode.";
+    return;
+  }
+  if (!Object.values(state.cart).some((quantity) => quantity > 0)) {
+    resetShippingQuote();
+    shippingStatus.classList.add("error");
+    shippingStatus.textContent = "Add at least one box before calculating shipping.";
+    return;
+  }
+
+  const shipment = buildShipment();
+  calculateShippingButton.disabled = true;
+  calculateShippingButton.textContent = "Checking…";
+  resetShippingQuote("Requesting live carrier rates…");
+  try {
+    const response = await fetch("shipping_rates.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        country: "AU", zip: postcode, state: shippingState.value, city: "Australia", address1: "Shipping quote",
+        name: "MegaCards customer", phone: "+61000000000", email: "quote@megacards.jp",
+        weight: shipment.weight, width: shipment.width, depth: shipment.depth, height: shipment.height,
+        items: shipment.items, total_value: shipment.totalValue
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || data.error) throw new Error(data.error || "Unable to retrieve shipping rates.");
+    renderShippingRates(data.rates || [], shipment);
+  } catch (error) {
+    resetShippingQuote();
+    shippingStatus.classList.add("error");
+    shippingStatus.textContent = error.message || "Unable to retrieve shipping rates.";
+  } finally {
+    calculateShippingButton.disabled = false;
+    calculateShippingButton.textContent = "Calculate";
+  }
+}
+
+async function loadShippingProfiles() {
+  try {
+    const response = await fetch("shipping_products.php", { cache: "no-store" });
+    if (!response.ok) return;
+    const data = await response.json();
+    if (data?.products) state.shippingProfiles = data;
+  } catch (_) {
+    state.shippingProfiles = fallbackShippingProfiles;
+  }
+}
+
+function renderCart() {
+  const entries = Object.entries(state.cart).filter(([, quantity]) => quantity > 0);
+  const count = entries.reduce((sum, [, quantity]) => sum + quantity, 0);
+  const total = cartSubtotalAud();
 
   cartCount.textContent = count;
   cartTotal.textContent = audLabel(total);
@@ -245,6 +418,7 @@ function renderCart() {
         <button type="button" data-remove="${id}">Remove</button>
       </div>`;
   }).join("") : '<div class="cart-empty">Your cart is empty.<br>Add a box to get started.</div>';
+  calculateShippingButton.disabled = entries.length === 0;
 }
 
 function openCart() {
@@ -268,6 +442,7 @@ productGrid.addEventListener("click", (event) => {
   if (!button) return;
   const id = button.dataset.add;
   state.cart[id] = (state.cart[id] || 0) + 1;
+  resetShippingQuote("Cart updated. Recalculate shipping for the new parcel.");
   renderCart();
   openCart();
 });
@@ -276,6 +451,7 @@ cartItems.addEventListener("click", (event) => {
   const button = event.target.closest("[data-remove]");
   if (!button) return;
   delete state.cart[button.dataset.remove];
+  resetShippingQuote(Object.keys(state.cart).length ? "Cart updated. Recalculate shipping for the new parcel." : "");
   renderCart();
 });
 
@@ -296,7 +472,20 @@ categoryTabs.addEventListener("click", (event) => {
 cartButton.addEventListener("click", openCart);
 closeCartButton.addEventListener("click", closeCart);
 cartScrim.addEventListener("click", closeCart);
+calculateShippingButton.addEventListener("click", calculateShipping);
+shippingPostcode.addEventListener("input", () => {
+  shippingPostcode.value = shippingPostcode.value.replace(/\D/g, "").slice(0, 4);
+  if (state.shippingQuote) resetShippingQuote("Postcode changed. Calculate again for updated rates.");
+});
+shippingState.addEventListener("change", () => {
+  if (state.shippingQuote) resetShippingQuote("State changed. Calculate again for updated rates.");
+});
+shippingRates.addEventListener("change", (event) => {
+  const input = event.target.closest('input[name="shippingRate"]');
+  if (input) selectShippingRate(Number(input.value));
+});
 document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeCart(); });
 
 renderProducts();
 renderCart();
+loadShippingProfiles();
