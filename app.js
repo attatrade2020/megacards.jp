@@ -364,7 +364,10 @@ function productCard(product) {
           <div class="product-card__price">
             <strong>${audLabel(aud(product.jpy))}</strong>
           </div>
-          <button class="add-button" type="button" data-add="${product.id}" aria-label="Add ${product.title} to cart">+</button>
+          <div class="product-card__actions">
+            <label class="product-card__quantity"><span>Qty</span><input type="number" min="1" max="99" step="1" value="1" inputmode="numeric" data-quantity="${product.id}" aria-label="Quantity for ${product.title}"></label>
+            <button class="add-button" type="button" data-add="${product.id}" aria-label="Add selected quantity of ${product.title} to cart">+</button>
+          </div>
         </div>
       </div>
     </article>`;
@@ -846,7 +849,10 @@ productGrid.addEventListener("click", (event) => {
   const button = event.target.closest("[data-add]");
   if (!button) return;
   const id = button.dataset.add;
-  state.cart[id] = (state.cart[id] || 0) + 1;
+  const quantityInput = button.closest(".product-card")?.querySelector(`[data-quantity="${id}"]`);
+  const quantity = Math.min(99, Math.max(1, Math.trunc(Number(quantityInput?.value) || 1)));
+  if (quantityInput) quantityInput.value = String(quantity);
+  state.cart[id] = (state.cart[id] || 0) + quantity;
   resetShippingQuote("Cart updated. Recalculate shipping for the new parcel.");
   renderCart();
   openCart();
