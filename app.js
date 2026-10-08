@@ -257,7 +257,6 @@ function productCard(product) {
           </div>
           <button class="add-button" type="button" data-add="${product.id}" aria-label="Add ${product.title} to cart">+</button>
         </div>
-        <a class="product-card__source" href="${product.source}" target="_blank" rel="noopener noreferrer">Price and image source: SNKRDUNK</a>
       </div>
     </article>`;
 }
