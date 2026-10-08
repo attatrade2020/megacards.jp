@@ -181,7 +181,7 @@ const fallbackShippingProfiles = {
 const state = { query: "", sort: "featured", category: "all", cart: {}, shippingProfiles: fallbackShippingProfiles, shippingQuote: null };
 
 const aud = (jpy) => Math.round(jpy / AUD_JPY_RATE);
-const audLabel = (value) => `A$${new Intl.NumberFormat("en-AU", { maximumFractionDigits: 0 }).format(value)} AUD`;
+const audLabel = (value) => `A$${new Intl.NumberFormat("en-AU", { maximumFractionDigits: 0 }).format(value)}`;
 const jpyLabel = (value) => new Intl.NumberFormat("ja-JP", { style: "currency", currency: "JPY", maximumFractionDigits: 0 }).format(value);
 
 const productGrid = document.getElementById("productGrid");
@@ -408,11 +408,11 @@ function renderCustomsEstimate() {
   if (productValueAud <= 1000) {
     customsIndicator.dataset.status = "low";
     customsTitle.textContent = "Customs duty generally not charged";
-    customsMessage.textContent = `${audLabel(productValueAud)} product value is within the ABF low-value threshold of A$1,000 AUD. GST may still apply at sale; ABF makes the final assessment.`;
+    customsMessage.textContent = `${audLabel(productValueAud)} product value is within the ABF low-value threshold of A$1,000. GST may still apply at sale; ABF makes the final assessment.`;
   } else {
     customsIndicator.dataset.status = "high";
     customsTitle.textContent = "Import charges may apply";
-    customsMessage.textContent = `${audLabel(productValueAud)} product value is above A$1,000 AUD. An Import Declaration is generally required; JAEPA may reduce duty for qualifying goods. ABF makes the final assessment.`;
+    customsMessage.textContent = `${audLabel(productValueAud)} product value is above A$1,000. An Import Declaration is generally required; JAEPA may reduce duty for qualifying goods. ABF makes the final assessment.`;
   }
 }
 
