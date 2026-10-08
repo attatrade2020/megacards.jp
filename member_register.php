@@ -20,8 +20,8 @@ function megacards_member_validate(array $input): array
 
     if ($name === '' || mb_strlen($name) > 80) return ['error' => 'Enter your full name.'];
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 190) return ['error' => 'Enter a valid email address.'];
-    if (strlen($password) < 10 || strlen($password) > 128 || !preg_match('/[A-Za-z]/', $password) || !preg_match('/\d/', $password)) {
-        return ['error' => 'Use at least 10 characters with a letter and a number.'];
+    if (strlen($password) < 8 || strlen($password) > 128 || !preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password)) {
+        return ['error' => 'Use at least 8 characters with an uppercase letter and a number.'];
     }
     if (!in_array($state, $states, true)) return ['error' => 'Select your Australian state or territory.'];
     if (!$accepted) return ['error' => 'Accept the Terms and Privacy Policy to register.'];

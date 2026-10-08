@@ -995,8 +995,8 @@ async function submitRegistration(event) {
     registerStatus.textContent = "Passwords do not match.";
     return;
   }
-  if (password.length < 10 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
-    registerStatus.textContent = "Use at least 10 characters with a letter and a number.";
+  if (password.length < 8 || !/[A-Z]/.test(password) || !/\d/.test(password)) {
+    registerStatus.textContent = "Use at least 8 characters with an uppercase letter and a number.";
     return;
   }
 

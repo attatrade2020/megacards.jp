@@ -284,8 +284,8 @@
           <label><span>Full name</span><input name="name" type="text" autocomplete="name" maxlength="80" required></label>
           <label><span>Email address</span><input name="email" type="email" autocomplete="email" maxlength="190" required></label>
           <label class="register-field--wide"><span>State or territory</span><select name="state" autocomplete="address-level1" required><option value="">Select</option><option value="NSW">New South Wales</option><option value="VIC">Victoria</option><option value="QLD">Queensland</option><option value="WA">Western Australia</option><option value="SA">South Australia</option><option value="TAS">Tasmania</option><option value="ACT">Australian Capital Territory</option><option value="NT">Northern Territory</option></select></label>
-          <label class="register-field--wide"><span>Password</span><input name="password" type="password" autocomplete="new-password" minlength="10" maxlength="128" required><small>At least 10 characters, including a letter and a number.</small></label>
-          <label class="register-field--wide"><span>Confirm password</span><input name="confirmPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label>
+          <label class="register-field--wide"><span>Password</span><input name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" pattern="(?=.*[A-Z])(?=.*[0-9]).{8,128}" title="Use at least 8 characters with an uppercase letter and a number." required><small>At least 8 characters, including an uppercase letter and a number.</small></label>
+          <label class="register-field--wide"><span>Confirm password</span><input name="confirmPassword" type="password" autocomplete="new-password" minlength="8" maxlength="128" pattern="(?=.*[A-Z])(?=.*[0-9]).{8,128}" title="Use at least 8 characters with an uppercase letter and a number." required></label>
           <label class="register-check"><input name="marketing" type="checkbox"><span>Send me occasional product and store updates.</span></label>
           <label class="register-check"><input name="acceptedTerms" type="checkbox" required><span>I agree to the <a href="terms.html" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>.</span></label>
           <label class="register-honeypot" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
@@ -312,6 +312,6 @@
     </div>
   </footer>
 
-  <script src="app.js?v=20261008-12"></script>
+  <script src="app.js?v=20261008-13"></script>
 </body>
 </html>
