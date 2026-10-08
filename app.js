@@ -487,9 +487,9 @@ function selectShippingRate(index) {
 
 function renderShippingRates(rates, shipment) {
   const allowed = rates
-    .filter((rate) => Number(rate.price) > 0 && serviceLabels[rate.service])
+    .filter((rate) => Number(rate.price) > 0 && ["dhl", "fedex"].includes(String(rate.carrier).toLowerCase()) && serviceLabels[rate.service])
     .sort((a, b) => Number(a.price) - Number(b.price));
-  if (!allowed.length) throw new Error("No shipping services are available for this postcode.");
+  if (!allowed.length) throw new Error("No DHL or FedEx services are available for this postcode.");
   state.shippingQuote = { rates: allowed, selected: 0 };
   shippingStatus.textContent = `${shipment.weight.toLocaleString()} g · ${shipment.width} × ${shipment.depth} × ${shipment.height} cm packed`;
   shippingRates.innerHTML = allowed.map((rate, index) => `
