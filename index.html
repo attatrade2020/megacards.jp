@@ -158,11 +158,72 @@
       </div>
       <div class="cart-total cart-total--shipping" id="shippingTotalRow" hidden><span>Shipping</span><strong id="shippingTotal">A$0</strong></div>
       <div class="cart-total cart-total--grand" id="grandTotalRow" hidden><span>Estimated total</span><strong id="grandTotal">A$0</strong></div>
-      <button class="button button--primary button--wide" type="button" disabled>Checkout coming next</button>
+      <button class="button button--primary button--wide" id="checkoutButton" type="button" disabled>Continue to secure checkout</button>
       <small>Shipping is calculated from packed weight and dimensions. Taxes and import charges are not included.</small>
     </div>
   </aside>
   <button class="cart-scrim" id="cartScrim" type="button" aria-label="Close cart" hidden></button>
+
+  <dialog class="checkout-modal" id="checkoutModal" aria-labelledby="checkoutTitle">
+    <div class="checkout-modal__header">
+      <div><p class="eyebrow eyebrow--dark">Secure checkout</p><h2 id="checkoutTitle">Delivery & payment</h2></div>
+      <button class="icon-button" id="closeCheckout" type="button" aria-label="Close checkout">Close</button>
+    </div>
+    <form class="checkout-form" id="checkoutForm">
+      <section class="checkout-section">
+        <div class="checkout-section__heading"><span>01</span><div><h3>Choose payment</h3><p>Your order is invoiced in Japanese yen.</p></div></div>
+        <div class="payment-options">
+          <label class="payment-option">
+            <input type="radio" name="paymentMethod" value="wise" checked>
+            <span class="payment-option__brand payment-option__brand--wise">WISE</span>
+            <span><strong>Pay with Wise</strong><small>Fast bank or card payment in JPY</small></span>
+          </label>
+          <label class="payment-option">
+            <input type="radio" name="paymentMethod" value="paypal">
+            <span class="payment-option__brand payment-option__brand--paypal">PayPal</span>
+            <span><strong>Pay with PayPal</strong><small>A 5% transaction fee applies</small></span>
+          </label>
+        </div>
+      </section>
+
+      <section class="checkout-section">
+        <div class="checkout-section__heading"><span>02</span><div><h3>Australian delivery address</h3><p>Use the address your carrier can deliver to.</p></div></div>
+        <div class="checkout-fields">
+          <label class="checkout-field checkout-field--wide"><span>Full name</span><input id="checkoutName" name="name" type="text" autocomplete="name" required></label>
+          <label><span>Email</span><input id="checkoutEmail" name="email" type="email" autocomplete="email" required></label>
+          <label><span>Phone</span><input id="checkoutPhone" name="phone" type="tel" autocomplete="tel" placeholder="+61" required></label>
+          <label class="checkout-field checkout-field--wide"><span>Street address</span><input id="checkoutAddress1" name="address1" type="text" autocomplete="address-line1" required></label>
+          <label class="checkout-field checkout-field--wide"><span>Apartment, suite, etc. <em>optional</em></span><input id="checkoutAddress2" name="address2" type="text" autocomplete="address-line2"></label>
+          <label><span>Suburb / city</span><input id="checkoutCity" name="city" type="text" autocomplete="address-level2" required></label>
+          <label><span>State</span><select id="checkoutState" name="state" autocomplete="address-level1" required><option value="NSW">New South Wales</option><option value="VIC">Victoria</option><option value="QLD">Queensland</option><option value="WA">Western Australia</option><option value="SA">South Australia</option><option value="TAS">Tasmania</option><option value="ACT">Australian Capital Territory</option><option value="NT">Northern Territory</option></select></label>
+          <label><span>Postcode</span><input id="checkoutPostcode" name="postcode" type="text" inputmode="numeric" maxlength="4" autocomplete="postal-code" required pattern="[0-9]{4}"></label>
+          <label><span>Country</span><input type="text" value="Australia" readonly></label>
+        </div>
+      </section>
+
+      <section class="checkout-section checkout-summary" aria-labelledby="checkoutSummaryTitle">
+        <div class="checkout-section__heading"><span>03</span><div><h3 id="checkoutSummaryTitle">Order summary</h3><p>Review the final invoice amount before submitting.</p></div></div>
+        <div id="checkoutItems"></div>
+        <div class="checkout-summary__row"><span>Products</span><strong id="checkoutSubtotal">¥0</strong></div>
+        <div class="checkout-summary__row"><span id="checkoutShippingLabel">Shipping</span><strong id="checkoutShipping">¥0</strong></div>
+        <div class="checkout-summary__row" id="checkoutFeeRow" hidden><span>PayPal transaction fee (5%)</span><strong id="checkoutFee">¥0</strong></div>
+        <div class="checkout-summary__row checkout-summary__row--total"><span>Total due in JPY<small id="checkoutAudEstimate">Approx. A$0</small></span><strong id="checkoutGrandTotal">¥0</strong></div>
+      </section>
+
+      <p class="checkout-status" id="checkoutStatus" role="status" aria-live="polite"></p>
+      <button class="button button--checkout" id="submitOrder" type="submit">Submit order & pay with Wise</button>
+      <p class="checkout-fineprint">By submitting, you confirm that the delivery details are correct. Your payment link is valid for 10 minutes.</p>
+    </form>
+    <div class="checkout-success" id="checkoutSuccess" hidden>
+      <span class="checkout-success__icon" aria-hidden="true">✓</span>
+      <p class="eyebrow eyebrow--dark">Order received</p>
+      <h2>Complete your payment</h2>
+      <p id="checkoutSuccessMessage"></p>
+      <a class="button button--pay" id="paymentLink" href="#" target="_blank" rel="noopener noreferrer">Pay now</a>
+      <p class="checkout-fineprint">We also sent the payment link to your email. Check your spam folder if it does not arrive within a few minutes.</p>
+      <button class="checkout-text-button" id="finishCheckout" type="button">Continue shopping</button>
+    </div>
+  </dialog>
 
   <footer>
     <div class="shell footer__inner">

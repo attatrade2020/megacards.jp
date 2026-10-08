@@ -219,6 +219,26 @@ const shippingTotalRow = document.getElementById("shippingTotalRow");
 const shippingTotal = document.getElementById("shippingTotal");
 const grandTotalRow = document.getElementById("grandTotalRow");
 const grandTotal = document.getElementById("grandTotal");
+const checkoutButton = document.getElementById("checkoutButton");
+const checkoutModal = document.getElementById("checkoutModal");
+const closeCheckoutButton = document.getElementById("closeCheckout");
+const checkoutForm = document.getElementById("checkoutForm");
+const checkoutSuccess = document.getElementById("checkoutSuccess");
+const checkoutItems = document.getElementById("checkoutItems");
+const checkoutSubtotal = document.getElementById("checkoutSubtotal");
+const checkoutShipping = document.getElementById("checkoutShipping");
+const checkoutShippingLabel = document.getElementById("checkoutShippingLabel");
+const checkoutFeeRow = document.getElementById("checkoutFeeRow");
+const checkoutFee = document.getElementById("checkoutFee");
+const checkoutGrandTotal = document.getElementById("checkoutGrandTotal");
+const checkoutAudEstimate = document.getElementById("checkoutAudEstimate");
+const checkoutStatus = document.getElementById("checkoutStatus");
+const submitOrderButton = document.getElementById("submitOrder");
+const checkoutSuccessMessage = document.getElementById("checkoutSuccessMessage");
+const paymentLink = document.getElementById("paymentLink");
+const finishCheckoutButton = document.getElementById("finishCheckout");
+const checkoutState = document.getElementById("checkoutState");
+const checkoutPostcode = document.getElementById("checkoutPostcode");
 
 function productCard(product) {
   return `
@@ -269,6 +289,7 @@ function resetShippingQuote(message = "") {
   grandTotalRow.hidden = true;
   shippingStatus.classList.remove("error");
   shippingStatus.textContent = message;
+  checkoutButton.disabled = true;
 }
 
 function buildShipment() {
@@ -329,6 +350,7 @@ function selectShippingRate(index) {
   grandTotal.textContent = audLabel(cartSubtotalAud() + shippingAud);
   shippingTotalRow.hidden = false;
   grandTotalRow.hidden = false;
+  checkoutButton.disabled = false;
 }
 
 function renderShippingRates(rates, shipment) {
@@ -401,6 +423,198 @@ async function loadShippingProfiles() {
   }
 }
 
+function selectedPaymentMethod() {
+  return checkoutForm.querySelector('input[name="paymentMethod"]:checked')?.value || "wise";
+}
+
+function checkoutAmounts() {
+  const subtotal = buildShipment().totalValue;
+  const selectedRate = state.shippingQuote?.rates[state.shippingQuote.selected];
+  const shipping = Number(selectedRate?.price) || 0;
+  const fee = selectedPaymentMethod() === "paypal" ? Math.round((subtotal + shipping) * 0.05) : 0;
+  return { subtotal, shipping, fee, total: subtotal + shipping + fee };
+}
+
+function updateCheckoutSummary() {
+  const shipment = buildShipment();
+  const rate = state.shippingQuote?.rates[state.shippingQuote.selected];
+  const amounts = checkoutAmounts();
+  checkoutItems.innerHTML = shipment.items.map((item) => `
+    <p class="checkout-summary__item"><span>${item.name} × ${item.quantity}</span><strong>${jpyLabel(item.price * item.quantity)}</strong></p>`).join("");
+  checkoutSubtotal.textContent = jpyLabel(amounts.subtotal);
+  checkoutShipping.textContent = jpyLabel(amounts.shipping);
+  checkoutShippingLabel.textContent = rate ? `${carrierLabels[rate.carrier] || rate.carrier} · ${serviceLabels[rate.service] || rate.service}` : "Shipping";
+  checkoutFeeRow.hidden = amounts.fee === 0;
+  checkoutFee.textContent = jpyLabel(amounts.fee);
+  checkoutGrandTotal.textContent = jpyLabel(amounts.total);
+  checkoutAudEstimate.textContent = `Approx. ${audLabel(aud(amounts.total))}`;
+  const method = selectedPaymentMethod();
+  submitOrderButton.textContent = `Submit order & pay with ${method === "paypal" ? "PayPal" : "Wise"}`;
+}
+
+function openCheckout() {
+  if (!state.shippingQuote?.rates[state.shippingQuote.selected]) return;
+  checkoutState.value = shippingState.value;
+  checkoutPostcode.value = shippingPostcode.value;
+  checkoutStatus.textContent = "";
+  checkoutForm.hidden = false;
+  checkoutSuccess.hidden = true;
+  updateCheckoutSummary();
+  closeCart();
+  checkoutModal.showModal();
+  document.body.classList.add("checkout-open");
+}
+
+function closeCheckout() {
+  if (checkoutModal.open) checkoutModal.close();
+  document.body.classList.remove("checkout-open");
+}
+
+function makeOrderNumber() {
+  return String(Math.floor(10000000 + Math.random() * 90000000));
+}
+
+async function parseJsonResponse(response, fallbackMessage) {
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.error) throw new Error(data.error || fallbackMessage);
+  return data;
+}
+
+async function submitOrder(event) {
+  event.preventDefault();
+  checkoutStatus.textContent = "";
+  if (!checkoutForm.reportValidity()) return;
+  if (!state.shippingQuote?.rates[state.shippingQuote.selected]) {
+    checkoutStatus.textContent = "Your shipping quote has expired. Return to the cart and calculate it again.";
+    return;
+  }
+  if (checkoutPostcode.value.trim() !== shippingPostcode.value.trim() || checkoutState.value !== shippingState.value) {
+    checkoutStatus.textContent = "Postcode or state changed. Close checkout and recalculate shipping for the new destination.";
+    return;
+  }
+
+  const formData = new FormData(checkoutForm);
+  const name = String(formData.get("name") || "").trim();
+  const email = String(formData.get("email") || "").trim();
+  const phone = String(formData.get("phone") || "").trim();
+  const address = {
+    line1: String(formData.get("address1") || "").trim(),
+    line2: String(formData.get("address2") || "").trim(),
+    city: String(formData.get("city") || "").trim(),
+    state: checkoutState.value,
+    zip: checkoutPostcode.value.trim(),
+    country: "AU",
+    phone
+  };
+  const paymentMethod = selectedPaymentMethod();
+  const shipment = buildShipment();
+  const rate = state.shippingQuote.rates[state.shippingQuote.selected];
+  const shippingInfo = { carrier: rate.carrier, service: rate.service, price: Number(rate.price) };
+  const amounts = checkoutAmounts();
+  const orderNumber = makeOrderNumber();
+  const now = new Date();
+  const items = shipment.items.map((item) => {
+    const product = products.find((entry) => entry.title === item.name);
+    return { id: product?.id || "", title: item.name, qty: item.quantity, price_jpy: item.price };
+  });
+  const payload = {
+    action: "order",
+    order_number: orderNumber,
+    name,
+    email,
+    country: "AU",
+    contact: phone,
+    address,
+    items,
+    subtotal_jpy: amounts.subtotal,
+    shipping: shippingInfo,
+    payment_method: paymentMethod,
+    paypal_fee: amounts.fee,
+    total_jpy: amounts.total,
+    invoice_currency: "JPY",
+    notes: "Australian storefront order",
+    timestamp: now.toISOString(),
+    status: "Pending_Payment"
+  };
+
+  submitOrderButton.disabled = true;
+  submitOrderButton.textContent = "Creating your order…";
+  try {
+    const orderResponse = await fetch("api_proxy.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    await parseJsonResponse(orderResponse, "The order service did not respond.");
+
+    let payUrl;
+    if (paymentMethod === "paypal") {
+      const paypalResponse = await fetch("paypal_invoice.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "create_invoice",
+          order_id: orderNumber,
+          customer_email: email,
+          customer_name: name,
+          items: [
+            ...items.map((item) => ({ name: item.title, quantity: item.qty, price: item.price_jpy })),
+            ...(amounts.fee ? [{ name: "PayPal transaction fee (5%)", quantity: 1, price: amounts.fee }] : [])
+          ],
+          shipping: amounts.shipping,
+          note: `MegaCards.jp Order: ${orderNumber}`
+        })
+      });
+      const paypalData = await parseJsonResponse(paypalResponse, "Could not create the PayPal invoice.");
+      if (!paypalData.ok || !paypalData.payment_link) throw new Error(paypalData.error || "Could not create the PayPal payment link.");
+      payUrl = paypalData.payment_link;
+    } else {
+      const description = `${orderNumber} - Valid for 10 minutes`;
+      payUrl = `https://wise.com/pay/business/q32cyu?amount=${amounts.total}&currency=JPY&description=${encodeURIComponent(description)}`;
+    }
+
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    const expiryString = expiresAt.toLocaleString("en-AU", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+    const emailPayload = {
+      email,
+      name,
+      order_number: orderNumber,
+      payment_method: paymentMethod,
+      country: "AU",
+      contact: phone,
+      address,
+      total_jpy: amounts.total,
+      subtotal_jpy: amounts.subtotal,
+      shipping_price: amounts.shipping,
+      shipping_carrier: rate.carrier,
+      shipping_service: rate.service,
+      items,
+      currency_code: "AUD",
+      currency_symbol: "A$",
+      currency_rate: 1 / AUD_JPY_RATE,
+      paypal_fee: amounts.fee,
+      expiry_str: expiryString,
+      ...(paymentMethod === "paypal" ? { paypal_pay_url: payUrl } : { wise_pay_url: payUrl })
+    };
+    fetch("send_order_email.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(emailPayload)
+    }).catch(() => {});
+
+    checkoutForm.hidden = true;
+    checkoutSuccess.hidden = false;
+    checkoutSuccessMessage.textContent = `Order ${orderNumber} is ready. Pay ${jpyLabel(amounts.total)} with ${paymentMethod === "paypal" ? "PayPal" : "Wise"} by ${expiryString}.`;
+    paymentLink.href = payUrl;
+    paymentLink.textContent = `Pay ${jpyLabel(amounts.total)} with ${paymentMethod === "paypal" ? "PayPal" : "Wise"}`;
+  } catch (error) {
+    checkoutStatus.textContent = error.message || "We could not create your order. Please try again.";
+  } finally {
+    submitOrderButton.disabled = false;
+    updateCheckoutSummary();
+  }
+}
+
 function renderCart() {
   const entries = Object.entries(state.cart).filter(([, quantity]) => quantity > 0);
   const count = entries.reduce((sum, [, quantity]) => sum + quantity, 0);
@@ -418,6 +632,7 @@ function renderCart() {
       </div>`;
   }).join("") : '<div class="cart-empty">Your cart is empty.<br>Add a box to get started.</div>';
   calculateShippingButton.disabled = entries.length === 0;
+  checkoutButton.disabled = !state.shippingQuote?.rates[state.shippingQuote.selected] || entries.length === 0;
 }
 
 function openCart() {
@@ -472,6 +687,26 @@ cartButton.addEventListener("click", openCart);
 closeCartButton.addEventListener("click", closeCart);
 cartScrim.addEventListener("click", closeCart);
 calculateShippingButton.addEventListener("click", calculateShipping);
+checkoutButton.addEventListener("click", openCheckout);
+closeCheckoutButton.addEventListener("click", closeCheckout);
+checkoutForm.addEventListener("submit", submitOrder);
+checkoutForm.addEventListener("change", (event) => {
+  if (event.target.matches('input[name="paymentMethod"]')) updateCheckoutSummary();
+});
+checkoutPostcode.addEventListener("input", () => {
+  checkoutPostcode.value = checkoutPostcode.value.replace(/\D/g, "").slice(0, 4);
+});
+checkoutModal.addEventListener("close", () => document.body.classList.remove("checkout-open"));
+checkoutModal.addEventListener("click", (event) => {
+  if (event.target === checkoutModal) closeCheckout();
+});
+finishCheckoutButton.addEventListener("click", () => {
+  state.cart = {};
+  resetShippingQuote();
+  renderCart();
+  checkoutForm.reset();
+  closeCheckout();
+});
 shippingPostcode.addEventListener("input", () => {
   shippingPostcode.value = shippingPostcode.value.replace(/\D/g, "").slice(0, 4);
   if (state.shippingQuote) resetShippingQuote("Postcode changed. Calculate again for updated rates.");

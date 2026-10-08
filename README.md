@@ -14,4 +14,8 @@ Product names, one-box reference prices, and product imagery were checked agains
 
 The cart requests live Australia shipping quotes from the existing Ship&co integration. Product weight and dimensions, packaging weight, and carton padding are maintained at `shipping-admin.html` and stored in `data/shipping_products.json` through `shipping_products.php`.
 
+## Payments
+
+Checkout supports Wise payment links and PayPal invoices. PayPal orders include the existing 5% transaction fee, itemised before the order is submitted. Both methods are invoiced in JPY and reuse the production order and confirmation-email endpoints.
+
 The Australia-focused customer FAQ is available at `faq.html` and covers ordering, shipping, GST and customs, Japanese product details, and support.
