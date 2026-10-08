@@ -14,6 +14,8 @@ The storefront includes an accessible three-slide hero rotation and a member-reg
 
 Product names, one-box reference prices, and product imagery were checked against SNKRDUNK item pages on 8 October 2026. Product images are stored locally under `assets/products` and served from MegaCards. AUD estimates use A$1 = ¥110.04.
 
+For Pokemon boxes, use only the image attached to the standard sealed-box listing. Never use an image from a listing whose Japanese title begins with `【シュリンクなし】`, even when the package artwork looks the same. The six current Pokemon assets were verified byte-for-byte against their standard-box listing images on 8 October 2026.
+
 ## Shipping
 
 The cart requests live Australia shipping quotes from the existing Ship&co integration. Product weight and dimensions, packaging weight, and carton padding are maintained at `shipping-admin.html` and stored in `data/shipping_products.json` through `shipping_products.php`.
