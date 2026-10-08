@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MegaCards Australia | Japanese TCG Booster Boxes</title>
+  <meta name="description" content="Shop authentic Japanese Pokemon, ONE PIECE, and Yu-Gi-Oh! booster boxes from Japan, priced for Australian collectors in AUD.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.snkrdunk.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="announcement">
+    <div class="shell announcement__inner">
+      <span>Japan to Australia</span>
+      <span class="announcement__copy">Authentic Japanese Pokemon boxes · Tracked international shipping</span>
+      <a href="#shipping">Shipping info</a>
+    </div>
+  </div>
+
+  <header class="site-header">
+    <div class="shell header__inner">
+      <a class="brand" href="#top" aria-label="MegaCards home">
+        <span class="brand__mark" aria-hidden="true">M</span>
+        <span>MegaCards<span class="brand__suffix">.jp</span></span>
+      </a>
+      <nav class="main-nav" aria-label="Main navigation">
+        <a href="#shop">Shop boxes</a>
+        <a href="#why-us">Why MegaCards</a>
+        <a href="#shipping">Shipping</a>
+      </nav>
+      <button class="cart-button" id="cartButton" type="button" aria-expanded="false" aria-controls="cartPanel">
+        Cart <span id="cartCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="shell hero__grid">
+        <div class="hero__content">
+          <p class="eyebrow">Japanese releases. Australian-ready.</p>
+          <h1>Japan’s latest TCG boxes, without the guesswork.</h1>
+          <p class="hero__lead">Pokemon, ONE PIECE, and Yu-Gi-Oh! boxes sourced in Japan and presented in Australian dollars. Clear market pricing, tracked delivery, and no language barrier.</p>
+          <div class="hero__actions">
+            <a class="button button--primary" href="#shop">Shop latest boxes</a>
+            <a class="button button--secondary" href="#how-pricing-works">How pricing works</a>
+          </div>
+          <ul class="hero__trust" aria-label="Store benefits">
+            <li>Licensed Japan-based dealer</li>
+            <li>Pokemon, ONE PIECE & Yu-Gi-Oh!</li>
+            <li>AUD price guide</li>
+          </ul>
+        </div>
+        <div class="hero__visual" aria-label="Featured Japanese Pokemon booster boxes">
+          <div class="hero-card hero-card--back">
+            <img src="https://cdn.snkrdunk.com/upload_bg_removed/c08dfabc-735b-4487-8231-06f565c5014c.webp?size=l" alt="Pokemon Card Game MEGA Storm Emeralda booster box" width="520" height="520">
+          </div>
+          <div class="hero-card hero-card--front">
+            <span class="hero-card__badge">Latest release</span>
+            <img src="https://cdn.snkrdunk.com/upload_bg_removed/9e6e18b1-ace5-4782-b975-81a17803faee.webp?size=l" alt="Pokemon Card Game MEGA 30th Celebration booster box" width="520" height="520">
+            <div class="hero-card__caption">
+              <span>30th Celebration</span>
+              <strong>A$236</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="value-strip" id="why-us">
+      <div class="shell value-strip__grid">
+        <div><span class="value-strip__index">01</span><strong>Japan sourced</strong><small>Current Japanese releases</small></div>
+        <div><span class="value-strip__index">02</span><strong>Japanese boxes</strong><small>Product condition shown clearly</small></div>
+        <div><span class="value-strip__index">03</span><strong>Australia focused</strong><small>AUD pricing and AU shipping</small></div>
+      </div>
+    </section>
+
+    <section class="catalog" id="shop">
+      <div class="shell">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow eyebrow--dark">Shop Japanese TCG</p>
+            <h2 id="catalogTitle">All booster boxes</h2>
+          </div>
+          <p>Prices below are based on the lowest current 1-box listing on SNKRDUNK, checked 8 October 2026.</p>
+        </div>
+
+        <div class="category-tabs" id="categoryTabs" role="tablist" aria-label="Trading card game">
+          <button class="category-tab active" type="button" role="tab" aria-selected="true" data-category="all">All <span>14</span></button>
+          <button class="category-tab" type="button" role="tab" aria-selected="false" data-category="pokemon">Pokémon <span>6</span></button>
+          <button class="category-tab" type="button" role="tab" aria-selected="false" data-category="onepiece">ONE PIECE <span>4</span></button>
+          <button class="category-tab" type="button" role="tab" aria-selected="false" data-category="yugioh">Yu-Gi-Oh! <span>4</span></button>
+        </div>
+
+        <div class="catalog-tools">
+          <label class="search-field">
+            <span class="sr-only">Search boxes</span>
+            <input id="searchInput" type="search" placeholder="Search by set name" autocomplete="off">
+          </label>
+          <label class="sort-field">
+            <span>Sort</span>
+            <select id="sortSelect">
+              <option value="featured">Featured</option>
+              <option value="newest">Newest release</option>
+              <option value="price-low">Price: low to high</option>
+              <option value="price-high">Price: high to low</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="product-grid" id="productGrid" aria-live="polite"></div>
+        <p class="catalog-note" id="how-pricing-works">AUD estimates use the 8 October 2026 mid-market rate of A$1 = ¥110.04. Shipping, Australian GST, customs charges, and payment-provider conversion are not included.</p>
+      </div>
+    </section>
+
+    <section class="shipping" id="shipping">
+      <div class="shell shipping__grid">
+        <div>
+          <p class="eyebrow">From Japan to your collection</p>
+          <h2>Made for Australian collectors.</h2>
+        </div>
+        <div class="shipping__details">
+          <p>Orders ship from Japan with end-to-end tracking. Delivery estimates and the exact shipping charge are confirmed before payment.</p>
+          <div class="shipping__stats">
+            <div><strong>4–7</strong><span>business days estimated</span></div>
+            <div><strong>10%</strong><span>GST may apply</span></div>
+          </div>
+          <small>Import charges depend on order value and Australian customs rules.</small>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <aside class="cart-panel" id="cartPanel" aria-hidden="true" aria-label="Shopping cart">
+    <div class="cart-panel__header">
+      <div><span class="eyebrow eyebrow--dark">Your cart</span><h2>Selected boxes</h2></div>
+      <button class="icon-button" id="closeCart" type="button" aria-label="Close cart">Close</button>
+    </div>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="cart-panel__footer">
+      <div class="cart-total"><span>Market-price subtotal</span><strong id="cartTotal">A$0</strong></div>
+      <button class="button button--primary button--wide" type="button" disabled>Checkout coming next</button>
+      <small>Shipping and taxes are calculated separately.</small>
+    </div>
+  </aside>
+  <button class="cart-scrim" id="cartScrim" type="button" aria-label="Close cart" hidden></button>
+
+  <footer>
+    <div class="shell footer__inner">
+      <a class="brand brand--footer" href="#top"><span class="brand__mark">M</span><span>MegaCards<span class="brand__suffix">.jp</span></span></a>
+      <p>Japanese TCG boxes for Australia.</p>
+      <p>© 2026 Atta Trade · Secondhand Dealer Permit #451460009881</p>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
