@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=20261008-2">
 </head>
 <body>
   <div class="announcement">
@@ -31,6 +31,7 @@
         <a href="#shipping">Shipping</a>
         <a href="faq.php">FAQ</a>
       </nav>
+      <button class="account-button" id="openRegister" type="button">Create account</button>
       <button class="cart-button" id="cartButton" type="button" aria-expanded="false" aria-controls="cartPanel">
         Cart <span id="cartCount">0</span>
       </button>
@@ -41,12 +42,12 @@
     <section class="hero">
       <div class="shell hero__grid">
         <div class="hero__content">
-          <p class="eyebrow">Japanese releases. Australian-ready.</p>
-          <h1>Japan’s latest TCG boxes, without the guesswork.</h1>
-          <p class="hero__lead">Pokemon, ONE PIECE, and Yu-Gi-Oh! boxes sourced, packed, and shipped directly from Japan to Australia. Clear AUD pricing and tracked international delivery.</p>
+          <p class="eyebrow" id="heroEyebrow">Japanese releases. Australian-ready.</p>
+          <h1 id="heroTitle">Japan’s latest TCG boxes, without the guesswork.</h1>
+          <p class="hero__lead" id="heroLead">Pokemon, ONE PIECE, and Yu-Gi-Oh! boxes sourced, packed, and shipped directly from Japan to Australia. Clear AUD pricing and tracked international delivery.</p>
           <div class="hero__actions">
-            <a class="button button--primary" href="#shop">Shop latest boxes</a>
-            <a class="button button--secondary" href="#how-pricing-works">How pricing works</a>
+            <a class="button button--primary" id="heroPrimaryAction" href="#shop">Shop latest boxes</a>
+            <button class="button button--secondary" id="heroRegisterAction" type="button">Create free account</button>
           </div>
           <ul class="hero__trust" aria-label="Store benefits">
             <li>Packed & shipped from Japan</li>
@@ -56,15 +57,20 @@
         </div>
         <div class="hero__visual" aria-label="Featured Japanese Pokemon booster boxes">
           <div class="hero-card hero-card--back">
-            <img src="assets/products/m6-storm-emeralda.webp" alt="Pokemon Card Game MEGA Storm Emeralda booster box" width="520" height="520">
+            <img id="heroBackImage" src="assets/products/m6-storm-emeralda.webp" alt="Pokemon Card Game MEGA Storm Emeralda booster box" width="520" height="520">
           </div>
           <div class="hero-card hero-card--front">
-            <span class="hero-card__badge">Latest release</span>
-            <img src="assets/products/m6a-30th-celebration.webp" alt="Pokemon Card Game MEGA 30th Celebration booster box" width="520" height="520">
+            <span class="hero-card__badge" id="heroBadge">Latest release</span>
+            <img id="heroFrontImage" src="assets/products/m6a-30th-celebration.webp" alt="Pokemon Card Game MEGA 30th Celebration booster box" width="520" height="520">
             <div class="hero-card__caption">
-              <span>30th Celebration</span>
-              <strong>A$236 AUD</strong>
+              <span id="heroProductName">30th Celebration</span>
+              <strong id="heroProductPrice">A$236 AUD</strong>
             </div>
+          </div>
+          <div class="hero-slider__controls" aria-label="Featured collections">
+            <button class="hero-slider__toggle" id="heroSliderToggle" type="button" aria-label="Pause hero slides">Pause</button>
+            <div class="hero-slider__dots" id="heroSliderDots"></div>
+            <span class="hero-slider__status" id="heroSliderStatus" aria-live="polite">1 / 3</span>
           </div>
         </div>
       </div>
@@ -237,6 +243,43 @@
     </div>
   </dialog>
 
+  <dialog class="register-modal" id="registerModal" aria-labelledby="registerTitle">
+    <div class="register-modal__visual">
+      <span class="register-modal__mark">M</span>
+      <p class="eyebrow">MegaCards membership</p>
+      <h2>Join from Australia.</h2>
+      <p>Register once so MegaCards can recognise you as a member when new Japanese TCG boxes and member services become available.</p>
+      <ul><li>Australian member profile</li><li>Pokémon, ONE PIECE & Yu-Gi-Oh!</li><li>Direct-from-Japan store updates</li></ul>
+    </div>
+    <div class="register-modal__content">
+      <button class="icon-button register-modal__close" id="closeRegister" type="button" aria-label="Close registration">Close</button>
+      <div id="registerFormView">
+        <p class="eyebrow eyebrow--dark">Create account</p>
+        <h2 id="registerTitle">New member registration</h2>
+        <p class="register-modal__intro">Enter your details below. Your password is securely hashed before it is stored.</p>
+        <form id="registerForm">
+          <label><span>Full name</span><input name="name" type="text" autocomplete="name" maxlength="80" required></label>
+          <label><span>Email address</span><input name="email" type="email" autocomplete="email" maxlength="190" required></label>
+          <label><span>State or territory</span><select name="state" autocomplete="address-level1" required><option value="">Select</option><option value="NSW">New South Wales</option><option value="VIC">Victoria</option><option value="QLD">Queensland</option><option value="WA">Western Australia</option><option value="SA">South Australia</option><option value="TAS">Tasmania</option><option value="ACT">Australian Capital Territory</option><option value="NT">Northern Territory</option></select></label>
+          <label><span>Password</span><input name="password" type="password" autocomplete="new-password" minlength="10" maxlength="128" required><small>At least 10 characters, including a letter and a number.</small></label>
+          <label><span>Confirm password</span><input name="confirmPassword" type="password" autocomplete="new-password" minlength="10" maxlength="128" required></label>
+          <label class="register-check"><input name="marketing" type="checkbox"><span>Send me occasional product and store updates.</span></label>
+          <label class="register-check"><input name="acceptedTerms" type="checkbox" required><span>I agree to the <a href="terms.html" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>.</span></label>
+          <label class="register-honeypot" aria-hidden="true">Website<input name="website" type="text" tabindex="-1" autocomplete="off"></label>
+          <p class="register-status" id="registerStatus" role="status" aria-live="polite"></p>
+          <button class="button button--register" id="registerSubmit" type="submit">Create my account</button>
+        </form>
+      </div>
+      <div class="register-success" id="registerSuccess" hidden>
+        <span aria-hidden="true">✓</span>
+        <p class="eyebrow eyebrow--dark">Welcome to MegaCards</p>
+        <h2>Your account is ready.</h2>
+        <p id="registerSuccessMessage"></p>
+        <button class="button button--register" id="finishRegister" type="button">Start shopping</button>
+      </div>
+    </div>
+  </dialog>
+
   <footer>
     <div class="shell footer__inner">
       <a class="brand brand--footer" href="#top"><span class="brand__mark">M</span><span>MegaCards<span class="brand__suffix">.jp</span></span></a>
@@ -246,6 +289,6 @@
     </div>
   </footer>
 
-  <script src="app.js"></script>
+  <script src="app.js?v=20261008-2"></script>
 </body>
 </html>

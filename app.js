@@ -242,6 +242,125 @@ const paymentLink = document.getElementById("paymentLink");
 const finishCheckoutButton = document.getElementById("finishCheckout");
 const checkoutState = document.getElementById("checkoutState");
 const checkoutPostcode = document.getElementById("checkoutPostcode");
+const hero = document.querySelector(".hero");
+const heroEyebrow = document.getElementById("heroEyebrow");
+const heroTitle = document.getElementById("heroTitle");
+const heroLead = document.getElementById("heroLead");
+const heroPrimaryAction = document.getElementById("heroPrimaryAction");
+const heroFrontImage = document.getElementById("heroFrontImage");
+const heroBackImage = document.getElementById("heroBackImage");
+const heroBadge = document.getElementById("heroBadge");
+const heroProductName = document.getElementById("heroProductName");
+const heroProductPrice = document.getElementById("heroProductPrice");
+const heroSliderToggle = document.getElementById("heroSliderToggle");
+const heroSliderDots = document.getElementById("heroSliderDots");
+const heroSliderStatus = document.getElementById("heroSliderStatus");
+const openRegisterButton = document.getElementById("openRegister");
+const heroRegisterAction = document.getElementById("heroRegisterAction");
+const registerModal = document.getElementById("registerModal");
+const closeRegisterButton = document.getElementById("closeRegister");
+const registerForm = document.getElementById("registerForm");
+const registerFormView = document.getElementById("registerFormView");
+const registerSuccess = document.getElementById("registerSuccess");
+const registerStatus = document.getElementById("registerStatus");
+const registerSubmit = document.getElementById("registerSubmit");
+const registerSuccessMessage = document.getElementById("registerSuccessMessage");
+const finishRegisterButton = document.getElementById("finishRegister");
+
+const heroSlides = [
+  {
+    category: "pokemon",
+    eyebrow: "Japanese Pokémon · shipped from Japan",
+    title: "Japan’s latest Pokémon boxes, ready for Australia.",
+    lead: "Discover current Japanese Pokémon releases with clear AUD estimates and tracked international delivery direct from Japan.",
+    action: "Shop Pokémon boxes",
+    badge: "Latest Pokémon",
+    front: "m6a-30th-celebration",
+    back: "m6-storm-emeralda",
+    name: "30th Celebration"
+  },
+  {
+    category: "onepiece",
+    eyebrow: "ONE PIECE Card Game · Japanese edition",
+    title: "Build your ONE PIECE collection from Japan.",
+    lead: "Shop Japanese ONE PIECE booster boxes, packed in Japan and sent to Australia with live tracked shipping options.",
+    action: "Shop ONE PIECE boxes",
+    badge: "ONE PIECE pick",
+    front: "op13-carrying-on-his-will",
+    back: "op14-azure-seas-seven",
+    name: "Carrying On His Will"
+  },
+  {
+    category: "yugioh",
+    eyebrow: "Yu-Gi-Oh! OCG · direct from Japan",
+    title: "Japanese Yu-Gi-Oh! OCG boxes for Australian collectors.",
+    lead: "Explore Japanese OCG releases with AUD estimates, secure checkout, and tracked shipping from Japan to Australia.",
+    action: "Shop Yu-Gi-Oh! boxes",
+    badge: "Yu-Gi-Oh! OCG",
+    front: "yac1-original-artwork",
+    back: "26lp-world-championship",
+    name: "Original Artwork Collection"
+  }
+];
+let heroSlideIndex = 0;
+let heroSlideTimer = null;
+let heroPaused = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function heroProduct(id) {
+  return products.find((product) => product.id === id);
+}
+
+function renderHeroSlide(index, animate = true) {
+  heroSlideIndex = (index + heroSlides.length) % heroSlides.length;
+  const slide = heroSlides[heroSlideIndex];
+  const front = heroProduct(slide.front);
+  const back = heroProduct(slide.back);
+  const apply = () => {
+    heroEyebrow.textContent = slide.eyebrow;
+    heroTitle.textContent = slide.title;
+    heroLead.textContent = slide.lead;
+    heroPrimaryAction.textContent = slide.action;
+    heroPrimaryAction.dataset.category = slide.category;
+    heroBadge.textContent = slide.badge;
+    heroProductName.textContent = slide.name;
+    if (front) {
+      heroFrontImage.src = front.image;
+      heroFrontImage.alt = `${front.title} booster box`;
+      heroProductPrice.textContent = audLabel(aud(front.jpy));
+    }
+    if (back) {
+      heroBackImage.src = back.image;
+      heroBackImage.alt = `${back.title} booster box`;
+    }
+    heroSliderDots.querySelectorAll("button").forEach((dot, dotIndex) => {
+      const active = dotIndex === heroSlideIndex;
+      dot.classList.toggle("active", active);
+      dot.setAttribute("aria-current", active ? "true" : "false");
+    });
+    heroSliderStatus.textContent = `${heroSlideIndex + 1} / ${heroSlides.length}`;
+    hero.classList.remove("is-changing");
+  };
+  if (animate) {
+    hero.classList.add("is-changing");
+    window.setTimeout(apply, 220);
+  } else {
+    apply();
+  }
+}
+
+function restartHeroTimer() {
+  if (heroSlideTimer) window.clearInterval(heroSlideTimer);
+  heroSlideTimer = null;
+  if (!heroPaused) heroSlideTimer = window.setInterval(() => renderHeroSlide(heroSlideIndex + 1), 6500);
+  heroSliderToggle.textContent = heroPaused ? "Play" : "Pause";
+  heroSliderToggle.setAttribute("aria-label", heroPaused ? "Play hero slides" : "Pause hero slides");
+}
+
+function initialiseHeroSlider() {
+  heroSliderDots.innerHTML = heroSlides.map((slide, index) => `<button class="hero-slider__dot${index === 0 ? " active" : ""}" type="button" data-hero-slide="${index}" aria-label="Show ${slide.category} feature" ${index === 0 ? 'aria-current="true"' : 'aria-current="false"'}></button>`).join("");
+  renderHeroSlide(0, false);
+  restartHeroTimer();
+}
 
 function productCard(product) {
   return `
@@ -642,6 +761,64 @@ async function submitOrder(event) {
   }
 }
 
+function openRegister() {
+  registerStatus.textContent = "";
+  if (!registerModal.open) registerModal.showModal();
+  document.body.classList.add("register-open");
+}
+
+function closeRegister() {
+  if (registerModal.open) registerModal.close();
+  document.body.classList.remove("register-open");
+}
+
+async function submitRegistration(event) {
+  event.preventDefault();
+  registerStatus.textContent = "";
+  if (!registerForm.reportValidity()) return;
+  const form = new FormData(registerForm);
+  const password = String(form.get("password") || "");
+  const confirmPassword = String(form.get("confirmPassword") || "");
+  if (password !== confirmPassword) {
+    registerStatus.textContent = "Passwords do not match.";
+    return;
+  }
+  if (password.length < 10 || !/[A-Za-z]/.test(password) || !/\d/.test(password)) {
+    registerStatus.textContent = "Use at least 10 characters with a letter and a number.";
+    return;
+  }
+
+  const payload = {
+    name: String(form.get("name") || "").trim(),
+    email: String(form.get("email") || "").trim(),
+    state: String(form.get("state") || ""),
+    password,
+    marketing: form.get("marketing") === "on",
+    accepted_terms: form.get("acceptedTerms") === "on",
+    website: String(form.get("website") || "")
+  };
+  registerSubmit.disabled = true;
+  registerSubmit.textContent = "Creating account…";
+  try {
+    const response = await fetch("member_register.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) throw new Error(data.error || "Registration could not be completed.");
+    registerFormView.hidden = true;
+    registerSuccess.hidden = false;
+    registerSuccessMessage.textContent = `Thanks, ${payload.name}. Your MegaCards member profile has been created for ${payload.email}.`;
+    registerForm.reset();
+  } catch (error) {
+    registerStatus.textContent = error.message || "Registration could not be completed.";
+  } finally {
+    registerSubmit.disabled = false;
+    registerSubmit.textContent = "Create my account";
+  }
+}
+
 function renderCart() {
   const entries = Object.entries(state.cart).filter(([, quantity]) => quantity > 0);
   const count = entries.reduce((sum, [, quantity]) => sum + quantity, 0);
@@ -714,6 +891,44 @@ categoryTabs.addEventListener("click", (event) => {
 cartButton.addEventListener("click", openCart);
 closeCartButton.addEventListener("click", closeCart);
 cartScrim.addEventListener("click", closeCart);
+openRegisterButton.addEventListener("click", openRegister);
+heroRegisterAction.addEventListener("click", openRegister);
+closeRegisterButton.addEventListener("click", closeRegister);
+registerForm.addEventListener("submit", submitRegistration);
+registerModal.addEventListener("close", () => document.body.classList.remove("register-open"));
+registerModal.addEventListener("click", (event) => {
+  if (event.target === registerModal) closeRegister();
+});
+finishRegisterButton.addEventListener("click", () => {
+  closeRegister();
+  window.setTimeout(() => {
+    registerFormView.hidden = false;
+    registerSuccess.hidden = true;
+  }, 250);
+  document.getElementById("shop").scrollIntoView({ behavior: "smooth" });
+});
+heroSliderToggle.addEventListener("click", () => {
+  heroPaused = !heroPaused;
+  restartHeroTimer();
+});
+heroSliderDots.addEventListener("click", (event) => {
+  const dot = event.target.closest("[data-hero-slide]");
+  if (!dot) return;
+  renderHeroSlide(Number(dot.dataset.heroSlide));
+  restartHeroTimer();
+});
+heroPrimaryAction.addEventListener("click", () => {
+  const tab = categoryTabs.querySelector(`[data-category="${heroPrimaryAction.dataset.category}"]`);
+  if (tab) tab.click();
+});
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && heroSlideTimer) {
+    window.clearInterval(heroSlideTimer);
+    heroSlideTimer = null;
+  } else if (!document.hidden) {
+    restartHeroTimer();
+  }
+});
 calculateShippingButton.addEventListener("click", calculateShipping);
 checkoutButton.addEventListener("click", openCheckout);
 closeCheckoutButton.addEventListener("click", closeCheckout);
@@ -751,3 +966,4 @@ document.addEventListener("keydown", (event) => { if (event.key === "Escape") cl
 renderProducts();
 renderCart();
 loadShippingProfiles();
+initialiseHeroSlider();

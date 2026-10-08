@@ -8,6 +8,8 @@ Open `index.html` directly, or start any static HTTP server in this directory.
 
 Production requests enter through `index.php` and `faq.php`. `access_gate.php` checks the visitor country from the server-side IP address, caches only the country result under `data/geo_cache`, and requires a password-backed 12-hour session for access from Japan. Direct requests for the public HTML files are redirected through the PHP gate by `.htaccess`.
 
+The storefront includes an accessible three-slide hero rotation and a member-registration dialog. `member_register.php` validates and rate-limits registrations, then stores member records with one-way password hashes in the web-blocked `data/members.json` file.
+
 ## Product data
 
 Product names, one-box reference prices, and product imagery were checked against SNKRDUNK item pages on 8 October 2026. Product images are stored locally under `assets/products` and served from MegaCards. AUD estimates use A$1 = ¥110.04.

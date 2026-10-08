@@ -8,7 +8,7 @@ RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 # Route public storefront HTML through the Japan access gate.
 RewriteRule ^index\.html$ / [R=302,L,NE]
 RewriteRule ^faq\.html$ /faq.php [R=302,L,NE]
-RewriteRule ^data/geo_cache/ - [F,L]
+RewriteRule ^data/ - [F,L]
 
 # Pretty product URLs: /product/{id} -> /product.php?id={id}
 RewriteRule ^product/([^/]+)/?$ /product.php?id=$1 [L]
