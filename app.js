@@ -10,7 +10,7 @@ const products = [
     releaseOrder: 20260916,
     jpy: 26000,
     tag: "Latest",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/9e6e18b1-ace5-4782-b975-81a17803faee.webp?size=l",
+    image: "assets/products/m6a-30th-celebration.webp",
     source: "https://snkrdunk.com/apparels/881421"
   },
   {
@@ -22,7 +22,7 @@ const products = [
     releaseOrder: 20260731,
     jpy: 10500,
     tag: "Popular",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/c08dfabc-735b-4487-8231-06f565c5014c.webp?size=l",
+    image: "assets/products/m6-storm-emeralda.webp",
     source: "https://snkrdunk.com/apparels/846048"
   },
   {
@@ -34,7 +34,7 @@ const products = [
     releaseOrder: 20260522,
     jpy: 8340,
     tag: "Value pick",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/08bd4531-8f88-451c-a952-78f999adc4d3.webp?size=l",
+    image: "assets/products/m5-abyss-eye.webp",
     source: "https://snkrdunk.com/apparels/806644"
   },
   {
@@ -46,7 +46,7 @@ const products = [
     releaseOrder: 20260313,
     jpy: 8500,
     tag: "Collector pick",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/c3829d36-641e-4dc2-84ba-4badcc376267.webp?size=l",
+    image: "assets/products/m4-ninja-spinner.webp",
     source: "https://snkrdunk.com/apparels/762693"
   },
   {
@@ -58,7 +58,7 @@ const products = [
     releaseOrder: 20251128,
     jpy: 12980,
     tag: "High class",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/fdd5a167-a53a-4b9f-9a3d-0864d311e378.webp?size=l",
+    image: "assets/products/m2a-mega-dream-ex.webp",
     source: "https://snkrdunk.com/apparels/721913"
   },
   {
@@ -70,7 +70,7 @@ const products = [
     releaseOrder: 20250926,
     jpy: 17000,
     tag: "Charizard set",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/a8d20d1e-64b7-448e-8e4c-4cc51583499a.webp?size=l",
+    image: "assets/products/m2-inferno-x.webp",
     source: "https://snkrdunk.com/apparels/687430"
   },
   {
@@ -82,7 +82,7 @@ const products = [
     releaseOrder: 20250823,
     jpy: 17999,
     tag: "Popular",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/9b92497a-a7d1-4027-80f6-93efad7eebdc.webp?size=l",
+    image: "assets/products/op13-carrying-on-his-will.webp",
     source: "https://snkrdunk.com/apparels/548909"
   },
   {
@@ -94,7 +94,7 @@ const products = [
     releaseOrder: 20251122,
     jpy: 8500,
     tag: "New generation",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/ad98e7cd-0028-4261-a22f-9c054c55fdfa.webp?size=l",
+    image: "assets/products/op14-azure-seas-seven.webp",
     source: "https://snkrdunk.com/apparels/725356"
   },
   {
@@ -106,7 +106,7 @@ const products = [
     releaseOrder: 20260131,
     jpy: 12250,
     tag: "Extra booster",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/7b8afbf6-b2f4-4a6b-a7f8-da83d318a039.webp?size=l",
+    image: "assets/products/eb04-egghead-crisis.webp",
     source: "https://snkrdunk.com/apparels/751287"
   },
   {
@@ -118,7 +118,7 @@ const products = [
     releaseOrder: 20250301,
     jpy: 30690,
     tag: "Collector pick",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/e8e3aea2-824f-4a46-9137-267f5ef2f0eb.webp?size=l",
+    image: "assets/products/op11-fist-divine-speed.webp",
     source: "https://snkrdunk.com/apparels/498158"
   },
   {
@@ -130,7 +130,7 @@ const products = [
     releaseOrder: 20260926,
     jpy: 8499,
     tag: "Latest",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/1018172e-bfe3-4bd6-b05a-a849e00c07eb.webp?size=l",
+    image: "assets/products/yac1-original-artwork.webp",
     source: "https://snkrdunk.com/apparels/886014"
   },
   {
@@ -142,7 +142,7 @@ const products = [
     releaseOrder: 20260905,
     jpy: 2999,
     tag: "Value pick",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/6abfdf99-039b-43d4-9575-b36d7782710f.webp?size=l",
+    image: "assets/products/dbgv-glorious-victors.webp",
     source: "https://snkrdunk.com/apparels/881242"
   },
   {
@@ -154,7 +154,7 @@ const products = [
     releaseOrder: 20260829,
     jpy: 4000,
     tag: "Limited pack",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/870c6b55-3f5c-4f39-b08e-5b557c4cdd7b.webp?size=l",
+    image: "assets/products/26lp-world-championship.webp",
     source: "https://snkrdunk.com/apparels/880998"
   },
   {
@@ -166,7 +166,7 @@ const products = [
     releaseOrder: 20260725,
     jpy: 3200,
     tag: "GX series",
-    image: "https://cdn.snkrdunk.com/upload_bg_removed/9dad378f-8228-4766-8313-c7de283dbc5b.webp?size=l",
+    image: "assets/products/lpg2-ra-yellow.webp",
     source: "https://snkrdunk.com/apparels/847245"
   }
 ];
