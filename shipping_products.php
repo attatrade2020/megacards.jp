@@ -6,7 +6,7 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
 header('X-Content-Type-Options: nosniff');
 
 $dataFile = __DIR__ . '/data/shipping_products.json';
-$adminPassword = 'megacards2026';
+$adminPassword = 'Kumaiden9';
 
 function readProfiles(string $path): array {
     if (!is_file($path)) {

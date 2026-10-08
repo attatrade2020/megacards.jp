@@ -1799,13 +1799,14 @@
 
     <script>
         // ===== CONFIG =====
-        const ADMIN_PASSWORD = 'megacards2026'; // Change this
+        const ADMIN_LOGIN_PASSWORD = 'Kumaiden9';
+        const ADMIN_PASSWORD = 'megacards2026';
         const GAS_ADMIN_URL = 'https://script.google.com/macros/s/AKfycbyhZu5LMJPiG5VGmAz9ctJ2O6BHsrA7r3-Ej3WLoh6SqiQKzquWURAYG0BWV4GPEAMi/exec';
 
         // ===== AUTH =====
         function doLogin() {
             const pw = document.getElementById('authPassword').value;
-            if (pw === ADMIN_PASSWORD) {
+            if (pw === ADMIN_LOGIN_PASSWORD) {
                 sessionStorage.setItem('mc_auth', '1');
                 showApp();
             } else {
