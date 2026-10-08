@@ -116,6 +116,30 @@ button, input, select { font: inherit; }
 .value-strip strong { font: 800 .95rem "Manrope", sans-serif; }
 .value-strip small { color: var(--ink-soft); }
 
+.ranking { padding: 96px 0 88px; background: #fff; border-bottom: 1px solid var(--line); }
+.ranking__heading { align-items: end; }
+.ranking-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; }
+.ranking-card { position: relative; display: flex; min-width: 0; flex-direction: column; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.ranking-card:hover { transform: translateY(-5px); border-color: #bdc9df; box-shadow: 0 20px 42px rgba(11,20,40,.11); }
+.ranking-card__image { position: relative; display: grid; place-items: center; aspect-ratio: 1.12; padding: 34px 24px 20px; overflow: hidden; background: linear-gradient(145deg,#f8faff,#eaf0fa); }
+.ranking-card__image::after { content: ""; position: absolute; width: 68%; aspect-ratio: 1; border-radius: 50%; background: rgba(20,89,233,.09); filter: blur(12px); }
+.ranking-card__image img { position: relative; z-index: 1; width: 94%; height: 94%; object-fit: contain; filter: drop-shadow(0 16px 13px rgba(31,47,78,.2)); transition: transform .3s ease; }
+.ranking-card:hover .ranking-card__image img { transform: scale(1.04) rotate(-1deg); }
+.ranking-card__position { position: absolute; z-index: 2; top: 14px; left: 14px; display: grid; place-items: center; width: 42px; height: 42px; color: #fff; background: var(--navy); border: 3px solid #fff; border-radius: 50%; box-shadow: 0 8px 18px rgba(11,20,40,.18); font: 800 .78rem "Manrope",sans-serif; }
+.ranking-card--1 .ranking-card__position { color: var(--navy); background: var(--yellow); }
+.ranking-card--2 .ranking-card__position { color: var(--navy); background: #dbe2ed; }
+.ranking-card--3 .ranking-card__position { background: #a65f35; }
+.ranking-card__content { display: flex; flex: 1; flex-direction: column; padding: 20px; background: #fff; }
+.ranking-card__content > p { margin: 0 0 8px; color: var(--blue); font-size: .68rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.ranking-card h3 { margin: 0; font: 800 .94rem/1.45 "Manrope",sans-serif; letter-spacing: -.02em; }
+.ranking-card__footer { display: flex; align-items: end; justify-content: space-between; gap: 12px; margin-top: auto; padding-top: 22px; }
+.ranking-card__footer div { display: flex; flex-direction: column; }
+.ranking-card__footer small { color: var(--ink-soft); font-size: .64rem; font-weight: 700; }
+.ranking-card__footer strong { font: 800 1.4rem "Manrope",sans-serif; letter-spacing: -.04em; }
+.ranking-card__footer button { min-height: 40px; padding: 0 13px; color: #fff; background: var(--blue); border: 0; border-radius: 10px; cursor: pointer; font-size: .72rem; font-weight: 800; white-space: nowrap; }
+.ranking-card__footer button:hover { background: var(--blue-dark); }
+.ranking-note { margin: 20px 0 0; color: var(--ink-soft); font-size: .74rem; }
+
 .catalog { padding: 100px 0 110px; }
 .section-heading { display: flex; justify-content: space-between; align-items: end; gap: 40px; margin-bottom: 34px; }
 .section-heading h2, .shipping h2, .cart-panel h2 { margin: 0; font: 800 clamp(2.2rem, 4vw, 3.7rem)/1 "Manrope", sans-serif; letter-spacing: -.055em; }
@@ -326,6 +350,7 @@ footer { color: #c6cede; background: var(--navy); }
   .hero__actions, .hero__trust { justify-content: center; }
   .hero__visual { width: min(560px, 100%); min-height: 470px; margin-inline: auto; }
   .product-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ranking-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .shipping__grid { gap: 45px; }
   .footer__inner { flex-wrap: wrap; padding-block: 35px; }
 }
@@ -350,6 +375,8 @@ footer { color: #c6cede; background: var(--navy); }
   .value-strip__grid { grid-template-columns: 1fr; padding-block: 8px; }
   .value-strip__grid > div { border-right: 0; border-bottom: 1px solid var(--line); padding: 17px 8px; }
   .value-strip__grid > div:last-child { border-bottom: 0; }
+  .ranking { padding-block: 72px 66px; }
+  .ranking-grid { grid-template-columns: 1fr; }
   .catalog { padding-block: 72px; }
   .section-heading { align-items: start; flex-direction: column; }
   .catalog-tools { align-items: stretch; flex-direction: column; }

@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261008-9">
+  <link rel="stylesheet" href="styles.css?v=20261008-11">
 </head>
 <body>
   <div class="announcement">
@@ -30,6 +30,7 @@
       </a>
       <nav class="main-nav" aria-label="Main navigation">
         <a href="#shop">Shop boxes</a>
+        <a href="#ranking">Ranking</a>
         <a href="#why-us">Why MegaCards</a>
         <a href="#shipping">Shipping</a>
         <a href="faq.php">FAQ</a>
@@ -89,6 +90,20 @@
         <div><span class="value-strip__index">01</span><strong>Ships from Japan</strong><small>Packed in Japan for direct export</small></div>
         <div><span class="value-strip__index">02</span><strong>Japanese boxes</strong><small>Product condition shown clearly</small></div>
         <div><span class="value-strip__index">03</span><strong>Tracked delivery</strong><small>DHL & FedEx shipping</small></div>
+      </div>
+    </section>
+
+    <section class="ranking" id="ranking">
+      <div class="shell">
+        <div class="section-heading ranking__heading">
+          <div>
+            <p class="eyebrow eyebrow--dark">Current sales ranking</p>
+            <h2>Pokémon box sales ranking</h2>
+          </div>
+          <p>The current sales order for matching sealed boxes available in the MegaCards catalogue.</p>
+        </div>
+        <div class="ranking-grid" id="rankingGrid" aria-live="polite"></div>
+        <p class="ranking-note">Ranking checked 8 October 2026. Only matching booster boxes currently sold by MegaCards are included.</p>
       </div>
     </section>
 
@@ -297,6 +312,6 @@
     </div>
   </footer>
 
-  <script src="app.js?v=20261008-10"></script>
+  <script src="app.js?v=20261008-11"></script>
 </body>
 </html>

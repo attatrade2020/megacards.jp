@@ -158,6 +158,12 @@ const products = [
 ];
 
 const categoryNames = { all: "All booster boxes", pokemon: "Pokémon boxes", onepiece: "ONE PIECE boxes", yugioh: "Yu-Gi-Oh! boxes" };
+const rankedProductIds = [
+  "m6-storm-emeralda",
+  "m6a-30th-celebration",
+  "m2a-mega-dream-ex",
+  "m2-inferno-x"
+];
 const fallbackShippingProfiles = {
   packaging_weight_g: 250,
   padding_cm: 4,
@@ -185,6 +191,7 @@ const audLabel = (value) => `A$${new Intl.NumberFormat("en-AU", { maximumFractio
 const jpyLabel = (value) => new Intl.NumberFormat("ja-JP", { style: "currency", currency: "JPY", maximumFractionDigits: 0 }).format(value);
 
 const productGrid = document.getElementById("productGrid");
+const rankingGrid = document.getElementById("rankingGrid");
 const searchInput = document.getElementById("searchInput");
 const sortSelect = document.getElementById("sortSelect");
 const categoryTabs = document.getElementById("categoryTabs");
@@ -418,6 +425,31 @@ function productCard(product) {
         </div>
       </div>
     </article>`;
+}
+
+function rankingCard(product, index) {
+  return `
+    <article class="ranking-card ranking-card--${index + 1}">
+      <div class="ranking-card__image">
+        <span class="ranking-card__position" aria-label="Rank ${index + 1}">${String(index + 1).padStart(2, "0")}</span>
+        <img src="${product.image}" alt="${product.title}" width="440" height="380" loading="eager" decoding="async">
+      </div>
+      <div class="ranking-card__content">
+        <p>${product.series}</p>
+        <h3>${product.title}</h3>
+        <div class="ranking-card__footer">
+          <div><small>Price per box</small><strong>${audLabel(aud(product.jpy))}</strong></div>
+          <button type="button" data-ranking-add="${product.id}" aria-label="Add one ${product.title} to cart">Add to cart</button>
+        </div>
+      </div>
+    </article>`;
+}
+
+function renderRanking() {
+  const rankedProducts = rankedProductIds
+    .map((id) => products.find((product) => product.id === id))
+    .filter(Boolean);
+  rankingGrid.innerHTML = rankedProducts.map(rankingCard).join("");
 }
 
 function renderProducts() {
@@ -905,6 +937,16 @@ productGrid.addEventListener("click", (event) => {
   openCart();
 });
 
+rankingGrid.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-ranking-add]");
+  if (!button) return;
+  const id = button.dataset.rankingAdd;
+  state.cart[id] = (state.cart[id] || 0) + 1;
+  resetShippingQuote("Cart updated. Recalculate shipping for the new parcel.");
+  renderCart();
+  openCart();
+});
+
 cartItems.addEventListener("click", (event) => {
   const button = event.target.closest("[data-remove]");
   if (!button) return;
@@ -1002,6 +1044,7 @@ shippingRates.addEventListener("change", (event) => {
 });
 document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeCart(); });
 
+renderRanking();
 renderProducts();
 renderCart();
 loadShippingProfiles();
