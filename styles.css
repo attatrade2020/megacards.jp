@@ -342,6 +342,8 @@ footer { color: #c6cede; background: var(--navy); }
 .footer__inner { min-height: 150px; display: flex; align-items: center; gap: 30px; }
 .brand--footer { color: #fff; margin-right: auto; }
 .footer__inner p { margin: 0; font-size: .75rem; }
+.footer__admin-link { color: inherit; font-size: .62rem; opacity: .32; text-decoration: none; transition: opacity .2s ease; }
+.footer__admin-link:hover, .footer__admin-link:focus-visible { opacity: .9; text-decoration: underline; }
 
 @media (max-width: 900px) {
   .main-nav { display: none; }
