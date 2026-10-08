@@ -235,12 +235,14 @@ const heroLead = document.getElementById("heroLead");
 const heroPrimaryAction = document.getElementById("heroPrimaryAction");
 const heroFrontImage = document.getElementById("heroFrontImage");
 const heroBackImage = document.getElementById("heroBackImage");
+const heroPeekImage = document.getElementById("heroPeekImage");
 const heroBadge = document.getElementById("heroBadge");
 const heroProductName = document.getElementById("heroProductName");
 const heroProductPrice = document.getElementById("heroProductPrice");
 const heroSliderToggle = document.getElementById("heroSliderToggle");
 const heroSliderDots = document.getElementById("heroSliderDots");
 const heroSliderStatus = document.getElementById("heroSliderStatus");
+const heroSliderProgress = document.getElementById("heroSliderProgress");
 const openRegisterButton = document.getElementById("openRegister");
 const heroRegisterAction = document.getElementById("heroRegisterAction");
 const registerModal = document.getElementById("registerModal");
@@ -263,6 +265,7 @@ const heroSlides = [
     badge: "Latest Pokémon",
     front: "m6a-30th-celebration",
     back: "m6-storm-emeralda",
+    peek: "m5-abyss-eye",
     name: "30th Celebration"
   },
   {
@@ -274,6 +277,7 @@ const heroSlides = [
     badge: "ONE PIECE pick",
     front: "op13-carrying-on-his-will",
     back: "op14-azure-seas-seven",
+    peek: "eb04-egghead-crisis",
     name: "Carrying On His Will"
   },
   {
@@ -285,7 +289,44 @@ const heroSlides = [
     badge: "Yu-Gi-Oh! OCG",
     front: "yac1-original-artwork",
     back: "26lp-world-championship",
+    peek: "dbgv-glorious-victors",
     name: "Original Artwork Collection"
+  },
+  {
+    category: "pokemon",
+    eyebrow: "Japanese Pokémon · collector rotation",
+    title: "More Japanese Pokémon sets, always in motion.",
+    lead: "Move through high-class and expansion boxes, compare clear Australian-dollar estimates, and build your shipment from Japan.",
+    action: "Explore Pokémon boxes",
+    badge: "Collector rotation",
+    front: "m2-inferno-x",
+    back: "m2a-mega-dream-ex",
+    peek: "m4-ninja-spinner",
+    name: "Inferno X"
+  },
+  {
+    category: "onepiece",
+    eyebrow: "ONE PIECE Card Game · rotating picks",
+    title: "Fresh ONE PIECE picks from the Japanese lineup.",
+    lead: "Browse booster and extra-booster boxes with a live view of the collection and tracked delivery choices for Australia.",
+    action: "Explore ONE PIECE boxes",
+    badge: "Extra booster pick",
+    front: "eb04-egghead-crisis",
+    back: "op11-fist-divine-speed",
+    peek: "op14-azure-seas-seven",
+    name: "Egghead Crisis"
+  },
+  {
+    category: "yugioh",
+    eyebrow: "Yu-Gi-Oh! OCG · rotating picks",
+    title: "Limited and value OCG boxes, direct from Japan.",
+    lead: "Discover current Japanese Yu-Gi-Oh! releases as the lineup rotates, with AUD estimates and tracked express shipping.",
+    action: "Explore Yu-Gi-Oh! boxes",
+    badge: "Value OCG pick",
+    front: "dbgv-glorious-victors",
+    back: "lpg2-ra-yellow",
+    peek: "26lp-world-championship",
+    name: "Glorious Victors"
   }
 ];
 let heroSlideIndex = 0;
@@ -301,7 +342,9 @@ function renderHeroSlide(index, animate = true) {
   const slide = heroSlides[heroSlideIndex];
   const front = heroProduct(slide.front);
   const back = heroProduct(slide.back);
+  const peek = heroProduct(slide.peek);
   const apply = () => {
+    hero.dataset.heroTheme = slide.category;
     heroEyebrow.textContent = slide.eyebrow;
     heroTitle.textContent = slide.title;
     heroLead.textContent = slide.lead;
@@ -318,12 +361,16 @@ function renderHeroSlide(index, animate = true) {
       heroBackImage.src = back.image;
       heroBackImage.alt = `${back.title} booster box`;
     }
+    if (peek) heroPeekImage.src = peek.image;
     heroSliderDots.querySelectorAll("button").forEach((dot, dotIndex) => {
       const active = dotIndex === heroSlideIndex;
       dot.classList.toggle("active", active);
       dot.setAttribute("aria-current", active ? "true" : "false");
     });
     heroSliderStatus.textContent = `${heroSlideIndex + 1} / ${heroSlides.length}`;
+    heroSliderProgress.style.animation = "none";
+    void heroSliderProgress.offsetWidth;
+    heroSliderProgress.style.animation = "";
     hero.classList.remove("is-changing");
   };
   if (animate) {
@@ -337,7 +384,8 @@ function renderHeroSlide(index, animate = true) {
 function restartHeroTimer() {
   if (heroSlideTimer) window.clearInterval(heroSlideTimer);
   heroSlideTimer = null;
-  if (!heroPaused) heroSlideTimer = window.setInterval(() => renderHeroSlide(heroSlideIndex + 1), 6500);
+  if (!heroPaused) heroSlideTimer = window.setInterval(() => renderHeroSlide(heroSlideIndex + 1), 5200);
+  hero.classList.toggle("is-paused", heroPaused);
   heroSliderToggle.textContent = heroPaused ? "Play" : "Pause";
   heroSliderToggle.setAttribute("aria-label", heroPaused ? "Play hero slides" : "Pause hero slides");
 }

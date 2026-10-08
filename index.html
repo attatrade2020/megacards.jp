@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261008-7">
+  <link rel="stylesheet" href="styles.css?v=20261008-9">
 </head>
 <body>
   <div class="announcement">
@@ -58,7 +58,11 @@
             <li>AUD price guide</li>
           </ul>
         </div>
-        <div class="hero__visual" aria-label="Featured Japanese Pokemon booster boxes">
+        <div class="hero__visual" aria-label="Rotating selection of featured Japanese trading card boxes">
+          <div class="hero__live-pill"><span aria-hidden="true"></span> Live Japan lineup</div>
+          <div class="hero-card hero-card--peek" aria-hidden="true">
+            <img id="heroPeekImage" src="assets/products/m5-abyss-eye.webp" alt="" width="520" height="520">
+          </div>
           <div class="hero-card hero-card--back">
             <img id="heroBackImage" src="assets/products/m6-storm-emeralda.webp" alt="Pokemon Card Game MEGA Storm Emeralda booster box" width="520" height="520">
           </div>
@@ -73,7 +77,8 @@
           <div class="hero-slider__controls" aria-label="Featured collections">
             <button class="hero-slider__toggle" id="heroSliderToggle" type="button" aria-label="Pause hero slides">Pause</button>
             <div class="hero-slider__dots" id="heroSliderDots"></div>
-            <span class="hero-slider__status" id="heroSliderStatus" aria-live="polite">1 / 3</span>
+            <span class="hero-slider__status" id="heroSliderStatus" aria-live="polite">1 / 6</span>
+            <span class="hero-slider__progress" aria-hidden="true"><span id="heroSliderProgress"></span></span>
           </div>
         </div>
       </div>
@@ -292,6 +297,6 @@
     </div>
   </footer>
 
-  <script src="app.js?v=20261008-8"></script>
+  <script src="app.js?v=20261008-9"></script>
 </body>
 </html>
