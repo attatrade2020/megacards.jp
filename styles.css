@@ -210,12 +210,12 @@ button, input, select { font: inherit; }
 .shipping-rate__price { font-weight: 800; font-size: .85rem; }
 .cart-panel__footer small { display: block; margin-top: 12px; color: var(--ink-soft); text-align: center; }
 
-.checkout-modal { width: min(760px, calc(100% - 28px)); max-height: min(920px, calc(100dvh - 28px)); padding: 0; overflow: hidden; color: var(--ink); background: #fff; border: 0; border-radius: 24px; box-shadow: 0 32px 100px rgba(5,10,20,.3); }
+.checkout-modal { width: min(760px, calc(100% - 28px)); max-height: min(920px, calc(100dvh - 28px)); padding: 0; overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; color: var(--ink); background: #fff; border: 0; border-radius: 24px; box-shadow: 0 32px 100px rgba(5,10,20,.3); }
 .checkout-modal::backdrop { background: rgba(5,10,20,.68); backdrop-filter: blur(4px); }
 .checkout-modal__header { position: sticky; z-index: 2; top: 0; display: flex; align-items: start; justify-content: space-between; gap: 24px; padding: 24px 28px 20px; background: rgba(255,255,255,.96); border-bottom: 1px solid var(--line); backdrop-filter: blur(12px); }
 .checkout-modal__header .eyebrow { margin-bottom: 5px; }
 .checkout-modal h2 { margin: 0; font: 800 2rem/1.1 "Manrope", sans-serif; letter-spacing: -.045em; }
-.checkout-form { max-height: calc(100dvh - 140px); padding: 6px 28px 30px; overflow-y: auto; }
+.checkout-form { padding: 6px 28px 30px; }
 .checkout-section { padding: 24px 0; border-bottom: 1px solid var(--line); }
 .checkout-section__heading { display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-items: start; margin-bottom: 16px; }
 .checkout-section__heading > span { display: grid; place-items: center; width: 30px; height: 30px; color: #fff; background: var(--navy); border-radius: 9px; font: 800 .7rem "Manrope", sans-serif; }
@@ -341,7 +341,7 @@ footer { color: #c6cede; background: var(--navy); }
   .checkout-modal { width: 100%; max-height: 100dvh; border-radius: 0; }
   .checkout-modal__header { padding: 20px 18px 16px; }
   .checkout-modal h2 { font-size: 1.65rem; }
-  .checkout-form { max-height: calc(100dvh - 104px); padding: 3px 18px 24px; }
+  .checkout-form { padding: 3px 18px 24px; }
   .payment-options, .checkout-fields { grid-template-columns: 1fr; }
   .checkout-field--wide { grid-column: auto; }
   .checkout-success { padding: 44px 22px; }
