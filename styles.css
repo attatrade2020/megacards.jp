@@ -46,8 +46,9 @@ button, input, select { font: inherit; }
 .brand__suffix { color: var(--blue); }
 .main-nav { display: flex; gap: 32px; margin-right: auto; font-size: .9rem; font-weight: 600; color: var(--ink-soft); }
 .main-nav a:hover { color: var(--blue); }
-.account-button { min-height: 42px; padding: 0 16px; color: var(--blue); background: #fff; border: 1px solid #b9c8eb; border-radius: 999px; cursor: pointer; font-size: .8rem; font-weight: 800; }
-.account-button:hover { color: #fff; background: var(--blue); border-color: var(--blue); }
+.account-button { min-height: 46px; padding: 0 20px; color: var(--navy); background: linear-gradient(135deg,#ffe783,var(--yellow)); border: 1px solid #e6b313; border-radius: 999px; cursor: pointer; box-shadow: 0 8px 22px rgba(230,179,19,.3); font-size: .82rem; font-weight: 900; transition: transform .2s ease, box-shadow .2s ease, color .2s ease, background .2s ease, border-color .2s ease; }
+.account-button:hover { color: #fff; background: var(--blue); border-color: var(--blue); box-shadow: 0 10px 26px rgba(20,89,233,.3); transform: translateY(-2px); }
+.account-button:focus-visible { outline: 3px solid rgba(20,89,233,.24); outline-offset: 3px; }
 .cart-button { display: flex; align-items: center; gap: 10px; padding: 10px 15px 10px 18px; color: #fff; background: var(--navy); border: 0; border-radius: 999px; cursor: pointer; font-weight: 700; }
 .cart-button span { display: grid; place-items: center; min-width: 25px; height: 25px; padding-inline: 6px; color: var(--navy); background: var(--yellow); border-radius: 50%; font-size: .75rem; }
 
@@ -361,7 +362,7 @@ footer { color: #c6cede; background: var(--navy); }
   .announcement__inner { min-height: 34px; justify-content: space-between; }
   .announcement__copy { display: none; }
   .header__inner { height: 66px; gap: 8px; }
-  .account-button { margin-left: auto; padding: 0 11px; font-size: .7rem; }
+  .account-button { min-height: 40px; margin-left: auto; padding: 0 13px; font-size: .7rem; }
   .cart-button { padding-left: 13px; }
   .hero h1 { font-size: clamp(2.65rem, 13vw, 4rem); }
   .hero__actions { align-items: stretch; flex-direction: column; }
