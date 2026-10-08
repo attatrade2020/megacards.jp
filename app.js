@@ -210,6 +210,9 @@ const closeCartButton = document.getElementById("closeCart");
 const cartItems = document.getElementById("cartItems");
 const cartCount = document.getElementById("cartCount");
 const cartTotal = document.getElementById("cartTotal");
+const customsIndicator = document.getElementById("customsIndicator");
+const customsTitle = document.getElementById("customsTitle");
+const customsMessage = document.getElementById("customsMessage");
 const shippingPostcode = document.getElementById("shippingPostcode");
 const shippingState = document.getElementById("shippingState");
 const calculateShippingButton = document.getElementById("calculateShipping");
@@ -273,11 +276,36 @@ function renderProducts() {
   productGrid.innerHTML = filtered.length ? filtered.map(productCard).join("") : '<div class="empty-state">No boxes match your search.</div>';
 }
 
-function cartSubtotalAud() {
+function cartSubtotalJpy() {
   return Object.entries(state.cart).reduce((sum, [id, quantity]) => {
     const product = products.find((item) => item.id === id);
-    return sum + (product ? aud(product.jpy) * quantity : 0);
+    return sum + (product ? product.jpy * quantity : 0);
   }, 0);
+}
+
+function cartSubtotalAud() {
+  return aud(cartSubtotalJpy());
+}
+
+function renderCustomsEstimate() {
+  const itemCount = Object.values(state.cart).reduce((sum, quantity) => sum + quantity, 0);
+  if (!itemCount) {
+    customsIndicator.dataset.status = "empty";
+    customsTitle.textContent = "Australian customs estimate";
+    customsMessage.textContent = "Add a box to see whether border charges are likely.";
+    return;
+  }
+
+  const productValueAud = cartSubtotalAud();
+  if (productValueAud <= 1000) {
+    customsIndicator.dataset.status = "low";
+    customsTitle.textContent = "Customs duty generally not charged";
+    customsMessage.textContent = `${audLabel(productValueAud)} product value is within the ABF low-value threshold of A$1,000 AUD. GST may still apply at sale; ABF makes the final assessment.`;
+  } else {
+    customsIndicator.dataset.status = "high";
+    customsTitle.textContent = "Import charges may apply";
+    customsMessage.textContent = `${audLabel(productValueAud)} product value is above A$1,000 AUD. An Import Declaration is generally required; JAEPA may reduce duty for qualifying goods. ABF makes the final assessment.`;
+  }
 }
 
 function resetShippingQuote(message = "") {
@@ -620,6 +648,7 @@ function renderCart() {
 
   cartCount.textContent = count;
   cartTotal.textContent = audLabel(total);
+  renderCustomsEstimate();
   cartItems.innerHTML = entries.length ? entries.map(([id, quantity]) => {
     const product = products.find((item) => item.id === id);
     return `

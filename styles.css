@@ -130,6 +130,12 @@ button, input, select { font: inherit; }
 .shipping__stats > div { padding-top: 18px; border-top: 1px solid rgba(255,255,255,.3); }
 .shipping__stats strong { display: block; font: 800 2rem "Manrope", sans-serif; }
 .shipping__stats span, .shipping small { color: #dce6ff; font-size: .78rem; }
+.trade-benefit { display: grid; grid-template-columns: auto 1fr; gap: 14px; margin: 26px 0 18px; padding: 18px; border: 1px solid rgba(255,255,255,.3); border-radius: 16px; background: rgba(7,31,91,.2); }
+.trade-benefit__badge { height: fit-content; padding: 6px 9px; color: var(--navy); background: var(--yellow); border-radius: 999px; font-size: .66rem; font-weight: 900; letter-spacing: .06em; }
+.trade-benefit strong { display: block; font: 800 .9rem "Manrope", sans-serif; }
+.trade-benefit p { margin: 6px 0 9px; color: #dce6ff; font-size: .78rem; line-height: 1.55; }
+.trade-benefit__links { display: flex; flex-wrap: wrap; gap: 8px 16px; }
+.trade-benefit__links a { color: #fff; font-size: .72rem; font-weight: 800; text-decoration: underline; text-underline-offset: 3px; }
 
 .cart-panel { position: fixed; z-index: 100; top: 0; right: 0; width: min(460px, 100%); height: 100dvh; display: flex; flex-direction: column; padding: 28px; background: #fff; transform: translateX(102%); transition: transform .3s ease; box-shadow: -20px 0 60px rgba(11,20,40,.18); }
 .cart-panel.open { transform: translateX(0); }
@@ -152,6 +158,20 @@ button, input, select { font: inherit; }
 .cart-total--shipping strong { font-size: 1.15rem; }
 .cart-total--grand { margin-bottom: 14px; }
 .cart-total--grand strong { color: var(--blue); }
+.customs-indicator { display: grid; grid-template-columns: 26px 1fr; gap: 9px; margin: -2px 0 14px; padding: 11px; border: 1px solid var(--line); border-radius: 12px; background: var(--paper); }
+.customs-indicator__icon { display: grid; place-items: center; width: 24px; height: 24px; color: #fff; background: #7c8699; border-radius: 50%; font: 800 .75rem "Manrope", sans-serif; }
+.customs-indicator strong { display: block; font: 800 .77rem "Manrope", sans-serif; }
+.customs-indicator p { margin: 3px 0 0; color: var(--ink-soft); font-size: .68rem; line-height: 1.45; }
+.customs-indicator[data-status="low"] { border-color: #a9dbc5; background: #f2fbf7; }
+.customs-indicator[data-status="low"] .customs-indicator__icon { background: var(--green); }
+.customs-indicator[data-status="low"] .customs-indicator__icon::before { content: "✓"; }
+.customs-indicator[data-status="low"] .customs-indicator__icon { font-size: 0; }
+.customs-indicator[data-status="low"] .customs-indicator__icon::before { font-size: .78rem; }
+.customs-indicator[data-status="high"] { border-color: #ecc878; background: #fffaf0; }
+.customs-indicator[data-status="high"] .customs-indicator__icon { background: #a76800; }
+.customs-indicator[data-status="high"] .customs-indicator__icon::before { content: "!"; }
+.customs-indicator[data-status="high"] .customs-indicator__icon { font-size: 0; }
+.customs-indicator[data-status="high"] .customs-indicator__icon::before { font-size: .85rem; }
 .shipping-calculator { margin: 0 0 14px; padding: 14px; border: 1px solid var(--line); border-radius: 16px; background: var(--paper); }
 .shipping-calculator__heading { display: flex; justify-content: space-between; gap: 12px; align-items: center; margin-bottom: 10px; }
 .shipping-calculator__heading strong { font: 700 .92rem "Manrope", sans-serif; }

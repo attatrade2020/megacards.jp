@@ -14,6 +14,8 @@ Product names, one-box reference prices, and product imagery were checked agains
 
 The cart requests live Australia shipping quotes from the existing Ship&co integration. Product weight and dimensions, packaging weight, and carton padding are maintained at `shipping-admin.html` and stored in `data/shipping_products.json` through `shipping_products.php`.
 
+The cart also estimates the Australian low-value import treatment from the product subtotal. Orders at or below A$1,000 AUD show the general ABF low-value treatment; orders above the threshold show the Import Declaration warning and JAEPA eligibility note.
+
 ## Payments
 
 Checkout supports Wise payment links and PayPal invoices. PayPal orders include the existing 5% transaction fee, itemised before the order is submitted. Both methods are invoiced in JPY and reuse the production order and confirmation-email endpoints.
