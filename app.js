@@ -195,7 +195,7 @@ const fallbackShippingProfiles = {
 const state = { query: "", sort: "featured", category: "all", cart: {}, shippingProfiles: fallbackShippingProfiles, shippingQuote: null };
 
 const aud = (jpy) => Math.round(jpy / AUD_JPY_RATE);
-const audLabel = (value) => new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 0 }).format(value);
+const audLabel = (value) => `A$${new Intl.NumberFormat("en-AU", { maximumFractionDigits: 0 }).format(value)} AUD`;
 const jpyLabel = (value) => new Intl.NumberFormat("ja-JP", { style: "currency", currency: "JPY", maximumFractionDigits: 0 }).format(value);
 
 const productGrid = document.getElementById("productGrid");
