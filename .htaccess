@@ -21,3 +21,10 @@ RewriteRule ^sitemap\.xml$ /sitemap.php [L]
     Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
 </Files>
+
+# Always load the latest admin interface after credential changes.
+<FilesMatch "^(admin\.html|shipping-admin\.html)$">
+    Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
+</FilesMatch>
