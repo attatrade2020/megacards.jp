@@ -359,7 +359,6 @@ function productCard(product) {
         <p class="product-card__series">${product.series}</p>
         <h3>${product.title}</h3>
         <div class="product-card__meta"><span>Japanese box</span><span>${product.release}</span></div>
-        <p class="product-card__origin"><span aria-hidden="true">JP</span> Ships from Japan to Australia</p>
         <div class="product-card__price-row">
           <div class="product-card__price">
             <strong>${audLabel(aud(product.jpy))}</strong>

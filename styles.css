@@ -125,8 +125,6 @@ button, input, select { font: inherit; }
 .product-card__series { margin: 0 0 8px; color: var(--blue); font-size: .7rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .product-card h3 { min-height: 3.8em; margin: 0; font: 800 1.04rem/1.45 "Manrope", sans-serif; letter-spacing: -.025em; }
 .product-card__meta { display: flex; justify-content: space-between; gap: 10px; margin-top: 18px; color: var(--ink-soft); font-size: .75rem; }
-.product-card__origin { display: flex; align-items: center; gap: 7px; margin: 11px 0 0; color: var(--blue-dark); font-size: .73rem; font-weight: 800; }
-.product-card__origin span { display: grid; place-items: center; width: 25px; height: 20px; color: #fff; background: var(--blue); border-radius: 5px; font: 800 .55rem "Manrope", sans-serif; letter-spacing: .04em; }
 .product-card__price-row { display: flex; justify-content: space-between; align-items: end; gap: 16px; margin-top: 12px; }
 .product-card__price { display: flex; flex-direction: column; }
 .product-card__price strong { font: 800 1.8rem "Manrope", sans-serif; letter-spacing: -.04em; }
