@@ -13,3 +13,5 @@ Product names, one-box reference prices, and product imagery were checked agains
 ## Shipping
 
 The cart requests live Australia shipping quotes from the existing Ship&co integration. Product weight and dimensions, packaging weight, and carton padding are maintained at `shipping-admin.html` and stored in `data/shipping_products.json` through `shipping_products.php`.
+
+The Australia-focused customer FAQ is available at `faq.html` and covers ordering, shipping, GST and customs, Japanese product details, and support.

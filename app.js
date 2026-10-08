@@ -313,7 +313,6 @@ const serviceLabels = {
   japanpost_ems: "EMS",
   japanpost_parcel_air: "International Parcel Air",
   japanpost_parcel_sea: "International Parcel Sea",
-  japanpost_air_packet: "Air Small Packet",
   ups_worldwide_express_plus: "Worldwide Express Plus",
   ups_worldwide_express: "Worldwide Express",
   ups_saver: "Worldwide Saver",
