@@ -11,7 +11,6 @@ const products = [
     jpy: 26000,
     tag: "Latest",
     image: "assets/products/m6a-30th-celebration.webp",
-    source: "https://snkrdunk.com/apparels/881421"
   },
   {
     id: "m6-storm-emeralda",
@@ -23,7 +22,6 @@ const products = [
     jpy: 10500,
     tag: "Popular",
     image: "assets/products/m6-storm-emeralda.webp",
-    source: "https://snkrdunk.com/apparels/846048"
   },
   {
     id: "m5-abyss-eye",
@@ -35,7 +33,6 @@ const products = [
     jpy: 8340,
     tag: "Value pick",
     image: "assets/products/m5-abyss-eye.webp",
-    source: "https://snkrdunk.com/apparels/806644"
   },
   {
     id: "m4-ninja-spinner",
@@ -47,7 +44,6 @@ const products = [
     jpy: 8500,
     tag: "Collector pick",
     image: "assets/products/m4-ninja-spinner.webp",
-    source: "https://snkrdunk.com/apparels/762693"
   },
   {
     id: "m2a-mega-dream-ex",
@@ -59,7 +55,6 @@ const products = [
     jpy: 12980,
     tag: "High class",
     image: "assets/products/m2a-mega-dream-ex.webp",
-    source: "https://snkrdunk.com/apparels/721913"
   },
   {
     id: "m2-inferno-x",
@@ -71,7 +66,6 @@ const products = [
     jpy: 17000,
     tag: "Charizard set",
     image: "assets/products/m2-inferno-x.webp",
-    source: "https://snkrdunk.com/apparels/687430"
   },
   {
     id: "op13-carrying-on-his-will",
@@ -83,7 +77,6 @@ const products = [
     jpy: 17999,
     tag: "Popular",
     image: "assets/products/op13-carrying-on-his-will.webp",
-    source: "https://snkrdunk.com/apparels/548909"
   },
   {
     id: "op14-azure-seas-seven",
@@ -95,7 +88,6 @@ const products = [
     jpy: 8500,
     tag: "New generation",
     image: "assets/products/op14-azure-seas-seven.webp",
-    source: "https://snkrdunk.com/apparels/725356"
   },
   {
     id: "eb04-egghead-crisis",
@@ -107,7 +99,6 @@ const products = [
     jpy: 12250,
     tag: "Extra booster",
     image: "assets/products/eb04-egghead-crisis.webp",
-    source: "https://snkrdunk.com/apparels/751287"
   },
   {
     id: "op11-fist-divine-speed",
@@ -119,7 +110,6 @@ const products = [
     jpy: 30690,
     tag: "Collector pick",
     image: "assets/products/op11-fist-divine-speed.webp",
-    source: "https://snkrdunk.com/apparels/498158"
   },
   {
     id: "yac1-original-artwork",
@@ -131,7 +121,6 @@ const products = [
     jpy: 8499,
     tag: "Latest",
     image: "assets/products/yac1-original-artwork.webp",
-    source: "https://snkrdunk.com/apparels/886014"
   },
   {
     id: "dbgv-glorious-victors",
@@ -143,7 +132,6 @@ const products = [
     jpy: 2999,
     tag: "Value pick",
     image: "assets/products/dbgv-glorious-victors.webp",
-    source: "https://snkrdunk.com/apparels/881242"
   },
   {
     id: "26lp-world-championship",
@@ -155,7 +143,6 @@ const products = [
     jpy: 4000,
     tag: "Limited pack",
     image: "assets/products/26lp-world-championship.webp",
-    source: "https://snkrdunk.com/apparels/880998"
   },
   {
     id: "lpg2-ra-yellow",
@@ -167,7 +154,6 @@ const products = [
     jpy: 3200,
     tag: "GX series",
     image: "assets/products/lpg2-ra-yellow.webp",
-    source: "https://snkrdunk.com/apparels/847245"
   }
 ];
 
