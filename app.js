@@ -1,4 +1,5 @@
 const AUD_JPY_RATE = 110.04;
+const JAPAN_DOMESTIC_SHIPPING_JPY = 990;
 
 let products = [
   {
@@ -333,6 +334,7 @@ const state = { query: "", sort: "featured", category: "all", cart: {}, shipping
 const aud = (jpy) => Math.round(jpy / AUD_JPY_RATE);
 const audLabel = (value) => `A$${new Intl.NumberFormat("en-AU", { maximumFractionDigits: 0 }).format(value)}`;
 const jpyLabel = (value) => new Intl.NumberFormat("ja-JP", { style: "currency", currency: "JPY", maximumFractionDigits: 0 }).format(value);
+const productPriceJpy = (product) => Math.max(0, Number(product?.jpy) || 0) + JAPAN_DOMESTIC_SHIPPING_JPY;
 
 const productGrid = document.getElementById("productGrid");
 const rankingGrid = document.getElementById("rankingGrid");
@@ -506,7 +508,7 @@ function renderHeroSlide(index, animate = true) {
     if (front) {
       heroFrontImage.src = front.image;
       heroFrontImage.alt = `${front.title} booster box`;
-      heroProductPrice.textContent = audLabel(aud(front.jpy));
+      heroProductPrice.textContent = audLabel(aud(productPriceJpy(front)));
     }
     if (back) {
       heroBackImage.src = back.image;
@@ -561,7 +563,7 @@ function productCard(product) {
         <div class="product-card__meta"><span>Japanese box</span><span>${escapeHtml(product.release)}</span></div>
         <div class="product-card__price-row">
           <div class="product-card__price">
-            <strong>${audLabel(aud(product.jpy))}</strong>
+            <strong>${audLabel(aud(productPriceJpy(product)))}</strong>
           </div>
           <div class="product-card__actions">
             <label class="product-card__quantity"><span>Qty</span><input type="number" min="1" max="99" step="1" value="1" inputmode="numeric" data-quantity="${product.id}" aria-label="Quantity for ${escapeHtml(product.title)}" ${soldOut ? "disabled" : ""}></label>
@@ -584,7 +586,7 @@ function rankingCard(product, index) {
         <p>${escapeHtml(product.series)}</p>
         <h3>${escapeHtml(product.title)}</h3>
         <div class="ranking-card__footer">
-          <div><small>Price per box</small><strong>${audLabel(aud(product.jpy))}</strong></div>
+          <div><small>Price per box</small><strong>${audLabel(aud(productPriceJpy(product)))}</strong></div>
           <button type="button" data-ranking-add="${product.id}" aria-label="Add one ${escapeHtml(product.title)} to cart" ${soldOut ? "disabled" : ""}>${soldOut ? "Sold out" : "Add to cart"}</button>
         </div>
       </div>
@@ -605,15 +607,15 @@ function renderProducts() {
     `${product.title} ${product.series}`.toLowerCase().includes(query)
   );
   if (state.sort === "newest") filtered.sort((a, b) => b.releaseOrder - a.releaseOrder);
-  if (state.sort === "price-low") filtered.sort((a, b) => a.jpy - b.jpy);
-  if (state.sort === "price-high") filtered.sort((a, b) => b.jpy - a.jpy);
+  if (state.sort === "price-low") filtered.sort((a, b) => productPriceJpy(a) - productPriceJpy(b));
+  if (state.sort === "price-high") filtered.sort((a, b) => productPriceJpy(b) - productPriceJpy(a));
   productGrid.innerHTML = filtered.length ? filtered.map(productCard).join("") : '<div class="empty-state">No boxes match your search.</div>';
 }
 
 function cartSubtotalJpy() {
   return Object.entries(state.cart).reduce((sum, [id, quantity]) => {
     const product = products.find((item) => item.id === id);
-    return sum + (product ? product.jpy * quantity : 0);
+    return sum + (product ? productPriceJpy(product) * quantity : 0);
   }, 0);
 }
 
@@ -674,7 +676,7 @@ function buildShipment() {
     width = Math.max(width, profile.width_cm);
     depth = Math.max(depth, profile.depth_cm);
     stackedHeight += profile.height_cm * quantity;
-    items.push({ name: product.title, price: product.jpy, quantity, weight: profile.weight_g });
+    items.push({ name: product.title, price: productPriceJpy(product), quantity, weight: profile.weight_g });
   });
 
   return {
@@ -685,7 +687,7 @@ function buildShipment() {
     items,
     totalValue: entries.reduce((sum, [id, quantity]) => {
       const product = products.find((item) => item.id === id);
-      return sum + (product ? product.jpy * quantity : 0);
+      return sum + (product ? productPriceJpy(product) * quantity : 0);
     }, 0)
   };
 }
@@ -1051,7 +1053,7 @@ function renderCart() {
     return `
       <div class="cart-item">
         <img src="${product.image}" alt="" width="74" height="74">
-        <div><strong>${product.title}</strong><span>${audLabel(aud(product.jpy))} × ${quantity}</span></div>
+        <div><strong>${product.title}</strong><span>${audLabel(aud(productPriceJpy(product)))} × ${quantity}</span></div>
         <button type="button" data-remove="${id}">Remove</button>
       </div>`;
   }).join("") : '<div class="cart-empty">Your cart is empty.<br>Add a box to get started.</div>';
