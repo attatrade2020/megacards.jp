@@ -35,6 +35,7 @@ function megacards_member_public_session(): ?array
         'name' => (string) ($member['name'] ?? ''),
         'email' => (string) $member['email'],
         'state' => (string) ($member['state'] ?? ''),
+        'address' => is_array($member['address'] ?? null) ? $member['address'] : [],
     ];
 }
 
@@ -81,14 +82,22 @@ function megacards_update_member_profile(array $input, string $membersFile): arr
 
     $name = trim((string) ($input['name'] ?? ''));
     $email = strtolower(trim((string) ($input['email'] ?? '')));
+    $addressLine1 = trim((string) ($input['address_line1'] ?? ''));
+    $addressLine2 = trim((string) ($input['address_line2'] ?? ''));
+    $suburb = trim((string) ($input['suburb'] ?? ''));
     $state = strtoupper(trim((string) ($input['state'] ?? '')));
+    $postcode = trim((string) ($input['postcode'] ?? ''));
     $currentPassword = (string) ($input['current_password'] ?? '');
     $newPassword = (string) ($input['new_password'] ?? '');
     $states = ['NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'];
 
     if ($name === '' || mb_strlen($name) > 80) return ['status' => 422, 'error' => 'Enter your full name.'];
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 190) return ['status' => 422, 'error' => 'Enter a valid email address.'];
+    if ($addressLine1 === '' || mb_strlen($addressLine1) > 120) return ['status' => 422, 'error' => 'Enter your street address.'];
+    if (mb_strlen($addressLine2) > 120) return ['status' => 422, 'error' => 'Address line 2 is too long.'];
+    if ($suburb === '' || mb_strlen($suburb) > 80) return ['status' => 422, 'error' => 'Enter your suburb or city.'];
     if (!in_array($state, $states, true)) return ['status' => 422, 'error' => 'Select your Australian state or territory.'];
+    if (!preg_match('/^\d{4}$/', $postcode)) return ['status' => 422, 'error' => 'Enter a valid 4-digit Australian postcode.'];
     if ($currentPassword === '' || strlen($currentPassword) > 128) return ['status' => 422, 'error' => 'Enter your current password to save changes.'];
     if ($newPassword !== '' && (strlen($newPassword) < 8 || strlen($newPassword) > 128 || !preg_match('/[A-Z]/', $newPassword) || !preg_match('/\d/', $newPassword))) {
         return ['status' => 422, 'error' => 'Use at least 8 characters with an uppercase letter and a number for the new password.'];
@@ -121,6 +130,15 @@ function megacards_update_member_profile(array $input, string $membersFile): arr
         $members[$memberIndex]['name'] = $name;
         $members[$memberIndex]['email'] = $email;
         $members[$memberIndex]['state'] = $state;
+        $members[$memberIndex]['address'] = [
+            'line1' => $addressLine1,
+            'line2' => $addressLine2,
+            'suburb' => $suburb,
+            'state' => $state,
+            'postcode' => $postcode,
+            'country' => 'Australia',
+            'country_code' => 'AU',
+        ];
         $members[$memberIndex]['updated_at'] = gmdate('c');
         if ($newPassword !== '') $members[$memberIndex]['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
 
@@ -136,6 +154,7 @@ function megacards_update_member_profile(array $input, string $membersFile): arr
             'name' => $name,
             'email' => $email,
             'state' => $state,
+            'address' => $members[$memberIndex]['address'],
             'authenticated_at' => time(),
         ];
         session_regenerate_id(true);
@@ -238,6 +257,7 @@ $_SESSION['mc_member'] = [
     'name' => (string) ($matched['name'] ?? ''),
     'email' => (string) $matched['email'],
     'state' => (string) ($matched['state'] ?? ''),
+    'address' => is_array($matched['address'] ?? null) ? $matched['address'] : [],
     'authenticated_at' => time(),
 ];
 $publicMember = megacards_member_public_session();

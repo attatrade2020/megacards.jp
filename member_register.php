@@ -14,7 +14,11 @@ function megacards_member_validate(array $input): array
     $name = trim((string)($input['name'] ?? ''));
     $email = strtolower(trim((string)($input['email'] ?? '')));
     $password = (string)($input['password'] ?? '');
+    $addressLine1 = trim((string)($input['address_line1'] ?? ''));
+    $addressLine2 = trim((string)($input['address_line2'] ?? ''));
+    $suburb = trim((string)($input['suburb'] ?? ''));
     $state = strtoupper(trim((string)($input['state'] ?? '')));
+    $postcode = trim((string)($input['postcode'] ?? ''));
     $accepted = ($input['accepted_terms'] ?? false) === true;
     $states = ['NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'];
 
@@ -23,7 +27,11 @@ function megacards_member_validate(array $input): array
     if (strlen($password) < 8 || strlen($password) > 128 || !preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password)) {
         return ['error' => 'Use at least 8 characters with an uppercase letter and a number.'];
     }
+    if ($addressLine1 === '' || mb_strlen($addressLine1) > 120) return ['error' => 'Enter your street address.'];
+    if (mb_strlen($addressLine2) > 120) return ['error' => 'Address line 2 is too long.'];
+    if ($suburb === '' || mb_strlen($suburb) > 80) return ['error' => 'Enter your suburb or city.'];
     if (!in_array($state, $states, true)) return ['error' => 'Select your Australian state or territory.'];
+    if (!preg_match('/^\d{4}$/', $postcode)) return ['error' => 'Enter a valid 4-digit Australian postcode.'];
     if (!$accepted) return ['error' => 'Accept the Terms and Privacy Policy to register.'];
 
     return [
@@ -31,6 +39,15 @@ function megacards_member_validate(array $input): array
         'email' => $email,
         'password' => $password,
         'state' => $state,
+        'address' => [
+            'line1' => $addressLine1,
+            'line2' => $addressLine2,
+            'suburb' => $suburb,
+            'state' => $state,
+            'postcode' => $postcode,
+            'country' => 'Australia',
+            'country_code' => 'AU',
+        ],
         'marketing' => ($input['marketing'] ?? false) === true,
     ];
 }
@@ -60,6 +77,7 @@ function megacards_member_store(array $member, string $file): array
             'email' => $member['email'],
             'password_hash' => password_hash($member['password'], PASSWORD_DEFAULT),
             'state' => $member['state'],
+            'address' => $member['address'],
             'marketing' => $member['marketing'],
             'email_verified' => false,
             'status' => 'active',
@@ -126,6 +144,7 @@ function megacards_member_login_after_registration(array $member, string $id): a
         'name' => $member['name'],
         'email' => $member['email'],
         'state' => $member['state'],
+        'address' => $member['address'],
         'authenticated_at' => time(),
     ];
     return [
@@ -133,6 +152,7 @@ function megacards_member_login_after_registration(array $member, string $id): a
         'name' => $member['name'],
         'email' => $member['email'],
         'state' => $member['state'],
+        'address' => $member['address'],
     ];
 }
 

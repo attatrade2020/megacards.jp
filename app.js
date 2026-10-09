@@ -1071,6 +1071,16 @@ function displayMemberSession(member) {
     : "Create free account";
   heroRegisterAction.disabled = signedIn;
   heroRegisterAction.classList.toggle("is-signed-in", signedIn);
+  if (signedIn) {
+    const address = currentMember.address || {};
+    checkoutForm.elements.name.value = currentMember.name || "";
+    checkoutForm.elements.email.value = currentMember.email || "";
+    checkoutForm.elements.address1.value = address.line1 || "";
+    checkoutForm.elements.address2.value = address.line2 || "";
+    checkoutForm.elements.city.value = address.suburb || "";
+    if (!state.shippingQuote && address.state) shippingState.value = address.state;
+    if (!state.shippingQuote && address.postcode) shippingPostcode.value = address.postcode;
+  }
 }
 
 async function refreshMemberSession() {
@@ -1166,7 +1176,11 @@ async function submitRegistration(event) {
   const payload = {
     name: String(form.get("name") || "").trim(),
     email: String(form.get("email") || "").trim(),
+    address_line1: String(form.get("addressLine1") || "").trim(),
+    address_line2: String(form.get("addressLine2") || "").trim(),
+    suburb: String(form.get("suburb") || "").trim(),
     state: String(form.get("state") || ""),
+    postcode: String(form.get("postcode") || "").trim(),
     password,
     marketing: form.get("marketing") === "on",
     accepted_terms: form.get("acceptedTerms") === "on",
@@ -1186,7 +1200,16 @@ async function submitRegistration(event) {
       id: data.member_id || "",
       name: payload.name,
       email: payload.email,
-      state: payload.state
+      state: payload.state,
+      address: {
+        line1: payload.address_line1,
+        line2: payload.address_line2,
+        suburb: payload.suburb,
+        state: payload.state,
+        postcode: payload.postcode,
+        country: "Australia",
+        country_code: "AU"
+      }
     });
     registerFormView.hidden = true;
     registerSuccess.hidden = false;
