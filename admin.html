@@ -1937,14 +1937,21 @@
         }
 
         function adminToCatalog(product) {
+            const releaseDate = String(product.release_date || '');
+            const releaseOrder = Number(product.releaseOrder) || (/^\d{4}-\d{2}-\d{2}$/.test(releaseDate) ? Number(releaseDate.replace(/-/g, '')) : 0);
+            let releaseLabel = product.release || '';
+            if (!releaseLabel && /^\d{4}-\d{2}-\d{2}$/.test(releaseDate)) {
+                const [year, month, day] = releaseDate.split('-').map(Number);
+                releaseLabel = `${day} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][month - 1]} ${year}`;
+            }
             return {
                 id: product.id,
                 category: product.category,
                 title: product.title_en,
                 series: product.series || 'Japanese TCG',
-                release_date: product.release_date || '',
-                release: product.release || '',
-                releaseOrder: Number(product.releaseOrder) || 0,
+                release_date: releaseDate,
+                release: releaseLabel,
+                releaseOrder,
                 jpy: Number(product.price_jpy) || 0,
                 tag: product.tag || 'Japanese box',
                 image: product.image_url || '',
@@ -2850,38 +2857,54 @@
             return 'pokemon';
         }
 
+        function normalizeQuickBoxTitle(value) {
+            const decoder = document.createElement('textarea');
+            decoder.innerHTML = String(value || '');
+            return decoder.value
+                .replace(/\s*(?:通販・買取・相場|通販|買取|相場).*$/u, '')
+                .replace(/\s*[｜|]\s*スニダン.*$/u, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        function hasJapaneseText(value) {
+            return /[ぁ-んァ-ヶ一-龠々]/u.test(String(value || ''));
+        }
+
         async function fetchQuickBoxInformation(url) {
-            let gasError = null;
+            let localError = null;
             try {
-                const response = await fetch(GAS_ADMIN_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'fetch_snkrdunk', url, password: ADMIN_PASSWORD })
-                });
-                const data = await response.json();
-                if (!response.ok || data.error) throw new Error(data.error || '商品ページを取得できませんでした');
-                if (data.title && (data.price || data.price_jpy) && data.image_url) {
-                    return {
-                        title: data.title,
-                        price_jpy: Number(data.price_jpy || data.price),
-                        image_url: data.image_url,
-                        release_date: data.release_date || '',
-                        snkrdunk_url: data.snkrdunk_url || url,
-                        snkr_id: data.snkr_id || '',
-                        condition: data.condition || ''
-                    };
-                }
-                throw new Error('商品名・価格・画像の一部を取得できませんでした');
+                const response = await fetch('/snkrdunk_import.php?action=fetch&url=' + encodeURIComponent(url));
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok || !data.ok) throw new Error(data.error || '商品ページを取得できませんでした');
+                const candidates = (Array.isArray(data.products) ? data.products : []).filter(isBoxImportCandidate);
+                if (candidates.length > 1) throw new Error('検索結果URLではなく、登録するボックスの商品ページURLを入力してください');
+                if (candidates.length === 1) return candidates[0];
+                throw new Error('未開封ボックスの商品情報が見つかりませんでした');
             } catch (error) {
-                gasError = error;
+                localError = error;
             }
 
-            const response = await fetch('/snkrdunk_import.php?action=fetch&url=' + encodeURIComponent(url));
+            const response = await fetch(GAS_ADMIN_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'fetch_snkrdunk', url, password: ADMIN_PASSWORD })
+            });
             const data = await response.json().catch(() => ({}));
-            if (!response.ok || !data.ok) throw new Error(data.error || gasError?.message || '商品情報を取得できませんでした');
-            const candidates = (Array.isArray(data.products) ? data.products : []).filter(isBoxImportCandidate);
-            if (candidates.length === 0) throw new Error(gasError?.message || '未開封ボックスの商品情報が見つかりませんでした');
-            if (candidates.length > 1) throw new Error('検索結果URLではなく、登録するボックスの商品ページURLを入力してください');
-            return candidates[0];
+            if (!response.ok || data.error) throw new Error(data.error || localError?.message || '商品情報を取得できませんでした');
+            if (!data.title || !(data.price || data.price_jpy) || !data.image_url) {
+                throw new Error(localError?.message || '商品名・価格・画像の一部を取得できませんでした');
+            }
+            return {
+                title: normalizeQuickBoxTitle(data.title),
+                title_en: normalizeQuickBoxTitle(data.title_en || ''),
+                price_jpy: Number(data.price_jpy || data.price),
+                image_url: data.image_url,
+                release_date: data.release_date || '',
+                product_number: data.product_number || '',
+                snkrdunk_url: data.snkrdunk_url || url,
+                snkr_id: data.snkr_id || '',
+                condition: data.condition || ''
+            };
         }
 
         async function importQuickBoxFromUrl() {
@@ -2921,8 +2944,10 @@
                 if (!sourcePrice) throw new Error('1ボックス価格を取得できませんでした');
 
                 setQuickBoxImportStatus('英語タイトルと商品画像を準備しています…', 'loading');
-                const englishTitle = await translateJaToEn(source.title || '');
-                if (!englishTitle) throw new Error('商品名を取得できませんでした');
+                const sourceTitle = normalizeQuickBoxTitle(source.title_en || source.title || '');
+                let englishTitle = sourceTitle;
+                if (hasJapaneseText(englishTitle)) englishTitle = normalizeQuickBoxTitle(await translateJaToEn(englishTitle));
+                if (!englishTitle || hasJapaneseText(englishTitle)) throw new Error('英語の商品名を取得できませんでした。登録を中止しました');
                 const localImage = await saveImportedBoxImage(source);
                 if (!localImage) throw new Error('商品画像をMegaCardsへ保存できませんでした');
 
@@ -2937,7 +2962,7 @@
                     id: productId,
                     title_en: englishTitle,
                     category,
-                    series: importedBoxSeries(category, englishTitle),
+                    series: importedBoxSeries(category, `${englishTitle} ${source.product_number || ''}`),
                     tag: 'Imported box',
                     price_jpy: sourcePrice + markup,
                     image_url: localImage,
@@ -4111,7 +4136,9 @@
         }
 
         function importedBoxSeries(category, title) {
-            const code = String(title || '').match(/\b(?:SV|SM|S|M|OP|EB|DB|LPG|YAC|26LP)[-\s]?\d*[A-Z]?\b/i)?.[0] || '';
+            const text = String(title || '');
+            const catalogCode = text.match(/\bpkmn-tcg-([a-z0-9-]+)\b/i)?.[1] || '';
+            const code = catalogCode || text.match(/\b(?:SV|SM|S|M|OP|EB|DB|LPG|YAC|26LP)[-\s]?\d*[A-Z]?\b/i)?.[0] || '';
             const names = { pokemon: 'Pokémon', onepiece: 'ONE PIECE', yugioh: 'Yu-Gi-Oh!' };
             return `${names[category] || 'Japanese TCG'}${code ? ' · ' + code.toUpperCase() : ' · Box'}`;
         }
