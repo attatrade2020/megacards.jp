@@ -1009,6 +1009,35 @@ async function submitOrder(event) {
 
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
     const expiryString = expiresAt.toLocaleString("en-AU", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
+    if (currentMember) {
+      try {
+        const historyResponse = await fetch("member_orders.php", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "record",
+            order: {
+              order_number: orderNumber,
+              name,
+              email,
+              address,
+              items,
+              subtotal_jpy: amounts.subtotal,
+              shipping_jpy: amounts.shipping,
+              paypal_fee_jpy: amounts.fee,
+              total_jpy: amounts.total,
+              shipping_carrier: rate.carrier,
+              shipping_service: rate.service,
+              payment_method: paymentMethod
+            }
+          })
+        });
+        const historyData = await historyResponse.json().catch(() => ({}));
+        if (!historyResponse.ok || !historyData.ok) throw new Error(historyData.error || "Order history could not be saved.");
+      } catch (historyError) {
+        console.error("Order history could not be saved:", historyError);
+      }
+    }
     const emailPayload = {
       email,
       name,

@@ -71,7 +71,8 @@ $states = [
     main{padding:58px 0 80px}.account-heading{display:grid;grid-template-columns:1fr auto;align-items:end;gap:24px;margin-bottom:26px}.eyebrow{margin:0 0 8px;color:var(--blue);font-size:.72rem;font-weight:900;letter-spacing:.13em;text-transform:uppercase}.account-heading h1{margin:0;font:800 clamp(2.1rem,5vw,3.5rem)/1 "Manrope",sans-serif;letter-spacing:-.055em}.account-heading p:last-child{margin:14px 0 0;color:var(--muted)}.signed-pill{display:flex;align-items:center;gap:9px;padding:10px 14px;color:#255333;background:#eef9f1;border:1px solid #b8dfc2;border-radius:999px;font-size:.75rem;font-weight:800}.signed-pill::before{content:"";width:8px;height:8px;background:#16a34a;border-radius:50%;box-shadow:0 0 0 4px rgba(22,163,74,.12)}
     .account-grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:22px}.panel{padding:30px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 50px rgba(11,20,40,.07)}.panel h2{margin:0 0 6px;font:800 1.35rem "Manrope",sans-serif;letter-spacing:-.025em}.panel__intro{margin:0 0 24px;color:var(--muted);font-size:.84rem}.profile-form{display:grid;grid-template-columns:1fr 1fr;gap:18px}.field{display:block}.field--wide{grid-column:1/-1}.field span{display:block;margin-bottom:6px;color:#465066;font-size:.72rem;font-weight:800;letter-spacing:.045em;text-transform:uppercase}.field small{display:block;margin-top:5px;color:#7b8495;font-size:.7rem}.field input,.field select{width:100%;min-height:48px;padding:10px 12px;color:var(--ink);background:#fff;border:1px solid #cfd7e3;border-radius:10px;outline:none}.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(20,89,233,.1)}.field input[readonly]{color:#4f596b;background:#f5f7fa}.form-section{grid-column:1/-1;margin-top:4px;padding-top:22px;border-top:1px solid var(--line)}.form-section h3{margin:0 0 4px;font-size:1rem}.form-section p{margin:0;color:var(--muted);font-size:.78rem}.form-status{grid-column:1/-1;min-height:22px;margin:0;font-size:.8rem;font-weight:700}.form-status.error{color:#b42318}.form-status.success{color:var(--green)}.save-button{grid-column:1/-1;min-height:50px;color:#fff;background:var(--blue);border:0;border-radius:11px;cursor:pointer;font-weight:900}.save-button:hover{background:var(--blue-dark)}.save-button:disabled{cursor:not-allowed;opacity:.58}
     .account-aside{display:grid;align-content:start;gap:14px}.info-card{padding:22px;background:var(--navy);border-radius:18px;color:#fff}.info-card h2{margin:0 0 12px;font:800 1.05rem "Manrope",sans-serif}.info-card p{margin:0;color:#b9c4d9;font-size:.78rem;overflow-wrap:anywhere}.info-card strong{display:block;margin-top:5px;color:#fff;font-size:.88rem}.security-card{padding:20px;background:#fff;border:1px solid var(--line);border-radius:16px}.security-card strong{display:block;margin-bottom:7px;font-size:.84rem}.security-card p{margin:0;color:var(--muted);font-size:.75rem}.back-link{display:block;padding:13px;color:var(--blue);background:#fff;border:1px solid var(--line);border-radius:12px;text-align:center;font-size:.8rem;font-weight:900}
-    @media(max-width:760px){.shell{width:min(calc(100% - 28px),1080px)}.topbar__inner{min-height:66px;gap:8px}.brand{font-size:1.05rem}.brand__mark{width:30px;height:30px}.topbar__link,.topbar__logout{padding:8px 9px;font-size:.68rem}main{padding:38px 0 56px}.account-heading{grid-template-columns:1fr;gap:14px}.signed-pill{justify-self:start}.account-grid{grid-template-columns:1fr}.panel{padding:22px}.profile-form{grid-template-columns:1fr}.field--wide,.form-section,.form-status,.save-button{grid-column:auto}.account-aside{grid-row:1}.info-card{padding:18px}}
+    .orders-panel{margin-top:22px;padding:30px;background:#fff;border:1px solid var(--line);border-radius:20px;box-shadow:0 18px 50px rgba(11,20,40,.07)}.orders-heading{display:flex;align-items:end;justify-content:space-between;gap:18px;margin-bottom:20px}.orders-heading h2{margin:0;font:800 1.35rem "Manrope",sans-serif}.orders-heading p{margin:5px 0 0;color:var(--muted);font-size:.8rem}.orders-count{padding:7px 11px;color:#294265;background:#edf3fd;border-radius:999px;font-size:.7rem;font-weight:800}.orders-list{display:grid;gap:14px}.orders-empty{padding:28px;color:var(--muted);background:#f7f9fc;border:1px dashed #cbd5e1;border-radius:14px;text-align:center;font-size:.82rem}.order-card{padding:20px;border:1px solid var(--line);border-radius:15px}.order-card__head{display:flex;justify-content:space-between;gap:14px;align-items:start}.order-card__number{font:800 1rem "Manrope",sans-serif}.order-card__date{margin-top:3px;color:var(--muted);font-size:.72rem}.order-status{padding:6px 10px;color:#7a5200;background:#fff5d6;border-radius:999px;font-size:.68rem;font-weight:900;text-transform:capitalize}.order-card__meta{display:flex;flex-wrap:wrap;gap:8px 18px;margin:15px 0;color:#4d586b;font-size:.75rem}.order-items{display:grid;gap:7px;padding:13px 0;border-top:1px solid #edf0f4;border-bottom:1px solid #edf0f4}.order-item{display:flex;justify-content:space-between;gap:16px;font-size:.76rem}.order-item span{color:#3f495a}.order-item strong{white-space:nowrap}.order-card__foot{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:15px}.order-total small{display:block;color:var(--muted);font-size:.66rem}.order-total strong{font-size:1.05rem}.receipt-button{display:inline-flex;align-items:center;justify-content:center;min-height:40px;padding:0 15px;color:#fff;background:var(--blue);border-radius:9px;font-size:.73rem;font-weight:900}.receipt-button:hover{background:var(--blue-dark)}
+    @media(max-width:760px){.shell{width:min(calc(100% - 28px),1080px)}.topbar__inner{min-height:66px;gap:8px}.brand{font-size:1.05rem}.brand__mark{width:30px;height:30px}.topbar__link,.topbar__logout{padding:8px 9px;font-size:.68rem}main{padding:38px 0 56px}.account-heading{grid-template-columns:1fr;gap:14px}.signed-pill{justify-self:start}.account-grid{grid-template-columns:1fr}.panel,.orders-panel{padding:22px}.profile-form{grid-template-columns:1fr}.field--wide,.form-section,.form-status,.save-button{grid-column:auto}.account-aside{grid-row:1}.info-card{padding:18px}.orders-heading,.order-card__head,.order-card__foot{align-items:stretch;flex-direction:column}.receipt-button{width:100%}}
   </style>
 </head>
 <body>
@@ -117,12 +118,48 @@ $states = [
           <a class="back-link" href="/">← Back to MegaCards</a>
         </aside>
       </div>
+      <section class="orders-panel" aria-labelledby="ordersTitle">
+        <div class="orders-heading"><div><h2 id="ordersTitle">Order history</h2><p>View orders placed with this account and download a PDF receipt.</p></div><span class="orders-count" id="ordersCount">Loading…</span></div>
+        <div class="orders-list" id="ordersList"><div class="orders-empty">Loading your orders…</div></div>
+      </section>
     </div>
   </main>
   <script>
     const profileForm = document.getElementById('memberProfileForm');
     const profileStatus = document.getElementById('memberProfileStatus');
     const profileSubmit = document.getElementById('memberProfileSubmit');
+    const ordersList = document.getElementById('ordersList');
+    const ordersCount = document.getElementById('ordersCount');
+    const accountEscape = value => String(value ?? '').replace(/[&<>'"]/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[character]));
+    const orderMoney = value => `JPY ${Math.max(0, Number(value) || 0).toLocaleString('en-AU')}`;
+    async function loadOrderHistory() {
+      try {
+        const response = await fetch('/member_orders.php?v=' + Date.now(), { cache: 'no-store' });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok || !Array.isArray(data.orders)) throw new Error(data.error || 'Order history could not be loaded.');
+        ordersCount.textContent = `${data.orders.length} ${data.orders.length === 1 ? 'order' : 'orders'}`;
+        if (!data.orders.length) {
+          ordersList.innerHTML = '<div class="orders-empty">No orders have been placed with this account yet.</div>';
+          return;
+        }
+        ordersList.innerHTML = data.orders.map(order => {
+          const date = order.created_at ? new Date(order.created_at).toLocaleString('en-AU', { day:'numeric', month:'short', year:'numeric', hour:'numeric', minute:'2-digit' }) : 'Date unavailable';
+          const items = Array.isArray(order.items) ? order.items : [];
+          const itemRows = items.map(item => `<div class="order-item"><span>${accountEscape(item.title)} × ${Math.max(1, Number(item.qty) || 1)}</span><strong>${orderMoney((Number(item.price_jpy) || 0) * Math.max(1, Number(item.qty) || 1))}</strong></div>`).join('');
+          const shipping = [order.shipping_carrier, order.shipping_service].filter(Boolean).join(' · ');
+          return `<article class="order-card">
+            <div class="order-card__head"><div><div class="order-card__number">Order ${accountEscape(order.order_number)}</div><div class="order-card__date">${accountEscape(date)}</div></div><span class="order-status">${accountEscape(order.status || 'Pending payment')}</span></div>
+            <div class="order-card__meta"><span>Payment: <strong>${accountEscape(String(order.payment_method || '').toUpperCase() || '—')}</strong></span>${shipping ? `<span>Delivery: <strong>${accountEscape(shipping)}</strong></span>` : ''}${order.tracking_number ? `<span>Tracking: <strong>${accountEscape(order.tracking_number)}</strong></span>` : ''}</div>
+            <div class="order-items">${itemRows || '<div class="order-item"><span>Order details</span><strong>—</strong></div>'}</div>
+            <div class="order-card__foot"><div class="order-total"><small>Order total</small><strong>${orderMoney(order.total_jpy)}</strong></div><a class="receipt-button" href="/member_orders.php?receipt=${encodeURIComponent(order.order_number)}" download>Download PDF receipt</a></div>
+          </article>`;
+        }).join('');
+      } catch (error) {
+        ordersCount.textContent = 'Unavailable';
+        ordersList.innerHTML = `<div class="orders-empty">${accountEscape(error.message || 'Order history could not be loaded.')}</div>`;
+      }
+    }
+    loadOrderHistory();
     profileForm.addEventListener('submit', async (event) => {
       event.preventDefault();
       profileStatus.textContent = '';
