@@ -2117,7 +2117,7 @@
             }
         ];
 
-        // localStorage cache for instant first paint
+        // Older code writes this cache, but authoritative reads always come from the server.
         const ADMIN_PRODUCT_CACHE_KEY = 'mc_catalog_products_cache_v2';
         const ADMIN_PRODUCT_CACHE_TTL = 5 * 60 * 1000;  // 5 min
 
@@ -2140,21 +2140,6 @@
             showLoading(true);
             setCatalogStatus('商品データを読込中');
             try {
-                // Instant first paint from localStorage cache (if fresh)
-                if (!opts.force) {
-                    const cached = _adminProductsFromCache();
-                    if (cached) {
-                        allProducts = cached;
-                        renderTable();
-                        updateStats();
-                        setCatalogStatus('商品データを表示中');
-                        try { recordDashSnapshot(); refreshDashboardWithServerSync(); } catch (_) {}
-                        showLoading(false);
-                        // Background refresh — don't await
-                        setTimeout(() => loadProducts({ force: true, _bg: true }), 0);
-                        return;
-                    }
-                }
                 const data = await catalogRequest('list');
                 allProducts = (data.products || []).map(catalogToAdmin);
                 _adminProductsToCache(allProducts);
@@ -2170,15 +2155,7 @@
                     updateStats();
                 }
             } catch (e) {
-                const cached = _adminProductsFromCache();
-                if (cached) {
-                    allProducts = cached;
-                    renderTable();
-                    updateStats();
-                    setCatalogStatus('一時保存データを表示中', true);
-                } else {
-                    setCatalogStatus('読込エラー — 再読込してください', true);
-                }
+                setCatalogStatus('読込エラー — 再読込してください', true);
                 if (!opts._bg) showToast('商品の読み込みに失敗: ' + e.message, 'error');
             } finally {
                 if (!opts._bg) showLoading(false);
@@ -3005,7 +2982,7 @@
                     source_search_url: rawUrl,
                     source_price_jpy: sourcePrice
                 };
-                const result = await catalogRequest('save', { product: adminToCatalog(product) });
+                const result = await catalogRequest('save', { product: adminToCatalog(product), restore_deleted: true });
                 const saved = catalogToAdmin(result.product || adminToCatalog(product));
                 lastQuickImportedBoxId = saved.id;
                 await loadProducts({ force: true });
@@ -3256,7 +3233,7 @@
             button.disabled = true;
             button.textContent = '保存中…';
             try {
-                const result = await catalogRequest('save', { product: adminToCatalog(product) });
+                const result = await catalogRequest('save', { product: adminToCatalog(product), restore_deleted: !editId });
                 const saved = catalogToAdmin(result.product);
                 const index = allProducts.findIndex(item => item.id === saved.id);
                 if (index >= 0) allProducts[index] = saved; else allProducts.unshift(saved);
@@ -3422,14 +3399,13 @@
             btn.disabled = true;
 
             try {
-                await catalogRequest('delete', { id: deleteTarget });
-
-                allProducts = allProducts.filter(p => p.id !== deleteTarget);
-                _adminProductsToCache(allProducts);
+                const deletedId = deleteTarget;
+                await catalogRequest('delete', { id: deletedId });
+                localStorage.removeItem(ADMIN_PRODUCT_CACHE_KEY);
+                await loadProducts({ force: true });
+                if (allProducts.some(product => product.id === deletedId)) throw new Error('削除後の確認に失敗しました。');
                 closeDeleteModal();
-                renderTable();
-                updateStats();
-                showToast('商品を削除しました', 'success');
+                showToast('商品を完全に削除しました', 'success');
             } catch (e) {
                 showToast('削除に失敗: ' + e.message, 'error');
             } finally {
@@ -6506,29 +6482,33 @@ ${body.innerHTML}
             if (ids.length === 0) return;
             if (!confirm(`${ids.length} 件の商品を削除しますか？`)) return;
 
-            for (const id of ids) {
-                const p = allProducts.find(x => x.id === id);
-                allProducts = allProducts.filter(p => p.id !== id);
-                try {
-                    await catalogRequest('delete', { id });
+            const selectedProducts = ids.map(id => allProducts.find(product => product.id === id)).filter(Boolean);
+            try {
+                const result = await catalogRequest('delete_many', { ids });
+                const deletedIds = new Set(result.deleted_ids || []);
+                selectedProducts.forEach(p => {
+                    if (!deletedIds.has(p.id)) return;
                     recordChangeLog({
                         type: 'delete',
-                        productId: id,
-                        productTitle: p?.title_en || p?.title_jp || id,
+                        productId: p.id,
+                        productTitle: p.title_en || p.title_jp || p.id,
                         oldValue: '存在',
                         newValue: '削除',
                         source: 'bulk',
                         notes: ''
                     });
-                } catch (e) { console.error(e); }
+                });
+                localStorage.removeItem(ADMIN_PRODUCT_CACHE_KEY);
+                await loadProducts({ force: true });
+                const remaining = ids.filter(id => allProducts.some(product => product.id === id));
+                if (remaining.length) throw new Error('削除後の確認に失敗しました。');
+                document.getElementById('selectAllCheckbox').checked = false;
+                updateBulkBar();
+                showToast(`${deletedIds.size} 件の商品を完全に削除しました`, 'success');
+            } catch (error) {
+                await loadProducts({ force: true });
+                showToast('一括削除に失敗: ' + error.message, 'error');
             }
-
-            _adminProductsToCache(allProducts);
-            renderTable();
-            updateStats();
-            document.getElementById('selectAllCheckbox').checked = false;
-            updateBulkBar();
-            showToast(`${ids.length} 件の商品を削除しました`, 'success');
         }
 
         async function bulkChangeCategory() {

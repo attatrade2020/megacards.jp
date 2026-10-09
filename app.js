@@ -1400,7 +1400,8 @@ async function loadCatalogProducts() {
       stock: Number(product.stock ?? 1),
     }));
   } catch (error) {
-    console.warn("Using bundled catalog fallback:", error);
+    products = [];
+    console.error("Catalog unavailable:", error);
   }
 }
 

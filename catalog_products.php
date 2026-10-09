@@ -9,6 +9,8 @@ header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 header('X-Content-Type-Options: nosniff');
 
 $catalogFile = __DIR__ . '/data/catalog_products.json';
+$deletedFile = __DIR__ . '/data/catalog_deleted_products.json';
+$shippingFile = __DIR__ . '/data/shipping_products.json';
 $categories = ['pokemon', 'onepiece', 'yugioh'];
 
 function readCatalog(string $path): array {
@@ -25,6 +27,57 @@ function writeCatalog(string $path, array $products): bool {
     $tmp = $path . '.tmp';
     if (@file_put_contents($tmp, $json . PHP_EOL, LOCK_EX) === false) return false;
     return @rename($tmp, $path);
+}
+
+function readJsonArray(string $path): array {
+    if (!is_file($path)) return [];
+    $decoded = json_decode((string) file_get_contents($path), true);
+    return is_array($decoded) ? $decoded : [];
+}
+
+function writeJson(string $path, array $data): bool {
+    $dir = dirname($path);
+    if (!is_dir($dir) && !@mkdir($dir, 0755, true)) return false;
+    $json = json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+    if ($json === false) return false;
+    $tmp = $path . '.tmp';
+    if (@file_put_contents($tmp, $json . PHP_EOL, LOCK_EX) === false) return false;
+    return @rename($tmp, $path);
+}
+
+function cleanupDeletedProducts(array $deletedProducts, array $remainingProducts, string $deletedFile, string $shippingFile): bool {
+    $tombstones = readJsonArray($deletedFile);
+    foreach ($deletedProducts as $product) {
+        $id = (string) ($product['id'] ?? '');
+        if ($id === '') continue;
+        $tombstones[$id] = [
+            'id' => $id,
+            'source_url' => (string) ($product['source_url'] ?? ''),
+            'image' => (string) ($product['image'] ?? ''),
+            'deleted_at' => gmdate('c'),
+        ];
+    }
+    if (!writeJson($deletedFile, $tombstones)) return false;
+
+    $shipping = readJsonArray($shippingFile);
+    if (isset($shipping['products']) && is_array($shipping['products'])) {
+        foreach ($deletedProducts as $product) unset($shipping['products'][(string) ($product['id'] ?? '')]);
+        $shipping['updated_at'] = gmdate('c');
+        if (!writeJson($shippingFile, $shipping)) return false;
+    }
+
+    $remainingImages = [];
+    foreach ($remainingProducts as $product) {
+        $image = ltrim((string) ($product['image'] ?? ''), '/');
+        if ($image !== '') $remainingImages[$image] = true;
+    }
+    foreach ($deletedProducts as $product) {
+        $image = ltrim((string) ($product['image'] ?? ''), '/');
+        if ($image === '' || isset($remainingImages[$image]) || !preg_match('#^(assets/products/|img/products/)#', $image)) continue;
+        $absolute = __DIR__ . '/' . $image;
+        if (is_file($absolute)) @unlink($absolute);
+    }
+    return true;
 }
 
 function slugify(string $value): string {
@@ -132,6 +185,30 @@ if ($action === 'save') {
         exit;
     }
     $requestedId = slugify((string) ($incoming['id'] ?? $incoming['title'] ?? ''));
+    $deleted = readJsonArray($deletedFile);
+    $sourceUrl = trim((string) ($incoming['source_url'] ?? ''));
+    $deletedMatch = isset($deleted[$requestedId]);
+    if (!$deletedMatch && $sourceUrl !== '') {
+        foreach ($deleted as $tombstone) {
+            if (is_array($tombstone) && (string) ($tombstone['source_url'] ?? '') === $sourceUrl) { $deletedMatch = true; break; }
+        }
+    }
+    if ($deletedMatch && empty($input['restore_deleted'])) {
+        http_response_code(409);
+        echo json_encode(['ok' => false, 'error' => '削除済みの商品です。再登録する場合は商品追加から明示的に登録してください。'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    if ($deletedMatch) {
+        unset($deleted[$requestedId]);
+        foreach ($deleted as $key => $tombstone) {
+            if ($sourceUrl !== '' && is_array($tombstone) && (string) ($tombstone['source_url'] ?? '') === $sourceUrl) unset($deleted[$key]);
+        }
+        if (!writeJson($deletedFile, $deleted)) {
+            http_response_code(500);
+            echo json_encode(['ok' => false, 'error' => '削除履歴を更新できませんでした。'], JSON_UNESCAPED_UNICODE);
+            exit;
+        }
+    }
     $index = null;
     foreach ($products as $i => $product) {
         if (($product['id'] ?? '') === $requestedId) { $index = $i; break; }
@@ -158,11 +235,14 @@ if ($action === 'save') {
     exit;
 }
 
-if ($action === 'delete') {
-    $id = (string) ($input['id'] ?? '');
-    $before = count($products);
-    $products = array_values(array_filter($products, static fn(array $p): bool => ($p['id'] ?? '') !== $id));
-    if (count($products) === $before) {
+if ($action === 'delete' || $action === 'delete_many') {
+    $ids = $action === 'delete_many' ? ($input['ids'] ?? []) : [(string) ($input['id'] ?? '')];
+    if (!is_array($ids)) $ids = [];
+    $ids = array_values(array_unique(array_filter(array_map('strval', $ids), static fn(string $id): bool => $id !== '')));
+    $idMap = array_fill_keys($ids, true);
+    $deletedProducts = array_values(array_filter($products, static fn(array $p): bool => isset($idMap[(string) ($p['id'] ?? '')])));
+    $products = array_values(array_filter($products, static fn(array $p): bool => !isset($idMap[(string) ($p['id'] ?? '')])));
+    if (!$deletedProducts) {
         http_response_code(404);
         echo json_encode(['ok' => false, 'error' => '商品が見つかりません。'], JSON_UNESCAPED_UNICODE);
         exit;
@@ -172,7 +252,12 @@ if ($action === 'delete') {
         echo json_encode(['ok' => false, 'error' => '商品データを保存できませんでした。'], JSON_UNESCAPED_UNICODE);
         exit;
     }
-    echo json_encode(['ok' => true]);
+    if (!cleanupDeletedProducts($deletedProducts, $products, $deletedFile, $shippingFile)) {
+        http_response_code(500);
+        echo json_encode(['ok' => false, 'error' => '関連データを完全に削除できませんでした。'], JSON_UNESCAPED_UNICODE);
+        exit;
+    }
+    echo json_encode(['ok' => true, 'deleted_ids' => array_values(array_map(static fn(array $p): string => (string) $p['id'], $deletedProducts))]);
     exit;
 }
 
