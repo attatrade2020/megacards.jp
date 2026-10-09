@@ -131,7 +131,9 @@ if (preg_match('~/apparels/(\d+)(?:[/?#]|$)~i', $url, $urlMatch)
     $imageUrl = '';
     if (preg_match_all('#<img\b[^>]*>#si', $html, $imageTags)) {
         foreach ($imageTags[0] as $imageTag) {
-            if (strpos($imageTag, 'mainImage') === false && strpos($imageTag, 'upload_bg_removed/') === false) continue;
+            // Product pages also contain many recommendation thumbnails using the
+            // same CDN path. Only the dedicated product hero is valid for import.
+            if (strpos($imageTag, 'mainImage') === false) continue;
             if (preg_match('#\bsrc="(https://cdn\.snkrdunk\.com/(?:upload_bg_removed|products)/[^"]+)"#i', $imageTag, $imageMatch)) {
                 $imageUrl = html_entity_decode($imageMatch[1], ENT_QUOTES | ENT_HTML5, 'UTF-8');
                 $imageUrl = preg_replace('/\?size=[a-z]+/i', '?size=l', $imageUrl);

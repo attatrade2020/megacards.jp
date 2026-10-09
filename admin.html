@@ -2889,15 +2889,21 @@
 
         async function fetchQuickBoxInformation(url) {
             let localError = null;
+            let localProductPageParsed = false;
             try {
                 const response = await fetch('/snkrdunk_import.php?action=fetch&url=' + encodeURIComponent(url));
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok || !data.ok) throw new Error(data.error || '商品ページを取得できませんでした');
+                localProductPageParsed = true;
                 const candidates = (Array.isArray(data.products) ? data.products : []).filter(isBoxImportCandidate);
                 if (candidates.length > 1) throw new Error('検索結果URLではなく、登録するボックスの商品ページURLを入力してください');
                 if (candidates.length === 1) return candidates[0];
                 throw new Error('未開封ボックスの商品情報が見つかりませんでした');
             } catch (error) {
+                // If our product-page parser reached the page but could not find a
+                // verified main image, stop. A generic fallback can select a
+                // recommendation thumbnail belonging to a different product.
+                if (localProductPageParsed) throw error;
                 localError = error;
             }
 
