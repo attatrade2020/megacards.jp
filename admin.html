@@ -935,6 +935,11 @@
         .catalog-toolbar .search-box { flex:1 1 260px; width:auto; min-width:220px; }
         .catalog-stock { width:72px; padding:7px 8px; border:1px solid var(--border); border-radius:7px; text-align:center; font-weight:700; }
         .catalog-status-select { padding:7px 9px; border:1px solid var(--border); border-radius:7px; background:#fff; font-size:.78rem; font-weight:700; }
+        .catalog-table { min-width:1260px; }
+        .catalog-money { text-align:right; white-space:nowrap; font-variant-numeric:tabular-nums; }
+        .catalog-money--shipping { color:#667085; }
+        .catalog-money--total { color:#111827; font-weight:800; }
+        .catalog-money--aud { color:#075985; font-weight:800; }
         .catalog-id { margin-top:3px; color:#9ca3af; font:500 .68rem monospace; }
         .catalog-empty { padding:54px 24px !important; text-align:center; color:#6b7280; }
         .form-section { margin:4px 0 18px; padding:14px; background:#f8fafc; border:1px solid #e5e7eb; border-radius:10px; }
@@ -1247,7 +1252,7 @@
                         <button class="btn btn-primary btn-sm" onclick="bulkChangeCategory()">カテゴリ適用</button>
                     </div>
                     <div class="table-wrap">
-                        <table>
+                        <table class="catalog-table">
                             <thead>
                                 <tr>
                                     <th style="width:36px;"><input type="checkbox" id="selectAllCheckbox" onchange="toggleSelectAll(this.checked)"></th>
@@ -1255,6 +1260,9 @@
                                     <th class="sortable" data-sort="title_en">商品 <span class="sort-ind"></span></th>
                                     <th class="sortable" data-sort="category">Category <span class="sort-ind"></span></th>
                                     <th class="sortable" data-sort="price_jpy">販売価格 <span class="sort-ind"></span></th>
+                                    <th>国内送料</th>
+                                    <th>合計金額</th>
+                                    <th>AUD換算</th>
                                     <th class="sortable" data-sort="stock">在庫 <span class="sort-ind"></span></th>
                                     <th class="sortable" data-sort="release_date">発売日 <span class="sort-ind"></span></th>
                                     <th class="sortable" data-sort="status">ステータス <span class="sort-ind"></span></th>
@@ -1263,7 +1271,7 @@
                                 </tr>
                             </thead>
                             <tbody id="productTableBody">
-                                <tr><td colspan="10" style="text-align:center;padding:40px;color:#999;">商品を読み込み中...</td></tr>
+                                <tr><td colspan="13" style="text-align:center;padding:40px;color:#999;">商品を読み込み中...</td></tr>
 
                             </tbody>
                         </table>
@@ -1905,6 +1913,8 @@
         const ADMIN_PASSWORD = 'megacards2026';
         const GAS_ADMIN_URL = 'https://script.google.com/macros/s/AKfycbyhZu5LMJPiG5VGmAz9ctJ2O6BHsrA7r3-Ej3WLoh6SqiQKzquWURAYG0BWV4GPEAMi/exec';
         const CATALOG_API_URL = 'catalog_products.php';
+        const JAPAN_DOMESTIC_SHIPPING_JPY = 990;
+        const ADMIN_AUD_JPY_RATE = 110.04;
 
         async function catalogRequest(action, payload = {}) {
             const response = await fetch(CATALOG_API_URL, {
@@ -2766,7 +2776,7 @@
             if (cntEl) cntEl.textContent = `${filtered.length} / ${allProducts.length} 件`;
 
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="10" class="catalog-empty">該当するボックスがありません。検索条件を変えるか、新しいボックスを登録してください。</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="13" class="catalog-empty">該当するボックスがありません。検索条件を変えるか、新しいボックスを登録してください。</td></tr>';
                 return;
             }
 
@@ -2782,6 +2792,9 @@
                 const title = adminEscape(p.title_en || '');
                 const series = adminEscape(p.series || '');
                 const id = adminEscape(p.id || '');
+                const salePriceJpy = Math.max(0, Number(p.price_jpy) || 0);
+                const totalPriceJpy = salePriceJpy + JAPAN_DOMESTIC_SHIPPING_JPY;
+                const totalPriceAud = Math.round(totalPriceJpy / ADMIN_AUD_JPY_RATE);
                 return `<tr>
                     <td><input type="checkbox" class="product-checkbox" data-id="${p.id}" onchange="updateBulkBar()"></td>
                     <td style="text-align:center;position:relative;">
@@ -2795,7 +2808,10 @@
                         <div class="catalog-id">${id}</div>
                     </td>
                     <td>${categoryLabels[p.category] || p.category}</td>
-                    <td class="price-cell">¥${(p.price_jpy || 0).toLocaleString()}</td>
+                    <td class="price-cell catalog-money">¥${salePriceJpy.toLocaleString()}</td>
+                    <td class="catalog-money catalog-money--shipping">¥${JAPAN_DOMESTIC_SHIPPING_JPY.toLocaleString()}</td>
+                    <td class="catalog-money catalog-money--total" title="¥${salePriceJpy.toLocaleString()} + ¥${JAPAN_DOMESTIC_SHIPPING_JPY.toLocaleString()}">¥${totalPriceJpy.toLocaleString()}</td>
+                    <td class="catalog-money catalog-money--aud">A$${totalPriceAud.toLocaleString('en-AU')}</td>
                     <td><input class="catalog-stock" type="number" min="0" step="1" value="${Number(p.stock ?? 1)}" aria-label="${title}の在庫数" onchange="updateCatalogField('${p.id}','stock',this.value)"></td>
                     <td style="font-size:0.8rem;white-space:nowrap;">${p.release_date || p.release || '-'}</td>
                     <td><select class="catalog-status-select" onchange="updateCatalogField('${p.id}','status',this.value)"><option value="active" ${p.status !== 'hidden' ? 'selected' : ''}>公開</option><option value="hidden" ${p.status === 'hidden' ? 'selected' : ''}>非公開</option></select></td>
