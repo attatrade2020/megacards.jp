@@ -379,10 +379,11 @@ button, input, select { font: inherit; }
 .login-modal__close { position:absolute; top:18px; right:18px; }
 .login-modal h2 { margin:0; font:800 2rem/1.08 "Manrope",sans-serif; letter-spacing:-.045em; }
 .login-modal__intro { margin:12px 38px 22px 0; color:var(--ink-soft); font-size:.82rem; line-height:1.6; }
-#loginForm { display:grid; gap:14px; }
-#loginForm label span { display:block; margin-bottom:5px; color:var(--ink-soft); font-size:.7rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
-#loginForm input { width:100%; min-height:46px; padding:9px 12px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:10px; outline:none; }
-#loginForm input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(20,89,233,.1); }
+#loginForm, #passwordResetForm { display:grid; gap:14px; }
+#loginForm label span, #passwordResetForm label span { display:block; margin-bottom:5px; color:var(--ink-soft); font-size:.7rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+#loginForm input, #passwordResetForm input { width:100%; min-height:46px; padding:9px 12px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:10px; outline:none; }
+#loginForm input:focus, #passwordResetForm input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(20,89,233,.1); }
+.login-modal__forgot { justify-self:end; margin-top:-7px; padding:0; color:var(--blue); background:none; border:0; cursor:pointer; font:700 .76rem/1.4 "DM Sans",sans-serif; text-decoration:underline; }
 .login-status { min-height:20px; margin:0; color:#a52a2a; font-size:.76rem; text-align:center; }
 .button--login { width:100%; color:#fff; background:var(--blue); }
 .button--login:hover { background:var(--blue-dark); }

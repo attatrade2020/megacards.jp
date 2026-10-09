@@ -424,6 +424,13 @@ const loginForm = document.getElementById("loginForm");
 const loginStatus = document.getElementById("loginStatus");
 const loginSubmit = document.getElementById("loginSubmit");
 const loginCreateAccount = document.getElementById("loginCreateAccount");
+const openPasswordResetButton = document.getElementById("openPasswordReset");
+const passwordResetModal = document.getElementById("passwordResetModal");
+const closePasswordResetButton = document.getElementById("closePasswordReset");
+const passwordResetForm = document.getElementById("passwordResetForm");
+const passwordResetStatus = document.getElementById("passwordResetStatus");
+const passwordResetSubmit = document.getElementById("passwordResetSubmit");
+const backToLoginButton = document.getElementById("backToLogin");
 
 let currentMember = null;
 
@@ -1137,6 +1144,50 @@ function closeLogin() {
   document.body.classList.remove("login-open");
 }
 
+function openPasswordReset() {
+  const email = String(loginForm.elements.email?.value || "").trim();
+  closeLogin();
+  passwordResetForm.reset();
+  passwordResetForm.elements.email.value = email;
+  passwordResetStatus.textContent = "";
+  passwordResetStatus.style.color = "";
+  if (!passwordResetModal.open) passwordResetModal.showModal();
+  document.body.classList.add("login-open");
+  window.setTimeout(() => passwordResetForm.elements.email?.focus(), 0);
+}
+
+function closePasswordReset() {
+  if (passwordResetModal.open) passwordResetModal.close();
+  document.body.classList.remove("login-open");
+}
+
+async function submitPasswordReset(event) {
+  event.preventDefault();
+  passwordResetStatus.textContent = "";
+  passwordResetStatus.style.color = "";
+  if (!passwordResetForm.reportValidity()) return;
+  const form = new FormData(passwordResetForm);
+  passwordResetSubmit.disabled = true;
+  passwordResetSubmit.textContent = "Sending…";
+  try {
+    const response = await fetch("password_reset.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "request", email: String(form.get("email") || "").trim() })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) throw new Error(data.error || "The reset request could not be completed.");
+    passwordResetStatus.style.color = "#16784a";
+    passwordResetStatus.textContent = data.message || "If that email is registered, a reset link has been sent.";
+    passwordResetForm.elements.email.value = "";
+  } catch (error) {
+    passwordResetStatus.textContent = error.message || "The reset request could not be completed.";
+  } finally {
+    passwordResetSubmit.disabled = false;
+    passwordResetSubmit.textContent = "Send reset link";
+  }
+}
+
 async function submitLogin(event) {
   event.preventDefault();
   loginStatus.textContent = "";
@@ -1366,6 +1417,17 @@ loginModal.addEventListener("click", (event) => {
 loginCreateAccount.addEventListener("click", () => {
   closeLogin();
   openRegister();
+});
+openPasswordResetButton.addEventListener("click", openPasswordReset);
+closePasswordResetButton.addEventListener("click", closePasswordReset);
+passwordResetForm.addEventListener("submit", submitPasswordReset);
+backToLoginButton.addEventListener("click", () => {
+  closePasswordReset();
+  openLogin();
+});
+passwordResetModal.addEventListener("close", () => document.body.classList.remove("login-open"));
+passwordResetModal.addEventListener("click", (event) => {
+  if (event.target === passwordResetModal) closePasswordReset();
 });
 closeRegisterButton.addEventListener("click", closeRegister);
 registerForm.addEventListener("submit", submitRegistration);

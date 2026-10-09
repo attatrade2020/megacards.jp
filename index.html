@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261009-06">
+  <link rel="stylesheet" href="styles.css?v=20261009-07">
 </head>
 <body>
   <div class="announcement">
@@ -334,10 +334,24 @@
     <form id="loginForm">
       <label><span>Email address</span><input name="email" type="email" autocomplete="email" maxlength="190" required></label>
       <label><span>Password</span><input name="password" type="password" autocomplete="current-password" maxlength="128" required></label>
+      <button class="login-modal__forgot" id="openPasswordReset" type="button">Forgot your password?</button>
       <p class="login-status" id="loginStatus" role="status" aria-live="polite"></p>
       <button class="button button--login" id="loginSubmit" type="submit">Log in</button>
     </form>
     <p class="login-modal__register">New to MegaCards? <button id="loginCreateAccount" type="button">Create an account</button></p>
+  </dialog>
+
+  <dialog class="login-modal" id="passwordResetModal" aria-labelledby="passwordResetTitle">
+    <button class="icon-button login-modal__close" id="closePasswordReset" type="button" aria-label="Close password reset">Close</button>
+    <p class="eyebrow eyebrow--dark">Password recovery</p>
+    <h2 id="passwordResetTitle">Reset your password.</h2>
+    <p class="login-modal__intro">Enter your member email address. If it matches an account, we will email a secure reset link valid for 60 minutes.</p>
+    <form id="passwordResetForm">
+      <label><span>Email address</span><input name="email" type="email" autocomplete="email" maxlength="190" required></label>
+      <p class="login-status" id="passwordResetStatus" role="status" aria-live="polite"></p>
+      <button class="button button--login" id="passwordResetSubmit" type="submit">Send reset link</button>
+    </form>
+    <p class="login-modal__register">Remembered your password? <button id="backToLogin" type="button">Back to log in</button></p>
   </dialog>
 
   <footer>
@@ -350,6 +364,6 @@
     </div>
   </footer>
 
-  <script src="app.js?v=20261009-06"></script>
+  <script src="app.js?v=20261009-07"></script>
 </body>
 </html>
