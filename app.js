@@ -706,6 +706,10 @@ function buildShipment() {
 }
 
 const carrierLabels = { fedex: "FedEx", japanpost: "Japan Post", ups: "UPS", dhl: "DHL" };
+const carrierBadges = {
+  dhl: '<span class="carrier-logo carrier-logo--dhl" role="img" aria-label="DHL"><span>DHL</span></span>',
+  fedex: '<span class="carrier-logo carrier-logo--fedex" role="img" aria-label="FedEx"><span>Fed</span><b>Ex</b></span>'
+};
 const serviceLabels = {
   fedex_international_priority_express: "International Priority Express",
   fedex_international_priority_eod: "International Priority",
@@ -743,7 +747,7 @@ function renderShippingRates(rates, shipment) {
   shippingRates.innerHTML = allowed.map((rate, index) => `
     <label class="shipping-rate">
       <input type="radio" name="shippingRate" value="${index}" ${index === 0 ? "checked" : ""}>
-      <span class="shipping-rate__name"><strong>${carrierLabels[rate.carrier] || rate.carrier}</strong><small>${serviceLabels[rate.service] || rate.service}</small></span>
+      <span class="shipping-rate__name">${carrierBadges[String(rate.carrier).toLowerCase()] || `<strong>${carrierLabels[rate.carrier] || rate.carrier}</strong>`}<small>${serviceLabels[rate.service] || rate.service}</small></span>
       <span class="shipping-rate__price">${audLabel(aud(Number(rate.price)))}</span>
     </label>`).join("");
   selectShippingRate(0);

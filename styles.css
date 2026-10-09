@@ -270,6 +270,13 @@ button, input, select { font: inherit; }
 .shipping-rate__name { display: grid; gap: 1px; min-width: 0; }
 .shipping-rate__name strong { font-size: .78rem; }
 .shipping-rate__name small { margin: 0; overflow: hidden; color: var(--ink-soft); font-size: .66rem; text-align: left; text-overflow: ellipsis; white-space: nowrap; }
+.carrier-logo { display:inline-flex; width:max-content; min-width:62px; height:25px; align-items:center; justify-content:center; line-height:1; }
+.carrier-logo--dhl { position:relative; overflow:hidden; padding:0 8px; color:#d40511; background:#ffcc00; font:900 italic .92rem/1 Arial,sans-serif; letter-spacing:-.08em; }
+.carrier-logo--dhl::before,.carrier-logo--dhl::after { content:""; position:absolute; left:3px; right:3px; height:1px; background:#d40511; opacity:.75; }
+.carrier-logo--dhl::before { top:5px; }.carrier-logo--dhl::after { bottom:5px; }
+.carrier-logo--dhl span { position:relative; z-index:1; padding:0 3px; background:#ffcc00; }
+.carrier-logo--fedex { justify-content:flex-start; background:#fff; font:900 1rem/1 Arial,sans-serif; letter-spacing:-.075em; }
+.carrier-logo--fedex span { color:#4d148c; }.carrier-logo--fedex b { color:#ff6600; font:inherit; }
 .shipping-rate__price { font-weight: 800; font-size: .85rem; }
 .cart-panel__footer small { display: block; margin-top: 12px; color: var(--ink-soft); text-align: center; }
 
