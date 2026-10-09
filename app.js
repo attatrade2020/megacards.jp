@@ -1,6 +1,6 @@
 const AUD_JPY_RATE = 110.04;
 
-const products = [
+let products = [
   {
     id: "m6a-30th-celebration",
     category: "pokemon",
@@ -548,23 +548,24 @@ function initialiseHeroSlider() {
 }
 
 function productCard(product) {
+  const soldOut = Number(product.stock ?? 1) <= 0;
   return `
     <article class="product-card">
       <div class="product-card__image">
-        <span class="product-card__tag">${product.tag}</span>
-        <img src="${product.image}" alt="${product.title}" width="480" height="420" loading="lazy" decoding="async">
+        <span class="product-card__tag">${soldOut ? "Sold out" : escapeHtml(product.tag)}</span>
+        <img src="${product.image}" alt="${escapeHtml(product.title)}" width="480" height="420" loading="lazy" decoding="async">
       </div>
       <div class="product-card__content">
-        <p class="product-card__series">${product.series}</p>
-        <h3>${product.title}</h3>
-        <div class="product-card__meta"><span>Japanese box</span><span>${product.release}</span></div>
+        <p class="product-card__series">${escapeHtml(product.series)}</p>
+        <h3>${escapeHtml(product.title)}</h3>
+        <div class="product-card__meta"><span>Japanese box</span><span>${escapeHtml(product.release)}</span></div>
         <div class="product-card__price-row">
           <div class="product-card__price">
             <strong>${audLabel(aud(product.jpy))}</strong>
           </div>
           <div class="product-card__actions">
-            <label class="product-card__quantity"><span>Qty</span><input type="number" min="1" max="99" step="1" value="1" inputmode="numeric" data-quantity="${product.id}" aria-label="Quantity for ${product.title}"></label>
-            <button class="add-button" type="button" data-add="${product.id}" aria-label="Add selected quantity of ${product.title} to cart">+</button>
+            <label class="product-card__quantity"><span>Qty</span><input type="number" min="1" max="99" step="1" value="1" inputmode="numeric" data-quantity="${product.id}" aria-label="Quantity for ${escapeHtml(product.title)}" ${soldOut ? "disabled" : ""}></label>
+            <button class="add-button" type="button" data-add="${product.id}" aria-label="Add selected quantity of ${escapeHtml(product.title)} to cart" ${soldOut ? "disabled" : ""}>${soldOut ? "×" : "+"}</button>
           </div>
         </div>
       </div>
@@ -572,18 +573,19 @@ function productCard(product) {
 }
 
 function rankingCard(product, index) {
+  const soldOut = Number(product.stock ?? 1) <= 0;
   return `
     <article class="ranking-card ranking-card--${index + 1}">
       <div class="ranking-card__image">
         <span class="ranking-card__position" aria-label="Rank ${index + 1}">${String(index + 1).padStart(2, "0")}</span>
-        <img src="${product.image}" alt="${product.title}" width="440" height="380" loading="eager" decoding="async">
+        <img src="${product.image}" alt="${escapeHtml(product.title)}" width="440" height="380" loading="eager" decoding="async">
       </div>
       <div class="ranking-card__content">
-        <p>${product.series}</p>
-        <h3>${product.title}</h3>
+        <p>${escapeHtml(product.series)}</p>
+        <h3>${escapeHtml(product.title)}</h3>
         <div class="ranking-card__footer">
           <div><small>Price per box</small><strong>${audLabel(aud(product.jpy))}</strong></div>
-          <button type="button" data-ranking-add="${product.id}" aria-label="Add one ${product.title} to cart">Add to cart</button>
+          <button type="button" data-ranking-add="${product.id}" aria-label="Add one ${escapeHtml(product.title)} to cart" ${soldOut ? "disabled" : ""}>${soldOut ? "Sold out" : "Add to cart"}</button>
         </div>
       </div>
     </article>`;
@@ -661,7 +663,12 @@ function buildShipment() {
 
   entries.forEach(([id, quantity]) => {
     const product = products.find((item) => item.id === id);
-    const profile = state.shippingProfiles.products[id] || fallbackShippingProfiles.products[id];
+    const profile = state.shippingProfiles.products[id] || fallbackShippingProfiles.products[id] || {
+      weight_g: Number(product?.weight_g) || 450,
+      width_cm: Number(product?.width_cm) || 14,
+      depth_cm: Number(product?.depth_cm) || 14,
+      height_cm: Number(product?.height_cm) || 5,
+    };
     if (!product || !profile) return;
     weight += profile.weight_g * quantity;
     width = Math.max(width, profile.width_cm);
@@ -1188,8 +1195,35 @@ shippingRates.addEventListener("change", (event) => {
 });
 document.addEventListener("keydown", (event) => { if (event.key === "Escape") closeCart(); });
 
-renderRanking();
-renderProducts();
-renderCart();
+function escapeHtml(value) {
+  return String(value ?? "").replace(/[&<>'"]/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
+  })[character]);
+}
+
+async function loadCatalogProducts() {
+  try {
+    const response = await fetch(`catalog_products.php?v=${Date.now()}`, { cache: "no-store" });
+    const data = await response.json();
+    if (!response.ok || !data.ok || !Array.isArray(data.products)) throw new Error(data.error || "Catalog unavailable");
+    products = data.products.map((product) => ({
+      ...product,
+      releaseOrder: Number(product.releaseOrder) || 0,
+      jpy: Number(product.jpy) || 0,
+      stock: Number(product.stock ?? 1),
+    }));
+  } catch (error) {
+    console.warn("Using bundled catalog fallback:", error);
+  }
+}
+
+async function initialiseStorefront() {
+  await loadCatalogProducts();
+  renderRanking();
+  renderProducts();
+  renderCart();
+}
+
+initialiseStorefront();
 loadShippingProfiles();
 initialiseHeroSlider();
