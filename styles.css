@@ -226,6 +226,16 @@ button, input, select { font: inherit; }
 .cart-item span { display: block; margin-top: 5px; color: var(--blue); font-weight: 800; }
 .cart-item button { border: 0; background: transparent; color: var(--ink-soft); cursor: pointer; text-decoration: underline; }
 .cart-panel__footer { padding-top: 20px; border-top: 1px solid var(--line); }
+.cart-suggestion { margin:12px 0; padding:13px; color:#fff; background:linear-gradient(135deg,#13264c,#174fae); border:1px solid rgba(255,255,255,.12); border-radius:14px; }
+.cart-suggestion[hidden] { display:none; }
+.cart-suggestion__heading { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.cart-suggestion__heading strong { font:800 .82rem "Manrope",sans-serif; }
+.cart-suggestion__heading span { color:var(--yellow); font-size:.7rem; font-weight:800; white-space:nowrap; }
+.cart-suggestion p { margin:6px 0 10px; color:#cad6eb; font-size:.68rem; line-height:1.45; }
+.cart-suggestion button { width:100%; min-height:38px; color:var(--navy); background:var(--yellow); border:0; border-radius:9px; cursor:pointer; font-size:.76rem; font-weight:900; }
+.cart-suggestion button:hover { background:#ffe172; }
+.cart-suggestion button:disabled { cursor:not-allowed; opacity:.56; }
+.cart-suggestion > small { min-height:0; margin:7px 0 0; color:#e5edf9; font-size:.66rem; line-height:1.4; text-align:left; }
 .cart-total { display: flex; justify-content: space-between; align-items: end; margin-bottom: 18px; }
 .cart-total span { color: var(--ink-soft); }
 .cart-total strong { font: 800 1.8rem "Manrope", sans-serif; }

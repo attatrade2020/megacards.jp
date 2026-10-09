@@ -1,5 +1,7 @@
 const AUD_JPY_RATE = 110.04;
 const JAPAN_DOMESTIC_SHIPPING_JPY = 990;
+const CART_SUGGESTION_LIMIT_AUD = 1000;
+const CART_SUGGESTION_LIMIT_JPY = Math.floor(CART_SUGGESTION_LIMIT_AUD * AUD_JPY_RATE);
 
 let products = [
   {
@@ -349,6 +351,10 @@ const closeCartButton = document.getElementById("closeCart");
 const cartItems = document.getElementById("cartItems");
 const cartCount = document.getElementById("cartCount");
 const cartTotal = document.getElementById("cartTotal");
+const cartSuggestion = document.getElementById("cartSuggestion");
+const cartSuggestionRemaining = document.getElementById("cartSuggestionRemaining");
+const cartSuggestionButton = document.getElementById("cartSuggestionButton");
+const cartSuggestionStatus = document.getElementById("cartSuggestionStatus");
 const customsIndicator = document.getElementById("customsIndicator");
 const customsTitle = document.getElementById("customsTitle");
 const customsMessage = document.getElementById("customsMessage");
@@ -634,6 +640,50 @@ function cartSubtotalJpy() {
 
 function cartSubtotalAud() {
   return aud(cartSubtotalJpy());
+}
+
+function popularSuggestionProducts() {
+  const ranked = rankedProductIds
+    .map((id) => products.find((product) => product.id === id))
+    .filter(Boolean);
+  const rankedIds = new Set(ranked.map((product) => product.id));
+  return [...ranked, ...products.filter((product) => !rankedIds.has(product.id))]
+    .filter((product) => product.status !== "hidden" && Number(product.stock ?? 1) > 0 && productPriceJpy(product) > 0);
+}
+
+function canAddPopularSuggestion(totalJpy = cartSubtotalJpy()) {
+  return popularSuggestionProducts().some((product) => {
+    const currentQuantity = Number(state.cart[product.id]) || 0;
+    return currentQuantity < Number(product.stock ?? 1) && totalJpy + productPriceJpy(product) <= CART_SUGGESTION_LIMIT_JPY;
+  });
+}
+
+function addPopularSuggestions() {
+  let totalJpy = cartSubtotalJpy();
+  let added = 0;
+  const suggestions = popularSuggestionProducts();
+  if (totalJpy >= CART_SUGGESTION_LIMIT_JPY) return;
+
+  for (let pass = 0; pass < 100; pass += 1) {
+    let addedThisPass = false;
+    for (const product of suggestions) {
+      const priceJpy = productPriceJpy(product);
+      const currentQuantity = Number(state.cart[product.id]) || 0;
+      const stock = Math.max(0, Number(product.stock ?? 1));
+      if (currentQuantity >= stock || totalJpy + priceJpy > CART_SUGGESTION_LIMIT_JPY) continue;
+      state.cart[product.id] = currentQuantity + 1;
+      totalJpy += priceJpy;
+      added += 1;
+      addedThisPass = true;
+    }
+    if (!addedThisPass) break;
+  }
+
+  resetShippingQuote(added ? "Popular picks added. Recalculate shipping for the new parcel." : "Your cart is already as close as available products allow.");
+  renderCart();
+  cartSuggestionStatus.textContent = added
+    ? `${added} ${added === 1 ? "box" : "boxes"} added · New subtotal ${audLabel(aud(totalJpy))}`
+    : "No available box fits within the remaining amount.";
 }
 
 function renderCustomsEstimate() {
@@ -1158,6 +1208,14 @@ function renderCart() {
   cartCount.textContent = count;
   cartButton.setAttribute("aria-label", `Shopping cart, ${count} ${count === 1 ? "item" : "items"}`);
   cartTotal.textContent = audLabel(total);
+  const subtotalJpy = cartSubtotalJpy();
+  const remainingJpy = Math.max(0, CART_SUGGESTION_LIMIT_JPY - subtotalJpy);
+  cartSuggestion.hidden = subtotalJpy >= CART_SUGGESTION_LIMIT_JPY;
+  cartSuggestionRemaining.textContent = `${audLabel(aud(remainingJpy))} remaining`;
+  cartSuggestionButton.disabled = !canAddPopularSuggestion(subtotalJpy);
+  if (!cartSuggestionStatus.textContent && cartSuggestionButton.disabled && subtotalJpy < CART_SUGGESTION_LIMIT_JPY) {
+    cartSuggestionStatus.textContent = "No available box fits within the remaining amount.";
+  }
   renderCustomsEstimate();
   cartItems.innerHTML = entries.length ? entries.map(([id, quantity]) => {
     const product = products.find((item) => item.id === id);
@@ -1196,6 +1254,7 @@ productGrid.addEventListener("click", (event) => {
   const quantity = Math.min(99, Math.max(1, Math.trunc(Number(quantityInput?.value) || 1)));
   if (quantityInput) quantityInput.value = String(quantity);
   state.cart[id] = (state.cart[id] || 0) + quantity;
+  cartSuggestionStatus.textContent = "";
   resetShippingQuote("Cart updated. Recalculate shipping for the new parcel.");
   renderCart();
   openCart();
@@ -1206,6 +1265,7 @@ rankingGrid.addEventListener("click", (event) => {
   if (!button) return;
   const id = button.dataset.rankingAdd;
   state.cart[id] = (state.cart[id] || 0) + 1;
+  cartSuggestionStatus.textContent = "";
   resetShippingQuote("Cart updated. Recalculate shipping for the new parcel.");
   renderCart();
   openCart();
@@ -1215,9 +1275,11 @@ cartItems.addEventListener("click", (event) => {
   const button = event.target.closest("[data-remove]");
   if (!button) return;
   delete state.cart[button.dataset.remove];
+  cartSuggestionStatus.textContent = "";
   resetShippingQuote(Object.keys(state.cart).length ? "Cart updated. Recalculate shipping for the new parcel." : "");
   renderCart();
 });
+cartSuggestionButton.addEventListener("click", addPopularSuggestions);
 
 searchInput.addEventListener("input", () => { state.query = searchInput.value; renderProducts(); });
 sortSelect.addEventListener("change", () => { state.sort = sortSelect.value; renderProducts(); });

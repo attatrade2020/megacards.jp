@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261009-05">
+  <link rel="stylesheet" href="styles.css?v=20261009-06">
 </head>
 <body>
   <div class="announcement">
@@ -189,6 +189,12 @@
     <div class="cart-items" id="cartItems"></div>
     <div class="cart-panel__footer">
       <div class="cart-total"><span>Market-price subtotal</span><strong id="cartTotal">A$0</strong></div>
+      <div class="cart-suggestion" id="cartSuggestion">
+        <div class="cart-suggestion__heading"><strong>Build toward A$1,000</strong><span id="cartSuggestionRemaining">A$1,000 available</span></div>
+        <p>Automatically add available boxes in popularity order without taking the product subtotal above A$1,000.</p>
+        <button id="cartSuggestionButton" type="button">Add popular picks</button>
+        <small id="cartSuggestionStatus" role="status" aria-live="polite"></small>
+      </div>
       <div class="customs-indicator" id="customsIndicator" data-status="empty">
         <span class="customs-indicator__icon" aria-hidden="true">i</span>
         <div><strong id="customsTitle">Australian customs estimate</strong><p id="customsMessage">Add a box to see whether border charges are likely.</p></div>
@@ -337,6 +343,6 @@
     </div>
   </footer>
 
-  <script src="app.js?v=20261009-05"></script>
+  <script src="app.js?v=20261009-06"></script>
 </body>
 </html>
