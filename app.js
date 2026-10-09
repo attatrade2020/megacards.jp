@@ -407,6 +407,19 @@ const registerStatus = document.getElementById("registerStatus");
 const registerSubmit = document.getElementById("registerSubmit");
 const registerSuccessMessage = document.getElementById("registerSuccessMessage");
 const finishRegisterButton = document.getElementById("finishRegister");
+const openLoginButton = document.getElementById("openLogin");
+const guestAccountActions = document.getElementById("guestAccountActions");
+const memberSummary = document.getElementById("memberSummary");
+const memberDisplayName = document.getElementById("memberDisplayName");
+const memberLogoutButton = document.getElementById("memberLogout");
+const loginModal = document.getElementById("loginModal");
+const closeLoginButton = document.getElementById("closeLogin");
+const loginForm = document.getElementById("loginForm");
+const loginStatus = document.getElementById("loginStatus");
+const loginSubmit = document.getElementById("loginSubmit");
+const loginCreateAccount = document.getElementById("loginCreateAccount");
+
+let currentMember = null;
 
 const heroSlides = [
   {
@@ -993,6 +1006,93 @@ function closeRegister() {
   document.body.classList.remove("register-open");
 }
 
+function displayMemberSession(member) {
+  currentMember = member && member.email ? member : null;
+  const signedIn = Boolean(currentMember);
+  guestAccountActions.hidden = signedIn;
+  memberSummary.hidden = !signedIn;
+  memberDisplayName.textContent = signedIn ? (currentMember.name || currentMember.email) : "";
+  heroRegisterAction.textContent = signedIn
+    ? `Signed in as ${currentMember.name || currentMember.email}`
+    : "Create free account";
+  heroRegisterAction.disabled = signedIn;
+  heroRegisterAction.classList.toggle("is-signed-in", signedIn);
+}
+
+async function refreshMemberSession() {
+  try {
+    const response = await fetch(`member_auth.php?v=${Date.now()}`, { cache: "no-store" });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Member session unavailable.");
+    displayMemberSession(data.authenticated ? data.member : null);
+  } catch (error) {
+    console.warn("Member session unavailable:", error);
+    displayMemberSession(null);
+  }
+}
+
+function openLogin() {
+  loginStatus.textContent = "";
+  if (!loginModal.open) loginModal.showModal();
+  document.body.classList.add("login-open");
+  window.setTimeout(() => loginForm.elements.email?.focus(), 0);
+}
+
+function closeLogin() {
+  if (loginModal.open) loginModal.close();
+  document.body.classList.remove("login-open");
+}
+
+async function submitLogin(event) {
+  event.preventDefault();
+  loginStatus.textContent = "";
+  if (!loginForm.reportValidity()) return;
+  const form = new FormData(loginForm);
+  loginSubmit.disabled = true;
+  loginSubmit.textContent = "Logging in…";
+  try {
+    const response = await fetch("member_auth.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        action: "login",
+        email: String(form.get("email") || "").trim(),
+        password: String(form.get("password") || "")
+      })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.authenticated || !data.member) {
+      throw new Error(data.error || "Login could not be completed.");
+    }
+    displayMemberSession(data.member);
+    loginForm.reset();
+    closeLogin();
+  } catch (error) {
+    loginStatus.textContent = error.message || "Login could not be completed.";
+  } finally {
+    loginSubmit.disabled = false;
+    loginSubmit.textContent = "Log in";
+  }
+}
+
+async function logoutMember() {
+  memberLogoutButton.disabled = true;
+  try {
+    const response = await fetch("member_auth.php", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "logout" })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) throw new Error(data.error || "Logout could not be completed.");
+    displayMemberSession(null);
+  } catch (error) {
+    console.warn("Logout could not be completed:", error);
+  } finally {
+    memberLogoutButton.disabled = false;
+  }
+}
+
 async function submitRegistration(event) {
   event.preventDefault();
   registerStatus.textContent = "";
@@ -1028,9 +1128,15 @@ async function submitRegistration(event) {
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || !data.ok) throw new Error(data.error || "Registration could not be completed.");
+    displayMemberSession(data.member || {
+      id: data.member_id || "",
+      name: payload.name,
+      email: payload.email,
+      state: payload.state
+    });
     registerFormView.hidden = true;
     registerSuccess.hidden = false;
-    registerSuccessMessage.textContent = `Thanks, ${payload.name}. Your MegaCards member profile has been created for ${payload.email}.`;
+    registerSuccessMessage.textContent = `Thanks, ${payload.name}. Your MegaCards member profile has been created for ${payload.email}, and you are now signed in.`;
     registerForm.reset();
   } catch (error) {
     registerStatus.textContent = error.message || "Registration could not be completed.";
@@ -1126,7 +1232,19 @@ cartButton.addEventListener("click", openCart);
 closeCartButton.addEventListener("click", closeCart);
 cartScrim.addEventListener("click", closeCart);
 openRegisterButton.addEventListener("click", openRegister);
-heroRegisterAction.addEventListener("click", openRegister);
+heroRegisterAction.addEventListener("click", () => { if (!currentMember) openRegister(); });
+openLoginButton.addEventListener("click", openLogin);
+closeLoginButton.addEventListener("click", closeLogin);
+loginForm.addEventListener("submit", submitLogin);
+memberLogoutButton.addEventListener("click", logoutMember);
+loginModal.addEventListener("close", () => document.body.classList.remove("login-open"));
+loginModal.addEventListener("click", (event) => {
+  if (event.target === loginModal) closeLogin();
+});
+loginCreateAccount.addEventListener("click", () => {
+  closeLogin();
+  openRegister();
+});
 closeRegisterButton.addEventListener("click", closeRegister);
 registerForm.addEventListener("submit", submitRegistration);
 registerModal.addEventListener("close", () => document.body.classList.remove("register-open"));
@@ -1227,5 +1345,6 @@ async function initialiseStorefront() {
 }
 
 initialiseStorefront();
+refreshMemberSession();
 loadShippingProfiles();
 initialiseHeroSlider();

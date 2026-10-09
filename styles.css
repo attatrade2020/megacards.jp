@@ -27,7 +27,7 @@ body {
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
 }
-body.cart-open, body.checkout-open, body.register-open { overflow: hidden; }
+body.cart-open, body.checkout-open, body.register-open, body.login-open { overflow: hidden; }
 img { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
 button, input, select { font: inherit; }
@@ -46,9 +46,19 @@ button, input, select { font: inherit; }
 .brand__suffix { color: var(--blue); }
 .main-nav { display: flex; gap: 32px; margin-right: auto; font-size: .9rem; font-weight: 600; color: var(--ink-soft); }
 .main-nav a:hover { color: var(--blue); }
+.account-actions { display: flex; align-items: center; gap: 8px; }
+.login-button { min-height: 44px; padding: 0 16px; color: var(--navy); background: #fff; border: 1px solid var(--line); border-radius: 999px; cursor: pointer; font-size: .8rem; font-weight: 800; transition: border-color .2s ease, color .2s ease, background .2s ease; }
+.login-button:hover { color: var(--blue); background: #f5f8ff; border-color: #a8bff3; }
 .account-button { min-height: 46px; padding: 0 20px; color: var(--navy); background: linear-gradient(135deg,#ffe783,var(--yellow)); border: 1px solid #e6b313; border-radius: 999px; cursor: pointer; box-shadow: 0 8px 22px rgba(230,179,19,.3); font-size: .82rem; font-weight: 900; transition: transform .2s ease, box-shadow .2s ease, color .2s ease, background .2s ease, border-color .2s ease; }
 .account-button:hover { color: #fff; background: var(--blue); border-color: var(--blue); box-shadow: 0 10px 26px rgba(20,89,233,.3); transform: translateY(-2px); }
 .account-button:focus-visible { outline: 3px solid rgba(20,89,233,.24); outline-offset: 3px; }
+.member-summary { display:flex; align-items:center; gap:9px; min-height:46px; padding:6px 8px 6px 12px; background:#f3f8f4; border:1px solid #b9dfc4; border-radius:999px; }
+.member-summary[hidden] { display:none; }
+.member-summary__dot { width:8px; height:8px; background:#16a34a; border-radius:50%; box-shadow:0 0 0 4px rgba(22,163,74,.12); }
+.member-summary__text { display:flex; min-width:0; flex-direction:column; line-height:1.05; }
+.member-summary__text small { color:#52705b; font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
+.member-summary__text strong { max-width:140px; overflow:hidden; color:#17351f; font-size:.75rem; text-overflow:ellipsis; white-space:nowrap; }
+.member-summary__logout { min-height:32px; padding:0 10px; color:#355b40; background:#fff; border:1px solid #c9ddce; border-radius:999px; cursor:pointer; font-size:.68rem; font-weight:800; }
 .cart-button { display: flex; align-items: center; gap: 10px; padding: 10px 15px 10px 18px; color: #fff; background: var(--navy); border: 0; border-radius: 999px; cursor: pointer; font-weight: 700; }
 .cart-button span { display: grid; place-items: center; min-width: 25px; height: 25px; padding-inline: 6px; color: var(--navy); background: var(--yellow); border-radius: 50%; font-size: .75rem; }
 
@@ -72,6 +82,7 @@ button, input, select { font: inherit; }
 .button--primary { color: var(--navy); background: var(--yellow); box-shadow: 0 12px 28px rgba(255,212,71,.15); }
 .button--primary:hover { background: #ffe071; }
 .button--secondary { color: #fff; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.06); }
+.button--secondary.is-signed-in:disabled { color:#d9fbe4; background:rgba(22,163,74,.18); border-color:rgba(134,239,172,.5); opacity:1; }
 .button--wide { width: 100%; }
 .button:disabled { cursor: not-allowed; opacity: .55; transform: none; }
 .hero__trust { display: flex; flex-wrap: wrap; gap: 18px 26px; padding: 0; margin: 30px 0 0; list-style: none; color: #d3daea; font-size: .82rem; font-weight: 600; }
@@ -339,6 +350,20 @@ button, input, select { font: inherit; }
 .register-success { padding: 90px 20px 40px; text-align: center; }
 .register-success > span { display: grid; place-items: center; width: 60px; height: 60px; margin: 0 auto 20px; color: #fff; background: var(--green); border-radius: 50%; font-size: 1.5rem; font-weight: 900; }
 .register-success p:not(.eyebrow) { max-width: 420px; margin: 16px auto 26px; color: var(--ink-soft); }
+.login-modal { width:min(460px,calc(100% - 28px)); padding:38px; color:var(--ink); background:#fff; border:0; border-radius:22px; box-shadow:0 32px 100px rgba(5,10,20,.34); }
+.login-modal::backdrop { background:rgba(5,10,20,.72); backdrop-filter:blur(4px); }
+.login-modal__close { position:absolute; top:18px; right:18px; }
+.login-modal h2 { margin:0; font:800 2rem/1.08 "Manrope",sans-serif; letter-spacing:-.045em; }
+.login-modal__intro { margin:12px 38px 22px 0; color:var(--ink-soft); font-size:.82rem; line-height:1.6; }
+#loginForm { display:grid; gap:14px; }
+#loginForm label span { display:block; margin-bottom:5px; color:var(--ink-soft); font-size:.7rem; font-weight:800; letter-spacing:.05em; text-transform:uppercase; }
+#loginForm input { width:100%; min-height:46px; padding:9px 12px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:10px; outline:none; }
+#loginForm input:focus { border-color:var(--blue); box-shadow:0 0 0 3px rgba(20,89,233,.1); }
+.login-status { min-height:20px; margin:0; color:#a52a2a; font-size:.76rem; text-align:center; }
+.button--login { width:100%; color:#fff; background:var(--blue); }
+.button--login:hover { background:var(--blue-dark); }
+.login-modal__register { margin:20px 0 0; color:var(--ink-soft); font-size:.76rem; text-align:center; }
+.login-modal__register button { padding:0; color:var(--blue); background:none; border:0; cursor:pointer; font:inherit; font-weight:800; text-decoration:underline; }
 
 footer { color: #c6cede; background: var(--navy); }
 .footer__inner { min-height: 150px; display: flex; align-items: center; gap: 30px; }
@@ -366,7 +391,14 @@ footer { color: #c6cede; background: var(--navy); }
   .announcement__inner { min-height: 34px; justify-content: space-between; }
   .announcement__copy { display: none; }
   .header__inner { height: 66px; gap: 8px; }
+  .account-actions { margin-left:auto; gap:5px; }
+  .login-button { min-height:38px; padding:0 10px; font-size:.68rem; }
   .account-button { min-height: 40px; margin-left: auto; padding: 0 13px; font-size: .7rem; }
+  .member-summary { margin-left:auto; min-height:40px; padding:5px 6px 5px 10px; gap:7px; }
+  .member-summary__text strong { max-width:72px; }
+  .member-summary__logout { min-height:29px; padding:0 8px; }
+  .brand { font-size:1.05rem; }
+  .brand__mark { width:30px; height:30px; }
   .cart-button { padding-left: 13px; }
   .hero h1 { font-size: clamp(2.65rem, 13vw, 4rem); }
   .hero__actions { align-items: stretch; flex-direction: column; }
@@ -408,6 +440,7 @@ footer { color: #c6cede; background: var(--navy); }
   .register-modal__content { max-height: 100dvh; padding: 62px 20px 28px; }
   #registerForm { grid-template-columns: 1fr; }
   #registerForm > label:nth-of-type(1), #registerForm > label:nth-of-type(2), .register-check, .register-status, .button--register { grid-column: auto; }
+  .login-modal { width:100%; min-height:100dvh; padding:70px 22px 30px; border-radius:0; }
   .footer__inner { align-items: flex-start; flex-direction: column; gap: 14px; }
 }
 

@@ -106,6 +106,36 @@ function megacards_member_rate_allowed(string $ip): bool
     }
 }
 
+function megacards_member_login_after_registration(array $member, string $id): array
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) {
+        $ttl = 2592000;
+        ini_set('session.gc_maxlifetime', (string) $ttl);
+        session_set_cookie_params([
+            'lifetime' => $ttl,
+            'path' => '/',
+            'secure' => true,
+            'httponly' => true,
+            'samesite' => 'Strict',
+        ]);
+        session_start();
+    }
+    session_regenerate_id(true);
+    $_SESSION['mc_member'] = [
+        'id' => $id,
+        'name' => $member['name'],
+        'email' => $member['email'],
+        'state' => $member['state'],
+        'authenticated_at' => time(),
+    ];
+    return [
+        'id' => $id,
+        'name' => $member['name'],
+        'email' => $member['email'],
+        'state' => $member['state'],
+    ];
+}
+
 function megacards_handle_member_registration(): void
 {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -154,7 +184,8 @@ function megacards_handle_member_registration(): void
         megacards_member_response(500, ['error' => $stored['error']]);
         return;
     }
-    megacards_member_response(201, ['ok' => true, 'member_id' => $stored['id']]);
+    $publicMember = megacards_member_login_after_registration($validated, $stored['id']);
+    megacards_member_response(201, ['ok' => true, 'authenticated' => true, 'member_id' => $stored['id'], 'member' => $publicMember]);
 }
 
 if (!defined('MEGACARDS_REGISTER_LIBRARY_ONLY')) {
