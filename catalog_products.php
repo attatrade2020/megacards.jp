@@ -56,7 +56,7 @@ function normalizeProduct(array $input, array $existing = []): array {
         if ($time !== false) $releaseLabel = date('j M Y', $time);
     }
     $image = trim((string) ($input['image'] ?? $input['image_url'] ?? $existing['image'] ?? ''));
-    if ($image !== '' && !preg_match('#^(assets/products/|/assets/products/)#', $image)) {
+    if ($image !== '' && !preg_match('#^(assets/products/|/assets/products/|img/|/img/)#', $image)) {
         throw new InvalidArgumentException('商品画像はMegaCards内のローカル画像を指定してください。');
     }
     return [
@@ -78,6 +78,9 @@ function normalizeProduct(array $input, array $existing = []): array {
         'height_cm' => max(1, (float) ($input['height_cm'] ?? $existing['height_cm'] ?? 5)),
         'sort' => max(0, (int) ($input['sort'] ?? $existing['sort'] ?? 0)),
         'notes' => trim((string) ($input['notes'] ?? $existing['notes'] ?? '')),
+        'source_url' => trim((string) ($input['source_url'] ?? $existing['source_url'] ?? '')),
+        'source_search_url' => trim((string) ($input['source_search_url'] ?? $existing['source_search_url'] ?? '')),
+        'source_price_jpy' => max(0, (int) ($input['source_price_jpy'] ?? $existing['source_price_jpy'] ?? 0)),
         'created_at' => (string) ($existing['created_at'] ?? $input['created_at'] ?? gmdate('c')),
         'updated_at' => gmdate('c'),
     ];
@@ -86,6 +89,12 @@ function normalizeProduct(array $input, array $existing = []): array {
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 if ($method === 'GET') {
     $products = array_values(array_filter(readCatalog($catalogFile), static fn(array $p): bool => ($p['status'] ?? 'active') === 'active'));
+    $publicFields = ['id','category','title','series','release','release_date','releaseOrder','jpy','tag','image','status','stock','weight_g','width_cm','depth_cm','height_cm','sort'];
+    $products = array_map(static function (array $product) use ($publicFields): array {
+        $public = [];
+        foreach ($publicFields as $field) if (array_key_exists($field, $product)) $public[$field] = $product[$field];
+        return $public;
+    }, $products);
     echo json_encode(['ok' => true, 'products' => $products], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }

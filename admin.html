@@ -990,7 +990,7 @@
                     <span class="tab-badge" id="orderBadge" style="display:none;">0</span>
                 </button>
                 <button class="tab-btn" onclick="switchTab('customers')">顧客管理</button>
-                <button class="tab-btn" onclick="switchTab('snkrdunk')">スニダン取込</button>
+                <button class="tab-btn" onclick="switchTab('snkrdunk')">ボックス取込</button>
                 <button class="tab-btn" onclick="switchTab('changelog')">更新ログ</button>
                 <button class="tab-btn" onclick="switchTab('shipping')">設定</button>
             </div>
@@ -1366,21 +1366,20 @@
             <div class="tab-page" id="tabSnkrdunk">
                 <div class="card" style="max-width:980px;margin-bottom:20px;">
                     <div class="card-header">
-                        <h2>スニダン検索URL管理</h2>
+                        <h2>未開封ボックス取込</h2>
                     </div>
                     <div style="padding:24px;">
                         <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:16px;">
-                            スニダン（snkrdunk.com）の検索結果URLを登録すると、その<strong>1ページ目の全商品</strong>を一括取込できます。<br>
-                            取込まれた商品は <strong style="color:var(--green);">公開（Active）</strong> 状態で即時保存され、サイトに反映されます。タイトル英訳も自動で実施されます。
+                            ボックス商品の検索結果URLを登録すると、1ページ目から<strong>未開封ボックスだけ</strong>を抽出して取込できます。<br>
+                            シングルカード、PSA商品、パック単品、シュリンクなし商品は自動的に除外します。価格は<strong>1ボックス単位</strong>として保存します。
                         </p>
 
                         <!-- Auto-import explanation banner -->
                         <div style="background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1px solid #2ed573;border-left:4px solid #2ed573;border-radius:var(--radius);padding:14px 18px;margin-bottom:20px;">
-                            <div style="font-weight:700;font-size:0.95rem;color:#1b5e20;margin-bottom:6px;">⏰ 自動取込について</div>
+                            <div style="font-weight:700;font-size:0.95rem;color:#1b5e20;margin-bottom:6px;">📦 ボックス専用の取込条件</div>
                             <p style="color:#2e4733;font-size:0.85rem;line-height:1.6;margin:0;">
-                                各登録URLには <strong>「✋ 手動」/「⏰ 自動」</strong> のトグルがあります。<br>
-                                <strong>自動</strong> に設定すると、<strong>1時間に1回</strong> サーバーが自動でそのURLの商品を取得し、<strong>新規商品のみ</strong>を Active 状態で登録します（既登録商品はスキップ）。<br>
-                                各URLには <strong>最終実行日時</strong> と <strong>新規登録件数</strong> が表示されます。
+                                商品名に「BOX」または「ボックス」を含む出品だけを対象にします。<br>
+                                画像はMegaCards内へ保存し、登録前にカテゴリ、在庫、重量、三辺、公開状態を下の設定から指定できます。
                             </p>
                         </div>
 
@@ -1392,47 +1391,61 @@
                                 <input type="text" id="snkrNewUrl" placeholder="https://snkrdunk.com/search?keywords=..." style="flex:1;padding:10px 14px;border:1px solid var(--border);border-radius:var(--radius);font-size:0.9rem;font-family:monospace;">
                                 <button class="btn btn-primary" onclick="addSnkrdunkUrl()">＋ 追加</button>
                             </div>
-                            <p style="color:var(--text-dim);font-size:0.8rem;margin-top:8px;">例: https://snkrdunk.com/search?keywords=ポケカ+PSA10&sort=latest&isSaleOnly=true&page=1</p>
+                            <p style="color:var(--text-dim);font-size:0.8rem;margin-top:8px;overflow-wrap:anywhere;">例: https://snkrdunk.com/brands/pokemon/categories/26</p>
                         </div>
 
                         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px;">
                             <h3 style="font-size:1rem;margin:0;">登録済みURL（<span id="snkrUrlCount">0</span>件）</h3>
                             <div style="display:inline-flex;align-items:center;gap:6px;background:#e6f7e6;border:1px solid #b6e0b6;color:#2a7a2a;padding:4px 10px;border-radius:14px;font-size:0.78rem;font-weight:600;">
-                                ⏱ 自動更新: <strong>1時間ごと</strong>（自動モードのURLのみ）
+                                📦 未開封ボックスのみ取込
                             </div>
                         </div>
                         <div id="snkrUrlList" style="display:flex;flex-direction:column;gap:8px;">
                             <p style="color:var(--text-dim);font-size:0.85rem;">URLを登録してください。</p>
                         </div>
 
+                        <div style="margin-top:20px;padding:18px;background:#f8fafc;border:1px solid var(--border);border-radius:var(--radius);">
+                            <h3 style="font-size:1rem;margin:0 0 14px;">取込時のボックス設定</h3>
+                            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;">
+                                <label class="form-group"><span>カテゴリ</span><select id="snkrImportCategory"><option value="pokemon">Pokémon</option><option value="onepiece">ONE PIECE</option><option value="yugioh">Yu-Gi-Oh!</option></select></label>
+                                <label class="form-group"><span>価格への上乗せ（円）</span><input id="snkrImportMarkup" type="number" min="0" step="100" value="0"></label>
+                                <label class="form-group"><span>初期在庫</span><input id="snkrImportStock" type="number" min="0" step="1" value="1"></label>
+                                <label class="form-group"><span>公開状態</span><select id="snkrImportStatus"><option value="active">公開</option><option value="hidden">非公開で確認</option></select></label>
+                                <label class="form-group"><span>重量（g）</span><input id="snkrImportWeight" type="number" min="1" step="1" value="450"></label>
+                                <label class="form-group"><span>幅（cm）</span><input id="snkrImportWidth" type="number" min="1" step="0.1" value="14"></label>
+                                <label class="form-group"><span>奥行（cm）</span><input id="snkrImportDepth" type="number" min="1" step="0.1" value="14"></label>
+                                <label class="form-group"><span>高さ（cm）</span><input id="snkrImportHeight" type="number" min="1" step="0.1" value="5"></label>
+                            </div>
+                        </div>
+
                         <div style="margin-top:20px;padding:14px 16px;background:#fffbe6;border:1px solid #ffe58f;border-radius:var(--radius);display:flex;flex-direction:column;gap:14px;">
                             <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:0.9rem;">
                                 <input type="checkbox" id="snkrUpdatePrices" checked style="margin-top:3px;width:16px;height:16px;cursor:pointer;">
                                 <span>
-                                    <strong>① 既存商品のスニダン価格変更を反映する</strong><br>
-                                    <span style="color:var(--text-dim);font-size:0.85rem;">既存商品（<code style="background:#f0f0f0;padding:1px 4px;border-radius:3px;">snkrdunk_url</code>一致）について、スニダン側で価格が変動していたら<code style="background:#f0f0f0;padding:1px 4px;border-radius:3px;">snkrdunk_price</code>を更新。<code>markup_jpy</code> が設定されていれば <code>price_jpy = 新スニダン価格 + markup</code> も自動再計算。手動で <code>price_jpy</code> を編集した商品は触りません。</span>
+                                    <strong>① 既存ボックスの価格を更新する</strong><br>
+                                    <span style="color:var(--text-dim);font-size:0.85rem;">同じ出品URLの1ボックス価格が変わった場合、上乗せ額を加えた販売価格へ更新します。</span>
                                 </span>
                             </label>
                             <label style="display:flex;align-items:flex-start;gap:10px;cursor:pointer;font-size:0.9rem;">
                                 <input type="checkbox" id="snkrDetectOos" checked style="margin-top:3px;width:16px;height:16px;cursor:pointer;">
                                 <span>
                                     <strong>② 在庫切れを検出して反映する</strong><br>
-                                    <span style="color:var(--text-dim);font-size:0.85rem;">スニダン検索結果に存在しなくなった既存商品（同一URLから取込済み）は <code style="background:#f0f0f0;padding:1px 4px;border-radius:3px;">stock = 0</code>（Sold Out）に。逆に再出品されていれば <code>stock = 1</code> に復帰。</span>
+                                    <span style="color:var(--text-dim);font-size:0.85rem;">検索結果から消えた取込済みボックスは在庫0（Sold out）にし、再出品された場合は指定した初期在庫へ戻します。</span>
                                 </span>
                             </label>
                         </div>
 
                         <div style="margin-top:20px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-                            <button class="btn btn-primary" onclick="importAllSnkrdunkUrls()" id="btnImportAll" style="font-size:1rem;padding:12px 24px;">▶ 全URL一括取込</button>
-                            <span style="color:var(--text-dim);font-size:0.85rem;">登録された全URLの1ページ目商品を取込み（Active保存）＋ 既存商品の価格更新</span>
+                            <button class="btn btn-primary" onclick="importAllSnkrdunkUrls()" id="btnImportAll" style="font-size:1rem;padding:12px 24px;">▶ ボックスを一括取込</button>
+                            <span style="color:var(--text-dim);font-size:0.85rem;">未開封ボックスだけを抽出し、共通商品データへ保存します。</span>
                         </div>
 
-                        <div style="margin-top:14px;padding-top:14px;border-top:1px dashed var(--border);display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <div style="display:none;">
                             <button class="btn btn-outline" onclick="translateAllSnkrdunkTitles()" id="btnTranslateAll" style="padding:10px 18px;">🌐 既存商品タイトルを一括英訳</button>
                             <span style="color:var(--text-dim);font-size:0.85rem;">日本語タイトルのスニダン取込商品を Google翻訳で英訳して<code>title_en</code>を更新</span>
                         </div>
 
-                        <div style="margin-top:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+                        <div style="display:none;">
                             <button class="btn btn-outline" onclick="refetchAllSnkrdunkImages()" id="btnRefetchImgs" style="padding:10px 18px;">📸 既存商品の複数画像を取得</button>
                             <span style="color:var(--text-dim);font-size:0.85rem;">スニダンAPIから裏面・追加写真を取得して<code>images[]</code>を更新（既存画像は保持）</span>
                         </div>
@@ -1839,6 +1852,9 @@
                 height_cm: Number(product.height_cm) || 5,
                 sort: Number(product.sort) || 0,
                 notes: product.notes || '',
+                source_url: product.source_url || '',
+                source_search_url: product.source_search_url || '',
+                source_price_jpy: Number(product.source_price_jpy) || 0,
                 created_at: product.created_at || '',
             };
         }
@@ -2884,7 +2900,7 @@
                 showToast('商品IDを作成できません。英数字の商品IDを入力してください。', 'error');
                 return;
             }
-            if (!/^assets\/products\//.test(image)) {
+            if (!/^(?:assets\/products|img)\//.test(image)) {
                 showToast('商品画像はアップロード済みのローカル画像を指定してください。', 'error');
                 return;
             }
@@ -3577,7 +3593,7 @@
             }
             return {
                 url: item.url || '',
-                mode: item.mode === 'auto' ? 'auto' : 'manual',
+                mode: 'manual',
                 last_run_at: item.last_run_at || null,
                 last_count: (item.last_count !== undefined && item.last_count !== null) ? item.last_count : null,
             };
@@ -3713,12 +3729,7 @@
                     runInfoHtml = `<span style="font-size:0.7rem;color:#888;white-space:nowrap;">⏳ 待機中</span>`;
                 }
 
-                // Mode toggle (compact)
-                const toggleHtml = `
-                    <div style="display:inline-flex;background:#f3f4f6;border:1px solid #d1d5db;border-radius:6px;padding:1px;">
-                        <button onclick="if('${entry.mode}'!=='manual')toggleSnkrUrlMode(${i})" style="border:none;cursor:${isAuto ? 'pointer' : 'default'};padding:3px 8px;border-radius:4px;font-size:0.7rem;font-weight:700;background:${!isAuto ? '#1a1a2e' : 'transparent'};color:${!isAuto ? '#FFD700' : '#666'};">✋手動</button>
-                        <button onclick="if('${entry.mode}'!=='auto')toggleSnkrUrlMode(${i})" style="border:none;cursor:${isAuto ? 'default' : 'pointer'};padding:3px 8px;border-radius:4px;font-size:0.7rem;font-weight:700;background:${isAuto ? '#2ed573' : 'transparent'};color:${isAuto ? '#fff' : '#666'};">⏰自動</button>
-                    </div>`;
+                const toggleHtml = '<span style="font-size:.7rem;font-weight:700;color:#64748b;">手動取込</span>';
 
                 return `
                 <div style="padding:8px 10px;background:#fff;border:1px solid ${isAuto ? '#2ed573' : 'var(--border)'};border-left:3px solid ${isAuto ? '#2ed573' : '#1a1a2e'};border-radius:6px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
@@ -3727,7 +3738,7 @@
                     <a href="${u.replace(/"/g, '&quot;')}" target="_blank" rel="noopener" style="flex:1;min-width:140px;color:#888;font-size:0.68rem;font-family:monospace;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${u.replace(/"/g, '&quot;')}">🔗${u}</a>
                     ${runInfoHtml}
                     ${toggleHtml}
-                    <button class="btn btn-primary btn-sm" onclick="importOneSnkrdunkUrl(${i})" style="padding:4px 10px;font-size:0.72rem;white-space:nowrap;">取込</button>
+                    <button class="btn btn-primary btn-sm" onclick="importOneSnkrdunkUrl(${i})" style="padding:4px 10px;font-size:0.72rem;white-space:nowrap;">ボックス取込</button>
                     <button class="btn btn-outline btn-sm" onclick="removeSnkrdunkUrl(${i})" style="padding:4px 10px;font-size:0.72rem;color:var(--red);white-space:nowrap;">削除</button>
                 </div>`;
             }).join('');
@@ -3800,7 +3811,7 @@
                     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
                 }
                 snkrLog('単一URL取込開始: ' + entry.url);
-                await runSnkrdunkImport([entry.url]);
+                await runBoxImport([entry.url]);
                 // Update last_run_at / last_count for this entry too
                 snkrdunkUrls[idx].last_run_at = new Date().toISOString();
                 await saveSnkrdunkUrls();
@@ -3819,10 +3830,182 @@
                 showToast('URLが登録されていません', 'error');
                 return;
             }
-            if (!confirm(snkrdunkUrls.length + '件のURLから商品を一括取込します。よろしいですか？\n\n（取込まれた商品は Active 状態で即時公開されます）')) return;
+            if (!confirm(snkrdunkUrls.length + '件のURLから未開封ボックスを一括取込します。よろしいですか？')) return;
             document.getElementById('snkrLogCard').style.display = 'block';
             snkrLog('全URL一括取込開始（' + snkrdunkUrls.length + '件）');
-            await runSnkrdunkImport(snkrdunkUrls.map(e => e.url));
+            await runBoxImport(snkrdunkUrls.map(e => e.url));
+        }
+
+        function isBoxImportCandidate(item) {
+            const text = `${item?.title || ''} ${item?.condition || ''}`;
+            if (/(シュリンクなし|シュリンク無し|no\s*shrink|without\s*shrink|psa\s*\d+|鑑定品|シングルカード|パック単品|1\s*pack)/i.test(text)) return false;
+            return /(\bbox\b|ボックス|ＢＯＸ)/i.test(text);
+        }
+
+        function importedBoxSeries(category, title) {
+            const code = String(title || '').match(/\b(?:SV|SM|S|M|OP|EB|DB|LPG|YAC|26LP)[-\s]?\d*[A-Z]?\b/i)?.[0] || '';
+            const names = { pokemon: 'Pokémon', onepiece: 'ONE PIECE', yugioh: 'Yu-Gi-Oh!' };
+            return `${names[category] || 'Japanese TCG'}${code ? ' · ' + code.toUpperCase() : ' · Box'}`;
+        }
+
+        async function saveImportedBoxImage(item) {
+            if (!item?.image_url) return '';
+            const extension = (item.image_url.match(/\.(jpe?g|png|webp)/i) || [, 'jpg'])[1].toLowerCase();
+            const filename = `${slugifyCatalogId(item.snkr_id || item.title || 'box')}.${extension}`;
+            const response = await fetch('/img_save.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: ADMIN_PASSWORD, url: item.image_url, filename })
+            });
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.success || !data.path) throw new Error(data.error || '画像をローカル保存できませんでした');
+            return String(data.path)
+                .replace(/^https?:\/\/megacards\.jp\//i, '')
+                .replace(/^\/+/, '')
+                .replace(/^megacards\//, '');
+        }
+
+        async function runBoxImport(urls) {
+            const button = document.getElementById('btnImportAll');
+            if (button) { button.disabled = true; button.textContent = 'ボックスを取込中…'; }
+            const category = document.getElementById('snkrImportCategory')?.value || 'pokemon';
+            const markup = Math.max(0, parseInt(document.getElementById('snkrImportMarkup')?.value) || 0);
+            const initialStock = Math.max(0, parseInt(document.getElementById('snkrImportStock')?.value) || 0);
+            const status = document.getElementById('snkrImportStatus')?.value || 'active';
+            const weight = Math.max(1, parseInt(document.getElementById('snkrImportWeight')?.value) || 450);
+            const width = Math.max(1, parseFloat(document.getElementById('snkrImportWidth')?.value) || 14);
+            const depth = Math.max(1, parseFloat(document.getElementById('snkrImportDepth')?.value) || 14);
+            const height = Math.max(1, parseFloat(document.getElementById('snkrImportHeight')?.value) || 5);
+            const updatePrices = document.getElementById('snkrUpdatePrices')?.checked !== false;
+            const detectOos = document.getElementById('snkrDetectOos')?.checked !== false;
+
+            let catalog = [];
+            try {
+                const data = await catalogRequest('list');
+                catalog = (data.products || []).map(catalogToAdmin);
+            } catch (error) {
+                snkrLog('商品データの読込に失敗: ' + error.message, 'err');
+                if (button) { button.disabled = false; button.textContent = '▶ ボックスを一括取込'; }
+                return;
+            }
+
+            const existingBySource = new Map(catalog.filter(product => product.source_url).map(product => [product.source_url, product]));
+            const processedSearchUrls = new Set(urls);
+            const activeSourceUrls = new Set();
+            let detected = 0, imported = 0, updated = 0, soldOut = 0, skipped = 0, errors = 0;
+
+            for (let urlIndex = 0; urlIndex < urls.length; urlIndex++) {
+                const url = urls[urlIndex];
+                snkrSetProgress(`URL ${urlIndex + 1}/${urls.length} のボックスを確認中…`);
+                snkrLog('▶ ボックス検索URLを取得: ' + url, 'info');
+                let fetched = [];
+                try {
+                    const response = await fetch('/snkrdunk_import.php?action=fetch&url=' + encodeURIComponent(url));
+                    const data = await response.json();
+                    if (!response.ok || !data.ok) throw new Error(data.error || '取得に失敗しました');
+                    fetched = Array.isArray(data.products) ? data.products : [];
+                } catch (error) {
+                    snkrLog('  ✗ 取得失敗: ' + error.message, 'err');
+                    errors++;
+                    continue;
+                }
+
+                const boxes = fetched.filter(isBoxImportCandidate);
+                detected += boxes.length;
+                skipped += fetched.length - boxes.length;
+                snkrLog(`  ✓ ${fetched.length}件中、未開封ボックス ${boxes.length}件を検出`, 'ok');
+
+                for (let index = 0; index < boxes.length; index++) {
+                    const source = boxes[index];
+                    const sourceUrl = source.snkrdunk_url || source.url || '';
+                    if (!sourceUrl) { skipped++; continue; }
+                    activeSourceUrls.add(sourceUrl);
+                    const sourcePrice = Math.max(1, parseInt(source.price_jpy) || 0);
+                    const existing = existingBySource.get(sourceUrl);
+
+                    if (existing) {
+                        let changed = false;
+                        if (updatePrices && sourcePrice !== Number(existing.source_price_jpy || 0)) {
+                            existing.source_price_jpy = sourcePrice;
+                            existing.price_jpy = sourcePrice + markup;
+                            changed = true;
+                        }
+                        if (Number(existing.stock) <= 0 && initialStock > 0) {
+                            existing.stock = initialStock;
+                            changed = true;
+                        }
+                        existing.source_search_url = url;
+                        if (changed) {
+                            try {
+                                await catalogRequest('save', { product: adminToCatalog(existing) });
+                                updated++;
+                                snkrLog(`  ↻ 更新: ${(existing.title_en || '').substring(0, 48)} — ¥${existing.price_jpy.toLocaleString()}`, 'ok');
+                            } catch (error) {
+                                errors++;
+                                snkrLog('  ✗ 更新失敗: ' + error.message, 'err');
+                            }
+                        }
+                        continue;
+                    }
+
+                    try {
+                        const localImage = await saveImportedBoxImage(source);
+                        if (!localImage) throw new Error('ローカル画像がありません');
+                        const translatedTitle = await translateJaToEn(source.title || '');
+                        const product = {
+                            id: slugifyCatalogId(source.snkr_id || translatedTitle || source.title),
+                            title_en: translatedTitle || source.title,
+                            category,
+                            series: importedBoxSeries(category, translatedTitle || source.title),
+                            tag: 'Imported box',
+                            price_jpy: sourcePrice + markup,
+                            image_url: localImage,
+                            status,
+                            stock: initialStock,
+                            weight_g: weight,
+                            width_cm: width,
+                            depth_cm: depth,
+                            height_cm: height,
+                            sort: catalog.length + imported + 1,
+                            release_date: source.release_date || '',
+                            notes: 'Sealed box import',
+                            source_url: sourceUrl,
+                            source_search_url: url,
+                            source_price_jpy: sourcePrice,
+                        };
+                        const result = await catalogRequest('save', { product: adminToCatalog(product) });
+                        const saved = catalogToAdmin(result.product);
+                        catalog.push(saved);
+                        existingBySource.set(sourceUrl, saved);
+                        imported++;
+                        snkrLog(`  ✓ ボックス登録: ${saved.title_en.substring(0, 48)} — ¥${saved.price_jpy.toLocaleString()}`, 'ok');
+                    } catch (error) {
+                        errors++;
+                        snkrLog(`  ✗ 登録失敗: ${(source.title || '').substring(0, 38)} — ${error.message}`, 'err');
+                    }
+                }
+            }
+
+            if (detectOos) {
+                for (const product of catalog) {
+                    if (!product.source_url || !processedSearchUrls.has(product.source_search_url || '')) continue;
+                    if (activeSourceUrls.has(product.source_url) || Number(product.stock) <= 0) continue;
+                    product.stock = 0;
+                    try {
+                        await catalogRequest('save', { product: adminToCatalog(product) });
+                        soldOut++;
+                        snkrLog(`  × 在庫切れ: ${(product.title_en || '').substring(0, 48)}`, 'warn');
+                    } catch (error) {
+                        errors++;
+                    }
+                }
+            }
+
+            snkrSetProgress('ボックス取込完了');
+            snkrLog(`取込完了: ボックス検出 ${detected} / 新規 ${imported} / 更新 ${updated} / 在庫切れ ${soldOut} / 対象外 ${skipped} / エラー ${errors}`, 'ok');
+            showToast(`ボックス取込完了: 新規${imported}件・更新${updated}件`, errors ? 'error' : 'success');
+            if (button) { button.disabled = false; button.textContent = '▶ ボックスを一括取込'; }
+            await loadProducts({ force: true });
         }
 
         async function runSnkrdunkImport(urls) {
