@@ -4952,6 +4952,20 @@
             } catch (_) { customerAddresses = {}; }
         }
 
+        // Registered members are customers even before their first order.
+        let registeredCustomers = [];
+        async function loadRegisteredCustomers() {
+            try {
+                const r = await fetch('/admin_customers.php?_=' + Date.now(), { cache: 'no-store' });
+                const d = await r.json();
+                if (!r.ok || !d.ok) throw new Error(d.error || '会員情報を取得できませんでした');
+                registeredCustomers = Array.isArray(d.customers) ? d.customers : [];
+            } catch (error) {
+                console.error('Registered customer load failed:', error);
+                registeredCustomers = [];
+            }
+        }
+
         async function loadOrders() {
             showLoading(true);
             try {
@@ -6916,6 +6930,7 @@ ${body.innerHTML}
                 loadDeletedOrderIds(),
                 loadOrderItemsCache(),
                 loadCustomerAddresses(),
+                loadRegisteredCustomers(),
             ];
             let ordersTask = null;
             if (allOrders.length === 0 && GAS_ADMIN_URL) {
@@ -6962,6 +6977,50 @@ ${body.innerHTML}
 
         function buildCustomerList() {
             const map = {};
+            registeredCustomers.forEach(member => {
+                const email = (member.email || '').toLowerCase().trim();
+                if (!email) return;
+                map[email] = {
+                    email: member.email,
+                    name: member.name || '',
+                    name_ts: new Date(member.updated_at || member.created_at || 0).getTime() || 0,
+                    country: member.country || 'AU',
+                    country_ts: new Date(member.updated_at || member.created_at || 0).getTime() || 0,
+                    address: member.address || null,
+                    address_ts: new Date(member.updated_at || member.created_at || 0).getTime() || 0,
+                    orders: [],
+                    total_spent: 0,
+                    last_order: '',
+                    first_order: '',
+                    payment_methods: new Set(),
+                    customer_source: 'member',
+                    registered_at: member.created_at || '',
+                    member_status: member.status || 'active'
+                };
+            });
+            Object.entries(customerAddresses || {}).forEach(([rawEmail, saved]) => {
+                const email = String(rawEmail || '').toLowerCase().trim();
+                if (!email || !saved || typeof saved !== 'object') return;
+                if (!map[email]) {
+                    map[email] = {
+                        email,
+                        name: saved.name || '',
+                        name_ts: new Date(saved.updated_at || 0).getTime() || 0,
+                        country: saved.address?.country || 'AU',
+                        country_ts: new Date(saved.updated_at || 0).getTime() || 0,
+                        address: saved.address || null,
+                        address_ts: new Date(saved.updated_at || 0).getTime() || 0,
+                        orders: [],
+                        total_spent: 0,
+                        last_order: '',
+                        first_order: '',
+                        payment_methods: new Set(),
+                        customer_source: 'proxy',
+                        registered_at: saved.updated_at || '',
+                        member_status: 'active'
+                    };
+                }
+            });
             allOrders.forEach(o => {
                 const email = (o.email || '').toLowerCase().trim();
                 if (!email) return;
@@ -7059,6 +7118,11 @@ ${body.innerHTML}
             tbody.innerHTML = filtered.map(c => {
                 const lastDate = c.last_order ? new Date(c.last_order).toLocaleDateString('ja-JP', { month: '2-digit', day: '2-digit' }) : '-';
                 const isRepeat = c.order_count >= 2;
+                const customerStatus = isRepeat
+                    ? '<span style="padding:3px 8px;border-radius:10px;font-size:0.72rem;font-weight:600;background:#dbeafe;color:#2563eb;">リピーター</span>'
+                    : c.order_count === 0
+                        ? `<span style="padding:3px 8px;border-radius:10px;font-size:0.72rem;font-weight:600;background:${c.customer_source === 'proxy' ? '#fef3c7' : '#dcfce7'};color:${c.customer_source === 'proxy' ? '#b45309' : '#15803d'};">${c.customer_source === 'proxy' ? '代理登録' : '会員登録'}</span>`
+                        : '<span style="padding:3px 8px;border-radius:10px;font-size:0.72rem;font-weight:600;background:#f3f4f6;color:#6b7280;">新規</span>';
                 const escEmail = c.email.replace(/'/g, "\\'");
                 return `<tr onclick="openCustomerDetail('${escEmail}')" style="cursor:pointer;">
                     <td onclick="event.stopPropagation();" style="text-align:center;"><input type="checkbox" class="customer-checkbox" data-email="${c.email.replace(/"/g, '&quot;')}" onchange="updateCustomerBulkBar()"></td>
@@ -7078,7 +7142,7 @@ ${body.innerHTML}
                     <td style="text-align:center;"><strong>${c.order_count}</strong></td>
                     <td class="price-cell">¥${c.total_spent.toLocaleString()}</td>
                     <td>${lastDate}</td>
-                    <td>${isRepeat ? '<span style="padding:3px 8px;border-radius:10px;font-size:0.72rem;font-weight:600;background:#dbeafe;color:#2563eb;">リピーター</span>' : '<span style="padding:3px 8px;border-radius:10px;font-size:0.72rem;font-weight:600;background:#f3f4f6;color:#6b7280;">新規</span>'}</td>
+                    <td>${customerStatus}</td>
                     <td><button class="btn btn-outline btn-sm" onclick="event.stopPropagation();openCustomerDetail('${escEmail}')">詳細</button></td>
                 </tr>`;
             }).join('');
@@ -7272,6 +7336,7 @@ ${body.innerHTML}
             const firstDate = c.first_order ? new Date(c.first_order).toLocaleDateString('ja-JP') : '-';
             const lastDate = c.last_order ? new Date(c.last_order).toLocaleDateString('ja-JP') : '-';
             const countryName = countryFull(c.country);
+            const sourceLabel = c.customer_source === 'proxy' ? '代理登録' : c.customer_source === 'member' ? '会員登録' : '注文から登録';
 
             // Build eBay-format shipping address block
             const a = c.address || {};
@@ -7310,6 +7375,7 @@ ${body.innerHTML}
                     <div class="order-meta-item"><label>名前</label><span>${c.name || '-'}</span></div>
                     <div class="order-meta-item"><label>メール</label><span style="font-size:0.85rem;">${c.email}</span></div>
                     <div class="order-meta-item"><label>国</label><span>${countryName || '-'}</span></div>
+                    <div class="order-meta-item"><label>登録区分</label><span>${sourceLabel}</span></div>
                     <div class="order-meta-item"><label>注文回数</label><span><strong>${c.order_count}</strong> 回</span></div>
                     <div class="order-meta-item"><label>合計金額</label><span><strong>¥${c.total_spent.toLocaleString()}</strong></span></div>
                     <div class="order-meta-item"><label>支払方法</label><span>${payMethods}</span></div>
