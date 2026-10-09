@@ -1152,6 +1152,7 @@ function renderCart() {
   const total = cartSubtotalAud();
 
   cartCount.textContent = count;
+  cartButton.setAttribute("aria-label", `Shopping cart, ${count} ${count === 1 ? "item" : "items"}`);
   cartTotal.textContent = audLabel(total);
   renderCustomsEstimate();
   cartItems.innerHTML = entries.length ? entries.map(([id, quantity]) => {

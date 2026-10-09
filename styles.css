@@ -59,7 +59,8 @@ button, input, select { font: inherit; }
 .member-summary__text small { color:#52705b; font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }
 .member-summary__text strong { max-width:140px; overflow:hidden; color:#17351f; font-size:.75rem; text-overflow:ellipsis; white-space:nowrap; }
 .member-summary__logout { min-height:32px; padding:0 10px; color:#355b40; background:#fff; border:1px solid #c9ddce; border-radius:999px; cursor:pointer; font-size:.68rem; font-weight:800; }
-.cart-button { display: flex; align-items: center; gap: 10px; padding: 10px 15px 10px 18px; color: #fff; background: var(--navy); border: 0; border-radius: 999px; cursor: pointer; font-weight: 700; }
+.cart-button { display: flex; align-items: center; gap: 9px; padding: 10px 12px; color: #fff; background: var(--navy); border: 0; border-radius: 999px; cursor: pointer; font-weight: 700; }
+.cart-button__icon { width:23px; height:23px; fill:none; stroke:currentColor; stroke-width:1.9; stroke-linecap:round; stroke-linejoin:round; }
 .cart-button span { display: grid; place-items: center; min-width: 25px; height: 25px; padding-inline: 6px; color: var(--navy); background: var(--yellow); border-radius: 50%; font-size: .75rem; }
 
 .hero { --hero-glow: 20,89,233; position: relative; overflow: hidden; color: #fff; background: var(--navy); transition: background-color .8s ease; }
@@ -399,7 +400,7 @@ footer { color: #c6cede; background: var(--navy); }
   .member-summary__logout { min-height:29px; padding:0 8px; }
   .brand { font-size:1.05rem; }
   .brand__mark { width:30px; height:30px; }
-  .cart-button { padding-left: 13px; }
+  .cart-button { padding:8px 10px; }
   .hero h1 { font-size: clamp(2.65rem, 13vw, 4rem); }
   .hero__actions { align-items: stretch; flex-direction: column; }
   .hero__actions .button { width: 100%; }
