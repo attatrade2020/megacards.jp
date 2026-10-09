@@ -1346,6 +1346,8 @@ async function initialiseStorefront() {
 }
 
 initialiseStorefront();
-refreshMemberSession();
+refreshMemberSession().then(() => {
+  if (!currentMember && new URLSearchParams(window.location.search).has("member_login")) openLogin();
+});
 loadShippingProfiles();
 initialiseHeroSlider();

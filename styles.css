@@ -54,6 +54,8 @@ button, input, select { font: inherit; }
 .account-button:focus-visible { outline: 3px solid rgba(20,89,233,.24); outline-offset: 3px; }
 .member-summary { display:flex; align-items:center; gap:9px; min-height:46px; padding:6px 8px 6px 12px; background:#f3f8f4; border:1px solid #b9dfc4; border-radius:999px; }
 .member-summary[hidden] { display:none; }
+.member-summary__account { display:flex; min-width:0; align-items:center; gap:9px; border-radius:999px; }
+.member-summary__account:hover strong { color:var(--blue); }
 .member-summary__dot { width:8px; height:8px; background:#16a34a; border-radius:50%; box-shadow:0 0 0 4px rgba(22,163,74,.12); }
 .member-summary__text { display:flex; min-width:0; flex-direction:column; line-height:1.05; }
 .member-summary__text small { color:#52705b; font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.06em; }

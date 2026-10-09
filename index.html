@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=20261009-03">
+  <link rel="stylesheet" href="styles.css?v=20261009-04">
 </head>
 <body>
   <div class="announcement">
@@ -39,8 +39,10 @@
         <button class="account-button" id="openRegister" type="button">Create account</button>
       </div>
       <div class="member-summary" id="memberSummary" hidden>
-        <span class="member-summary__dot" aria-hidden="true"></span>
-        <span class="member-summary__text"><small>Signed in</small><strong id="memberDisplayName"></strong></span>
+        <a class="member-summary__account" href="member.php" aria-label="Open my account">
+          <span class="member-summary__dot" aria-hidden="true"></span>
+          <span class="member-summary__text"><small>My account</small><strong id="memberDisplayName"></strong></span>
+        </a>
         <button class="member-summary__logout" id="memberLogout" type="button">Log out</button>
       </div>
       <button class="cart-button" id="cartButton" type="button" aria-label="Shopping cart, 0 items" aria-expanded="false" aria-controls="cartPanel">
@@ -335,6 +337,6 @@
     </div>
   </footer>
 
-  <script src="app.js?v=20261009-03"></script>
+  <script src="app.js?v=20261009-04"></script>
 </body>
 </html>

@@ -74,6 +74,78 @@ function megacards_login_rate_allowed(string $ip): bool
     }
 }
 
+function megacards_update_member_profile(array $input, string $membersFile): array
+{
+    $sessionMember = megacards_member_public_session();
+    if ($sessionMember === null) return ['status' => 401, 'error' => 'Please log in again.'];
+
+    $name = trim((string) ($input['name'] ?? ''));
+    $email = strtolower(trim((string) ($input['email'] ?? '')));
+    $state = strtoupper(trim((string) ($input['state'] ?? '')));
+    $currentPassword = (string) ($input['current_password'] ?? '');
+    $newPassword = (string) ($input['new_password'] ?? '');
+    $states = ['NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'];
+
+    if ($name === '' || mb_strlen($name) > 80) return ['status' => 422, 'error' => 'Enter your full name.'];
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 190) return ['status' => 422, 'error' => 'Enter a valid email address.'];
+    if (!in_array($state, $states, true)) return ['status' => 422, 'error' => 'Select your Australian state or territory.'];
+    if ($currentPassword === '' || strlen($currentPassword) > 128) return ['status' => 422, 'error' => 'Enter your current password to save changes.'];
+    if ($newPassword !== '' && (strlen($newPassword) < 8 || strlen($newPassword) > 128 || !preg_match('/[A-Z]/', $newPassword) || !preg_match('/\d/', $newPassword))) {
+        return ['status' => 422, 'error' => 'Use at least 8 characters with an uppercase letter and a number for the new password.'];
+    }
+
+    $handle = @fopen($membersFile, 'c+');
+    if (!$handle || !flock($handle, LOCK_EX)) return ['status' => 500, 'error' => 'Member information is temporarily unavailable.'];
+    try {
+        rewind($handle);
+        $raw = stream_get_contents($handle);
+        $members = $raw !== false && trim($raw) !== '' ? json_decode($raw, true) : [];
+        if (!is_array($members)) return ['status' => 500, 'error' => 'Member information is temporarily unavailable.'];
+
+        $memberIndex = null;
+        foreach ($members as $index => $member) {
+            if (!is_array($member)) continue;
+            if ((string) ($member['id'] ?? '') === $sessionMember['id']) $memberIndex = $index;
+            if ((string) ($member['id'] ?? '') !== $sessionMember['id'] && strtolower((string) ($member['email'] ?? '')) === $email) {
+                return ['status' => 409, 'error' => 'An account already exists for this email address.'];
+            }
+        }
+        if ($memberIndex === null || ($members[$memberIndex]['status'] ?? 'active') !== 'active') {
+            return ['status' => 401, 'error' => 'Please log in again.'];
+        }
+        if (!password_verify($currentPassword, (string) ($members[$memberIndex]['password_hash'] ?? ''))) {
+            usleep(250000);
+            return ['status' => 401, 'error' => 'Current password is incorrect.'];
+        }
+
+        $members[$memberIndex]['name'] = $name;
+        $members[$memberIndex]['email'] = $email;
+        $members[$memberIndex]['state'] = $state;
+        $members[$memberIndex]['updated_at'] = gmdate('c');
+        if ($newPassword !== '') $members[$memberIndex]['password_hash'] = password_hash($newPassword, PASSWORD_DEFAULT);
+
+        $encoded = json_encode($members, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT);
+        if (!is_string($encoded)) return ['status' => 500, 'error' => 'Could not save your member information.'];
+        rewind($handle);
+        if (!ftruncate($handle, 0) || fwrite($handle, $encoded . PHP_EOL) === false || !fflush($handle)) {
+            return ['status' => 500, 'error' => 'Could not save your member information.'];
+        }
+        @chmod($membersFile, 0640);
+        $_SESSION['mc_member'] = [
+            'id' => $sessionMember['id'],
+            'name' => $name,
+            'email' => $email,
+            'state' => $state,
+            'authenticated_at' => time(),
+        ];
+        session_regenerate_id(true);
+        return ['status' => 200, 'member' => megacards_member_public_session()];
+    } finally {
+        flock($handle, LOCK_UN);
+        fclose($handle);
+    }
+}
+
 megacards_member_session_start();
 
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
@@ -105,6 +177,22 @@ if ($action === 'logout') {
     unset($_SESSION['mc_member']);
     session_regenerate_id(true);
     megacards_auth_response(200, ['ok' => true, 'authenticated' => false]);
+    exit;
+}
+
+if ($action === 'update_profile') {
+    $ip = filter_var((string) ($_SERVER['REMOTE_ADDR'] ?? ''), FILTER_VALIDATE_IP) ?: 'unknown';
+    if (!megacards_login_rate_allowed($ip)) {
+        megacards_auth_response(429, ['error' => 'Too many attempts. Try again in 15 minutes.']);
+        exit;
+    }
+    $result = megacards_update_member_profile($input, __DIR__ . '/data/members.json');
+    $status = (int) ($result['status'] ?? 500);
+    if (isset($result['error'])) {
+        megacards_auth_response($status, ['error' => $result['error']]);
+        exit;
+    }
+    megacards_auth_response(200, ['ok' => true, 'authenticated' => true, 'member' => $result['member']]);
     exit;
 }
 
