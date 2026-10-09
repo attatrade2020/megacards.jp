@@ -292,7 +292,6 @@ let products = [
   }
 ];
 
-const categoryNames = { all: "All Japanese TCG boxes", pokemon: "Pokémon boxes", onepiece: "ONE PIECE boxes", yugioh: "Yu-Gi-Oh! boxes" };
 const rankedProductIds = [
   "m6-storm-emeralda",
   "m6a-30th-celebration",
@@ -343,7 +342,6 @@ const rankingGrid = document.getElementById("rankingGrid");
 const searchInput = document.getElementById("searchInput");
 const sortSelect = document.getElementById("sortSelect");
 const categoryTabs = document.getElementById("categoryTabs");
-const catalogTitle = document.getElementById("catalogTitle");
 const cartButton = document.getElementById("cartButton");
 const cartPanel = document.getElementById("cartPanel");
 const cartScrim = document.getElementById("cartScrim");
@@ -437,9 +435,9 @@ let currentMember = null;
 const heroSlides = [
   {
     category: "pokemon",
-    eyebrow: "Japanese Pokémon · shipped from Japan",
-    title: "Japan’s latest Pokémon boxes, without the guesswork.",
-    lead: "Discover current Japanese Pokémon releases with clear price estimates and tracked international delivery direct from Japan.",
+    eyebrow: "Pokémon",
+    title: "Japanese Pokémon boxes",
+    lead: "Sealed boxes with tracked DHL or FedEx delivery.",
     action: "Shop Pokémon boxes",
     badge: "Latest Pokémon",
     front: "m6a-30th-celebration",
@@ -449,9 +447,9 @@ const heroSlides = [
   },
   {
     category: "onepiece",
-    eyebrow: "ONE PIECE Card Game · Japanese edition",
-    title: "Build your ONE PIECE collection from Japan.",
-    lead: "Shop Japanese ONE PIECE booster boxes, packed in Japan with live tracked shipping options at checkout.",
+    eyebrow: "ONE PIECE Card Game",
+    title: "Japanese ONE PIECE boxes",
+    lead: "Booster boxes with tracked DHL or FedEx delivery.",
     action: "Shop ONE PIECE boxes",
     badge: "ONE PIECE pick",
     front: "op13-carrying-on-his-will",
@@ -461,9 +459,9 @@ const heroSlides = [
   },
   {
     category: "yugioh",
-    eyebrow: "Yu-Gi-Oh! OCG · direct from Japan",
-    title: "Japanese Yu-Gi-Oh! OCG boxes for collectors.",
-    lead: "Explore Japanese OCG releases with clear price estimates, secure checkout, and tracked shipping from Japan.",
+    eyebrow: "Yu-Gi-Oh! OCG",
+    title: "Japanese Yu-Gi-Oh! boxes",
+    lead: "OCG boxes with tracked DHL or FedEx delivery.",
     action: "Shop Yu-Gi-Oh! boxes",
     badge: "Yu-Gi-Oh! OCG",
     front: "yac1-original-artwork",
@@ -473,9 +471,9 @@ const heroSlides = [
   },
   {
     category: "pokemon",
-    eyebrow: "Japanese Pokémon · collector rotation",
-    title: "More Japanese Pokémon sets, always in motion.",
-    lead: "Move through high-class and expansion boxes, compare clear price estimates, and build your shipment from Japan.",
+    eyebrow: "Pokémon",
+    title: "More Pokémon sets",
+    lead: "High-class and expansion boxes from Japan.",
     action: "Explore Pokémon boxes",
     badge: "Collector rotation",
     front: "m2-inferno-x",
@@ -485,9 +483,9 @@ const heroSlides = [
   },
   {
     category: "onepiece",
-    eyebrow: "ONE PIECE Card Game · rotating picks",
-    title: "Fresh ONE PIECE picks from the Japanese lineup.",
-    lead: "Browse booster and extra-booster boxes with a live view of the collection and tracked delivery choices for your postcode.",
+    eyebrow: "ONE PIECE Card Game",
+    title: "More ONE PIECE sets",
+    lead: "Booster and extra-booster boxes from Japan.",
     action: "Explore ONE PIECE boxes",
     badge: "Extra booster pick",
     front: "eb04-egghead-crisis",
@@ -497,9 +495,9 @@ const heroSlides = [
   },
   {
     category: "yugioh",
-    eyebrow: "Yu-Gi-Oh! OCG · rotating picks",
-    title: "Limited and value OCG boxes, direct from Japan.",
-    lead: "Discover current Japanese Yu-Gi-Oh! releases as the lineup rotates, with clear price estimates and tracked express shipping.",
+    eyebrow: "Yu-Gi-Oh! OCG",
+    title: "More Yu-Gi-Oh! sets",
+    lead: "Limited and OCG boxes from Japan.",
     action: "Explore Yu-Gi-Oh! boxes",
     badge: "Value OCG pick",
     front: "dbgv-glorious-victors",
@@ -1398,7 +1396,6 @@ categoryTabs.addEventListener("click", (event) => {
     tab.classList.toggle("active", active);
     tab.setAttribute("aria-selected", String(active));
   });
-  catalogTitle.textContent = categoryNames[state.category];
   renderProducts();
 });
 cartButton.addEventListener("click", openCart);
