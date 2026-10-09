@@ -171,6 +171,22 @@ if (preg_match('~/apparels/(\d+)(?:[/?#]|$)~i', $url, $urlMatch)
         }
     }
 
+    // Use the displayed count for the one-item option as MegaCards stock.
+    // Snkrdunk caps this label at "99+"; MegaCards stores that as 99.
+    $stock = null;
+    $listingCountText = '';
+    $stockPosition = strpos($html, 'listingCountText');
+    if ($stockPosition !== false) {
+        $stockChunk = substr($html, $stockPosition, 100);
+        if (preg_match('/listingCountText[^0-9]{0,30}(\d+)(\+?)/', $stockChunk, $stockMatch)) {
+            $listingCountText = $stockMatch[1] . $stockMatch[2];
+            $stock = min(99, max(0, (int) $stockMatch[1]));
+        } elseif (stripos($stockChunk, 'Sold out') !== false) {
+            $listingCountText = 'Sold out';
+            $stock = 0;
+        }
+    }
+
     if ($title !== '' && $priceJpy > 0 && $imageUrl !== '') {
         $products[] = [
             'snkr_id'        => 'snkr_' . $apparelId,
@@ -185,6 +201,8 @@ if (preg_match('~/apparels/(\d+)(?:[/?#]|$)~i', $url, $urlMatch)
             'condition'      => 'BOX',
             'release_date'   => $releaseDate,
             'product_number' => $productNumber,
+            'stock'          => $stock,
+            'stock_text'     => $listingCountText,
         ];
     }
 }

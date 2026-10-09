@@ -1733,7 +1733,7 @@
                 <button class="modal-close" onclick="closeQuickBoxImportModal()">×</button>
             </div>
             <div class="modal-body">
-                <p class="quick-import-lead">商品ページのURLを貼り付けると、商品名、1ボックス価格、商品画像、発売情報、カテゴリを取得し、画像をMegaCards内へ保存して登録します。</p>
+                <p class="quick-import-lead">商品ページのURLを貼り付けると、商品名、1ボックス価格、1個販売の在庫数、商品画像、発売情報、カテゴリを取得し、画像をMegaCards内へ保存して登録します。</p>
                 <label class="form-group" for="quickBoxUrl">
                     <span>商品ページURL</span>
                     <div class="quick-import-url">
@@ -2901,6 +2901,8 @@
                 image_url: data.image_url,
                 release_date: data.release_date || '',
                 product_number: data.product_number || '',
+                stock: data.stock ?? data.listing_count ?? null,
+                stock_text: data.stock_text || data.listing_count_text || '',
                 snkrdunk_url: data.snkrdunk_url || url,
                 snkr_id: data.snkr_id || '',
                 condition: data.condition || ''
@@ -2952,6 +2954,8 @@
                 if (!localImage) throw new Error('商品画像をMegaCardsへ保存できませんでした');
 
                 const category = detectQuickBoxCategory(source.title, rawUrl);
+                const sourceStockAvailable = source.stock !== null && source.stock !== undefined && source.stock !== '';
+                const sourceStock = sourceStockAvailable ? Math.min(99, Math.max(0, parseInt(source.stock) || 0)) : 1;
                 const markupElement = document.getElementById('bulkAllMarkupBox');
                 let markup = parseInt(markupElement?.value || localStorage.getItem('mc_bulkmarkup_box') || '1500') || 0;
                 markup = Math.max(0, markup);
@@ -2967,7 +2971,7 @@
                     price_jpy: sourcePrice + markup,
                     image_url: localImage,
                     status: 'active',
-                    stock: 1,
+                    stock: sourceStock,
                     weight_g: 450,
                     width_cm: 14,
                     depth_cm: 14,
@@ -2986,7 +2990,7 @@
 
                 document.getElementById('quickBoxImportImage').src = localImage;
                 document.getElementById('quickBoxImportTitle').textContent = saved.title_en || englishTitle;
-                document.getElementById('quickBoxImportMeta').textContent = `${category === 'onepiece' ? 'ONE PIECE' : category === 'yugioh' ? 'Yu-Gi-Oh!' : 'Pokémon'} · 仕入価格 ¥${sourcePrice.toLocaleString()} · 販売価格 ¥${(sourcePrice + markup).toLocaleString()} · 在庫1`;
+                document.getElementById('quickBoxImportMeta').textContent = `${category === 'onepiece' ? 'ONE PIECE' : category === 'yugioh' ? 'Yu-Gi-Oh!' : 'Pokémon'} · 仕入価格 ¥${sourcePrice.toLocaleString()} · 販売価格 ¥${(sourcePrice + markup).toLocaleString()} · 在庫${sourceStock}`;
                 document.getElementById('quickBoxImportPreview').classList.add('open');
                 document.getElementById('quickBoxEditButton').style.display = 'inline-flex';
                 setQuickBoxImportStatus('登録が完了しました。商品名、価格、画像、カテゴリ、発売情報を保存しました。', 'success');
