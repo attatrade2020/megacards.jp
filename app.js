@@ -1104,6 +1104,7 @@ function displayMemberSession(member) {
     const address = currentMember.address || {};
     checkoutForm.elements.name.value = currentMember.name || "";
     checkoutForm.elements.email.value = currentMember.email || "";
+    checkoutForm.elements.phone.value = currentMember.phone || "";
     checkoutForm.elements.address1.value = address.line1 || "";
     checkoutForm.elements.address2.value = address.line2 || "";
     checkoutForm.elements.city.value = address.suburb || "";
@@ -1205,6 +1206,7 @@ async function submitRegistration(event) {
   const payload = {
     name: String(form.get("name") || "").trim(),
     email: String(form.get("email") || "").trim(),
+    phone: String(form.get("phone") || "").trim(),
     address_line1: String(form.get("addressLine1") || "").trim(),
     address_line2: String(form.get("addressLine2") || "").trim(),
     suburb: String(form.get("suburb") || "").trim(),
@@ -1229,6 +1231,7 @@ async function submitRegistration(event) {
       id: data.member_id || "",
       name: payload.name,
       email: payload.email,
+      phone: payload.phone,
       state: payload.state,
       address: {
         line1: payload.address_line1,

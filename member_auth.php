@@ -34,6 +34,7 @@ function megacards_member_public_session(): ?array
         'id' => (string) $member['id'],
         'name' => (string) ($member['name'] ?? ''),
         'email' => (string) $member['email'],
+        'phone' => (string) ($member['phone'] ?? ''),
         'state' => (string) ($member['state'] ?? ''),
         'address' => is_array($member['address'] ?? null) ? $member['address'] : [],
     ];
@@ -82,6 +83,7 @@ function megacards_update_member_profile(array $input, string $membersFile): arr
 
     $name = trim((string) ($input['name'] ?? ''));
     $email = strtolower(trim((string) ($input['email'] ?? '')));
+    $phone = trim((string) ($input['phone'] ?? ''));
     $addressLine1 = trim((string) ($input['address_line1'] ?? ''));
     $addressLine2 = trim((string) ($input['address_line2'] ?? ''));
     $suburb = trim((string) ($input['suburb'] ?? ''));
@@ -93,6 +95,8 @@ function megacards_update_member_profile(array $input, string $membersFile): arr
 
     if ($name === '' || mb_strlen($name) > 80) return ['status' => 422, 'error' => 'Enter your full name.'];
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 190) return ['status' => 422, 'error' => 'Enter a valid email address.'];
+    $phoneDigits = preg_replace('/\D/', '', $phone) ?? '';
+    if (!preg_match('/^[+0-9][0-9 ()-]{7,24}$/', $phone) || strlen($phoneDigits) < 8 || strlen($phoneDigits) > 15) return ['status' => 422, 'error' => 'Enter a valid phone number, including the country code when applicable.'];
     if ($addressLine1 === '' || mb_strlen($addressLine1) > 120) return ['status' => 422, 'error' => 'Enter your street address.'];
     if (mb_strlen($addressLine2) > 120) return ['status' => 422, 'error' => 'Address line 2 is too long.'];
     if ($suburb === '' || mb_strlen($suburb) > 80) return ['status' => 422, 'error' => 'Enter your suburb or city.'];
@@ -129,6 +133,7 @@ function megacards_update_member_profile(array $input, string $membersFile): arr
 
         $members[$memberIndex]['name'] = $name;
         $members[$memberIndex]['email'] = $email;
+        $members[$memberIndex]['phone'] = $phone;
         $members[$memberIndex]['state'] = $state;
         $members[$memberIndex]['address'] = [
             'line1' => $addressLine1,
@@ -153,6 +158,7 @@ function megacards_update_member_profile(array $input, string $membersFile): arr
             'id' => $sessionMember['id'],
             'name' => $name,
             'email' => $email,
+            'phone' => $phone,
             'state' => $state,
             'address' => $members[$memberIndex]['address'],
             'authenticated_at' => time(),
@@ -256,6 +262,7 @@ $_SESSION['mc_member'] = [
     'id' => (string) $matched['id'],
     'name' => (string) ($matched['name'] ?? ''),
     'email' => (string) $matched['email'],
+    'phone' => (string) ($matched['phone'] ?? ''),
     'state' => (string) ($matched['state'] ?? ''),
     'address' => is_array($matched['address'] ?? null) ? $matched['address'] : [],
     'authenticated_at' => time(),

@@ -13,6 +13,7 @@ function megacards_member_validate(array $input): array
 {
     $name = trim((string)($input['name'] ?? ''));
     $email = strtolower(trim((string)($input['email'] ?? '')));
+    $phone = trim((string)($input['phone'] ?? ''));
     $password = (string)($input['password'] ?? '');
     $addressLine1 = trim((string)($input['address_line1'] ?? ''));
     $addressLine2 = trim((string)($input['address_line2'] ?? ''));
@@ -24,6 +25,8 @@ function megacards_member_validate(array $input): array
 
     if ($name === '' || mb_strlen($name) > 80) return ['error' => 'Enter your full name.'];
     if (!filter_var($email, FILTER_VALIDATE_EMAIL) || strlen($email) > 190) return ['error' => 'Enter a valid email address.'];
+    $phoneDigits = preg_replace('/\D/', '', $phone) ?? '';
+    if (!preg_match('/^[+0-9][0-9 ()-]{7,24}$/', $phone) || strlen($phoneDigits) < 8 || strlen($phoneDigits) > 15) return ['error' => 'Enter a valid phone number, including the country code when applicable.'];
     if (strlen($password) < 8 || strlen($password) > 128 || !preg_match('/[A-Z]/', $password) || !preg_match('/\d/', $password)) {
         return ['error' => 'Use at least 8 characters with an uppercase letter and a number.'];
     }
@@ -37,6 +40,7 @@ function megacards_member_validate(array $input): array
     return [
         'name' => $name,
         'email' => $email,
+        'phone' => $phone,
         'password' => $password,
         'state' => $state,
         'address' => [
@@ -75,6 +79,7 @@ function megacards_member_store(array $member, string $file): array
             'id' => $id,
             'name' => $member['name'],
             'email' => $member['email'],
+            'phone' => $member['phone'],
             'password_hash' => password_hash($member['password'], PASSWORD_DEFAULT),
             'state' => $member['state'],
             'address' => $member['address'],
@@ -143,6 +148,7 @@ function megacards_member_login_after_registration(array $member, string $id): a
         'id' => $id,
         'name' => $member['name'],
         'email' => $member['email'],
+        'phone' => $member['phone'],
         'state' => $member['state'],
         'address' => $member['address'],
         'authenticated_at' => time(),
@@ -151,6 +157,7 @@ function megacards_member_login_after_registration(array $member, string $id): a
         'id' => $id,
         'name' => $member['name'],
         'email' => $member['email'],
+        'phone' => $member['phone'],
         'state' => $member['state'],
         'address' => $member['address'],
     ];

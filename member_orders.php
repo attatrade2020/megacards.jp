@@ -72,6 +72,7 @@ function member_orders_clean_address($address): array
         'state' => substr(strtoupper(trim((string) ($address['state'] ?? ''))), 0, 4),
         'zip' => substr(trim((string) ($address['zip'] ?? $address['postcode'] ?? '')), 0, 10),
         'country' => 'Australia',
+        'phone' => mb_substr(trim((string) ($address['phone'] ?? '')), 0, 30),
     ];
 }
 
@@ -140,6 +141,7 @@ function member_orders_pdf(array $order): string
         (string) ($address['line2'] ?? ''),
         trim((string) ($address['city'] ?? '') . ', ' . (string) ($address['state'] ?? '') . ' ' . (string) ($address['zip'] ?? '')),
         'Australia',
+        !empty($address['phone']) ? 'Tel: ' . (string) $address['phone'] : '',
     ], static fn(string $line): bool => trim($line, " ,") !== '');
     $y = 600;
     foreach ($addressLines as $line) { $add($line, 48, $y); $y -= 16; }
