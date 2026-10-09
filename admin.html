@@ -970,11 +970,29 @@
         .settings-links { display:flex; gap:14px; flex-wrap:wrap; }
         .settings-links a { color:#2563eb; font-size:.76rem; text-decoration:none; }
         .settings-links a:hover { text-decoration:underline; }
+        .quick-import-lead { margin:0 0 18px; color:#5f6672; font-size:.86rem; line-height:1.7; }
+        .quick-import-url { display:flex; gap:8px; align-items:stretch; }
+        .quick-import-url input { flex:1; min-width:0; padding:12px 13px; border:1px solid var(--border); border-radius:8px; font:500 .84rem monospace; }
+        .quick-import-url input:focus { outline:2px solid rgba(201,168,0,.18); border-color:#c9a800; }
+        .quick-import-status { display:none; margin-top:14px; padding:12px 14px; border:1px solid #e5e7eb; border-radius:8px; background:#f8fafc; color:#5f6672; font-size:.8rem; line-height:1.6; }
+        .quick-import-status.loading { display:block; border-color:#fde68a; background:#fffbeb; color:#785d00; }
+        .quick-import-status.success { display:block; border-color:#bbf7d0; background:#f0fdf4; color:#166534; }
+        .quick-import-status.error { display:block; border-color:#fecaca; background:#fef2f2; color:#b91c1c; }
+        .quick-import-preview { display:none; grid-template-columns:82px minmax(0,1fr); gap:14px; align-items:center; margin-top:14px; padding:12px; border:1px solid #dbe3ec; border-radius:9px; background:#fff; }
+        .quick-import-preview.open { display:grid; }
+        .quick-import-preview img { width:82px; height:82px; border-radius:8px; background:#f3f4f6; object-fit:contain; }
+        .quick-import-preview h4 { margin:0 0 6px; color:#111827; font-size:.9rem; line-height:1.45; }
+        .quick-import-preview p { margin:0; color:#6b7280; font-size:.75rem; line-height:1.55; }
+        .quick-header-add__short { display:none; }
         @media(max-width:700px) {
             .topbar { min-height:58px; height:auto; padding:8px 12px; }
             .topbar h1 { font-size:.88rem; white-space:nowrap; }
             .topbar-actions { gap:6px; }
             .topbar-actions .btn-primary { display:none; }
+            .topbar-actions .quick-header-add { display:inline-flex; }
+            .topbar-actions .topbar-site-link { display:none; }
+            .quick-header-add .quick-header-add__long { display:none; }
+            .quick-header-add .quick-header-add__short { display:inline; }
             .topbar-actions .btn { padding:6px 8px !important; font-size:.68rem !important; white-space:nowrap; }
             .catalog-hero { align-items:flex-start; flex-direction:column; }
             .catalog-hero .btn { width:100%; justify-content:center; }
@@ -984,6 +1002,8 @@
             .settings-section__heading { align-items:flex-start; flex-direction:column; gap:3px; }
             .settings-card__header, .settings-card__body { padding-left:15px; padding-right:15px; }
             .settings-actions .btn { flex:1 1 auto; justify-content:center; }
+            .quick-import-url { flex-direction:column; }
+            .quick-import-url .btn { width:100%; justify-content:center; }
         }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
@@ -1008,8 +1028,8 @@
         <div class="topbar">
             <h1><span>M</span> MegaCards 管理画面</h1>
             <div class="topbar-actions">
-                <a href="index.html" class="btn btn-outline" style="color:#fff;border-color:rgba(255,255,255,0.3)">サイトを見る</a>
-                <button class="btn btn-primary" onclick="openAddModal()">＋ 新しいボックス</button>
+                <a href="index.html" class="btn btn-outline topbar-site-link" style="color:#fff;border-color:rgba(255,255,255,0.3)">サイトを見る</a>
+                <button class="btn btn-primary quick-header-add" onclick="openQuickBoxImportModal()"><span class="quick-header-add__long">＋ URLで新しいボックス</span><span class="quick-header-add__short">＋ URL登録</span></button>
                 <button class="btn btn-outline" onclick="doLogout()" style="color:#fff;border-color:rgba(255,255,255,0.3)">ログアウト</button>
             </div>
         </div>
@@ -1124,7 +1144,7 @@
             <div class="tab-page active" id="tabProducts">
                 <div class="catalog-hero">
                     <div><h2>出品ボックス管理</h2><p>公開中の商品、価格、在庫、画像をここで一元管理します。</p></div>
-                    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;"><span class="catalog-hero__status" id="catalogSyncStatus">商品データを確認中</span><button class="btn btn-primary" onclick="openAddModal()">＋ 新しいボックスを登録</button></div>
+                    <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;"><span class="catalog-hero__status" id="catalogSyncStatus">商品データを確認中</span><button class="btn btn-primary" onclick="openQuickBoxImportModal()">＋ URLで新しいボックス</button></div>
                 </div>
                 <!-- STATS -->
                 <div class="stats">
@@ -1704,6 +1724,39 @@
     </div>
 
     <!-- MODALS -->
+
+    <!-- Quick box import modal -->
+    <div class="modal-overlay" id="quickBoxImportModal">
+        <div class="modal" style="width:680px;">
+            <div class="modal-header">
+                <h3>URLから新しいボックスを登録</h3>
+                <button class="modal-close" onclick="closeQuickBoxImportModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <p class="quick-import-lead">商品ページのURLを貼り付けると、商品名、1ボックス価格、商品画像、発売情報、カテゴリを取得し、画像をMegaCards内へ保存して登録します。</p>
+                <label class="form-group" for="quickBoxUrl">
+                    <span>商品ページURL</span>
+                    <div class="quick-import-url">
+                        <input type="url" id="quickBoxUrl" placeholder="https://snkrdunk.com/..." autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();importQuickBoxFromUrl();}">
+                        <button class="btn btn-primary" id="quickBoxImportButton" onclick="importQuickBoxFromUrl()">情報を取得して登録</button>
+                    </div>
+                </label>
+                <div class="quick-import-status" id="quickBoxImportStatus" role="status" aria-live="polite"></div>
+                <div class="quick-import-preview" id="quickBoxImportPreview">
+                    <img id="quickBoxImportImage" alt="">
+                    <div>
+                        <h4 id="quickBoxImportTitle"></h4>
+                        <p id="quickBoxImportMeta"></p>
+                    </div>
+                </div>
+                <p class="settings-note" style="margin-top:14px !important;">シュリンクなし、シングルカード、PSA、パック単品は登録対象外です。在庫・重量・サイズはボックス用の初期値で登録後、商品管理から変更できます。</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeQuickBoxImportModal()">閉じる</button>
+                <button class="btn btn-outline" id="quickBoxEditButton" style="display:none;" onclick="editLastQuickImportedBox()">登録した商品を編集</button>
+            </div>
+        </div>
+    </div>
 
     <!-- Product Detail Modal -->
     <div class="modal-overlay" id="productModal">
@@ -2765,6 +2818,170 @@
         }
 
         // ===== ADD / EDIT MODAL =====
+        let lastQuickImportedBoxId = '';
+
+        function openQuickBoxImportModal() {
+            lastQuickImportedBoxId = '';
+            document.getElementById('quickBoxUrl').value = '';
+            document.getElementById('quickBoxImportStatus').className = 'quick-import-status';
+            document.getElementById('quickBoxImportStatus').textContent = '';
+            document.getElementById('quickBoxImportPreview').classList.remove('open');
+            document.getElementById('quickBoxEditButton').style.display = 'none';
+            document.getElementById('quickBoxImportButton').disabled = false;
+            document.getElementById('quickBoxImportButton').textContent = '情報を取得して登録';
+            document.getElementById('quickBoxImportModal').classList.add('open');
+            setTimeout(() => document.getElementById('quickBoxUrl').focus(), 50);
+        }
+
+        function closeQuickBoxImportModal() {
+            document.getElementById('quickBoxImportModal').classList.remove('open');
+        }
+
+        function setQuickBoxImportStatus(message, type) {
+            const element = document.getElementById('quickBoxImportStatus');
+            element.textContent = message;
+            element.className = 'quick-import-status ' + (type || 'loading');
+        }
+
+        function detectQuickBoxCategory(title, url) {
+            const text = `${title || ''} ${url || ''}`.toLowerCase();
+            if (/(one\s*piece|ワンピース|\bop[-\s]?\d|\beb[-\s]?\d)/i.test(text)) return 'onepiece';
+            if (/(yu-?gi-?oh|遊戯王|\bdb[-\s]?\d|\byac[-\s]?\d|\b26lp)/i.test(text)) return 'yugioh';
+            return 'pokemon';
+        }
+
+        async function fetchQuickBoxInformation(url) {
+            let gasError = null;
+            try {
+                const response = await fetch(GAS_ADMIN_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'fetch_snkrdunk', url, password: ADMIN_PASSWORD })
+                });
+                const data = await response.json();
+                if (!response.ok || data.error) throw new Error(data.error || '商品ページを取得できませんでした');
+                if (data.title && (data.price || data.price_jpy) && data.image_url) {
+                    return {
+                        title: data.title,
+                        price_jpy: Number(data.price_jpy || data.price),
+                        image_url: data.image_url,
+                        release_date: data.release_date || '',
+                        snkrdunk_url: data.snkrdunk_url || url,
+                        snkr_id: data.snkr_id || '',
+                        condition: data.condition || ''
+                    };
+                }
+                throw new Error('商品名・価格・画像の一部を取得できませんでした');
+            } catch (error) {
+                gasError = error;
+            }
+
+            const response = await fetch('/snkrdunk_import.php?action=fetch&url=' + encodeURIComponent(url));
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok || !data.ok) throw new Error(data.error || gasError?.message || '商品情報を取得できませんでした');
+            const candidates = (Array.isArray(data.products) ? data.products : []).filter(isBoxImportCandidate);
+            if (candidates.length === 0) throw new Error(gasError?.message || '未開封ボックスの商品情報が見つかりませんでした');
+            if (candidates.length > 1) throw new Error('検索結果URLではなく、登録するボックスの商品ページURLを入力してください');
+            return candidates[0];
+        }
+
+        async function importQuickBoxFromUrl() {
+            const input = document.getElementById('quickBoxUrl');
+            const button = document.getElementById('quickBoxImportButton');
+            const rawUrl = input.value.trim();
+            let parsedUrl;
+            try {
+                parsedUrl = new URL(rawUrl);
+                if (!/(^|\.)snkrdunk\.com$/i.test(parsedUrl.hostname)) throw new Error();
+            } catch (_) {
+                setQuickBoxImportStatus('snkrdunk.comの商品ページURLを入力してください。', 'error');
+                return;
+            }
+
+            const duplicate = allProducts.find(product => {
+                const source = String(product.source_url || product.snkrdunk_url || '').replace(/\/$/, '');
+                return source && source === rawUrl.replace(/\/$/, '');
+            });
+            if (duplicate) {
+                lastQuickImportedBoxId = duplicate.id;
+                document.getElementById('quickBoxEditButton').style.display = 'inline-flex';
+                setQuickBoxImportStatus('このURLの商品はすでに登録されています。', 'error');
+                return;
+            }
+
+            button.disabled = true;
+            button.textContent = '取得・登録中…';
+            document.getElementById('quickBoxEditButton').style.display = 'none';
+            document.getElementById('quickBoxImportPreview').classList.remove('open');
+            setQuickBoxImportStatus('商品情報を取得しています…', 'loading');
+
+            try {
+                const source = await fetchQuickBoxInformation(rawUrl);
+                if (!isBoxImportCandidate(source)) throw new Error('未開封ボックスではない商品、またはシュリンクなし商品は登録できません');
+                const sourcePrice = Math.max(1, parseInt(source.price_jpy || source.price) || 0);
+                if (!sourcePrice) throw new Error('1ボックス価格を取得できませんでした');
+
+                setQuickBoxImportStatus('英語タイトルと商品画像を準備しています…', 'loading');
+                const englishTitle = await translateJaToEn(source.title || '');
+                if (!englishTitle) throw new Error('商品名を取得できませんでした');
+                const localImage = await saveImportedBoxImage(source);
+                if (!localImage) throw new Error('商品画像をMegaCardsへ保存できませんでした');
+
+                const category = detectQuickBoxCategory(source.title, rawUrl);
+                const markupElement = document.getElementById('bulkAllMarkupBox');
+                let markup = parseInt(markupElement?.value || localStorage.getItem('mc_bulkmarkup_box') || '1500') || 0;
+                markup = Math.max(0, markup);
+                let productId = slugifyCatalogId(source.snkr_id || englishTitle || source.title) || ('box-' + Date.now().toString(36));
+                if (allProducts.some(product => product.id === productId)) productId += '-' + Date.now().toString(36);
+
+                const product = {
+                    id: productId,
+                    title_en: englishTitle,
+                    category,
+                    series: importedBoxSeries(category, englishTitle),
+                    tag: 'Imported box',
+                    price_jpy: sourcePrice + markup,
+                    image_url: localImage,
+                    status: 'active',
+                    stock: 1,
+                    weight_g: 450,
+                    width_cm: 14,
+                    depth_cm: 14,
+                    height_cm: 5,
+                    sort: allProducts.length + 1,
+                    release_date: source.release_date || '',
+                    notes: 'Sealed box import',
+                    source_url: source.snkrdunk_url || rawUrl,
+                    source_search_url: rawUrl,
+                    source_price_jpy: sourcePrice
+                };
+                const result = await catalogRequest('save', { product: adminToCatalog(product) });
+                const saved = catalogToAdmin(result.product || adminToCatalog(product));
+                lastQuickImportedBoxId = saved.id;
+                await loadProducts({ force: true });
+
+                document.getElementById('quickBoxImportImage').src = localImage;
+                document.getElementById('quickBoxImportTitle').textContent = saved.title_en || englishTitle;
+                document.getElementById('quickBoxImportMeta').textContent = `${category === 'onepiece' ? 'ONE PIECE' : category === 'yugioh' ? 'Yu-Gi-Oh!' : 'Pokémon'} · 仕入価格 ¥${sourcePrice.toLocaleString()} · 販売価格 ¥${(sourcePrice + markup).toLocaleString()} · 在庫1`;
+                document.getElementById('quickBoxImportPreview').classList.add('open');
+                document.getElementById('quickBoxEditButton').style.display = 'inline-flex';
+                setQuickBoxImportStatus('登録が完了しました。商品名、価格、画像、カテゴリ、発売情報を保存しました。', 'success');
+                showToast('新しいボックスを登録しました', 'success');
+            } catch (error) {
+                console.error(error);
+                setQuickBoxImportStatus('登録できませんでした: ' + error.message, 'error');
+                showToast('ボックスの登録に失敗しました', 'error');
+            } finally {
+                button.disabled = false;
+                button.textContent = '情報を取得して登録';
+            }
+        }
+
+        function editLastQuickImportedBox() {
+            if (!lastQuickImportedBoxId) return;
+            closeQuickBoxImportModal();
+            openEditModal(lastQuickImportedBoxId);
+        }
+
         function openAddModal() {
             document.getElementById('modalTitle').textContent = '新しいボックスを登録';
             document.getElementById('editId').value = '';
