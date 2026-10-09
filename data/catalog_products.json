@@ -297,7 +297,7 @@
         "tag": "Imported box",
         "image": "img/products/amp-box.webp",
         "status": "active",
-        "stock": 1,
+        "stock": 99,
         "weight_g": 450,
         "width_cm": 14,
         "depth_cm": 14,
@@ -308,6 +308,31 @@
         "source_search_url": "https://snkrdunk.com/apparels/618442",
         "source_price_jpy": 14000,
         "created_at": "",
-        "updated_at": "2026-10-09T01:20:03+00:00"
+        "updated_at": "2026-10-09T01:22:29+00:00"
+    },
+    {
+        "id": "snkr-618443",
+        "category": "pokemon",
+        "title": "Pokemon Card Game Scarlet & Violet Special Box \"Pokemon Center Hiroshima\"",
+        "series": "Pokémon · SV-SB-HR",
+        "release": "8 Sep 2025",
+        "release_date": "2025-09-08",
+        "releaseOrder": 20250908,
+        "jpy": 17499,
+        "tag": "Imported box",
+        "image": "img/products/snkr-618443.webp",
+        "status": "active",
+        "stock": 1,
+        "weight_g": 450,
+        "width_cm": 14,
+        "depth_cm": 14,
+        "height_cm": 5,
+        "sort": 28,
+        "notes": "Sealed box import",
+        "source_url": "https://snkrdunk.com/apparels/618443",
+        "source_search_url": "https://snkrdunk.com/apparels/618443",
+        "source_price_jpy": 15999,
+        "created_at": "",
+        "updated_at": "2026-10-09T01:21:57+00:00"
     }
 ]
