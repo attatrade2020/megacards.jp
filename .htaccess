@@ -16,6 +16,9 @@ RewriteRule ^product/([^/]+)/?$ /product.php?id=$1 [L]
 # Dynamic sitemap: /sitemap.xml -> /sitemap.php
 RewriteRule ^sitemap\.xml$ /sitemap.php [L]
 
+# Stable Google Merchant Center feed URL for Australia.
+RewriteRule ^google-shopping\.xml$ /feed.php?country=AU [L,QSA]
+
 # Disable cache for Bing site verification
 <Files BingSiteAuth.xml>
     Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"

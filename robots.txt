@@ -1,0 +1,29 @@
+# MegaCards.jp
+User-agent: *
+Allow: /
+Allow: /product/
+Allow: /feed.php
+Allow: /google-shopping.xml
+Disallow: /admin.html
+Disallow: /admin_auth.php
+Disallow: /admin_customers.php
+Disallow: /data/
+Disallow: /api_proxy.php
+Disallow: /catalog_image_upload.php
+Disallow: /customer_address.php
+Disallow: /img_proxy.php
+Disallow: /member_auth.php
+Disallow: /member_orders.php
+Disallow: /member_register.php
+Disallow: /password_reset.php
+Disallow: /shipping_products.php
+Disallow: /shipping_rates.php
+Disallow: /snkrdunk_import.php
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+Sitemap: https://megacards.jp/sitemap.xml

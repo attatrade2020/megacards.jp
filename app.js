@@ -1524,6 +1524,21 @@ async function initialiseStorefront() {
   renderRanking();
   renderProducts();
   renderCart();
+  const params = new URLSearchParams(window.location.search);
+  const requestedProduct = params.get("add");
+  if (requestedProduct) {
+    const product = products.find((item) => item.id === requestedProduct);
+    const quantity = Math.max(1, Math.min(99, Number(params.get("qty")) || 1));
+    if (product && Number(product.stock ?? 1) > 0) {
+      state.cart[product.id] = Math.min(Number(product.stock ?? 1), (state.cart[product.id] || 0) + quantity);
+      renderCart();
+      openCart();
+    }
+    params.delete("add");
+    params.delete("qty");
+    const cleaned = `${window.location.pathname}${params.toString() ? `?${params}` : ""}${window.location.hash}`;
+    window.history.replaceState({}, "", cleaned);
+  }
 }
 
 initialiseStorefront();
