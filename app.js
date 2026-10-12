@@ -2,6 +2,7 @@ const AUD_JPY_RATE = 110.04;
 const JAPAN_DOMESTIC_SHIPPING_JPY = 990;
 const CART_SUGGESTION_LIMIT_AUD = 1000;
 const CART_SUGGESTION_LIMIT_JPY = Math.floor(CART_SUGGESTION_LIMIT_AUD * AUD_JPY_RATE);
+const CART_STORAGE_KEY = "megacards.cart.v1";
 
 let products = [
   {
@@ -331,6 +332,31 @@ const fallbackShippingProfiles = {
   }
 };
 const state = { query: "", sort: "featured", category: "all", cart: {}, shippingProfiles: fallbackShippingProfiles, shippingQuote: null };
+
+function restoreCart() {
+  let saved;
+  try {
+    saved = JSON.parse(localStorage.getItem(CART_STORAGE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+  if (!saved || typeof saved !== "object" || Array.isArray(saved)) return {};
+  return Object.fromEntries(Object.entries(saved).flatMap(([id, value]) => {
+    const product = products.find((item) => item.id === id && item.status !== "hidden");
+    const stock = Math.max(0, Math.trunc(Number(product?.stock ?? 1)));
+    const quantity = Math.max(0, Math.trunc(Number(value) || 0));
+    return product && stock > 0 && quantity > 0 ? [[id, Math.min(99, stock, quantity)]] : [];
+  }));
+}
+
+function persistCart() {
+  if (!products.length) return;
+  try {
+    localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(state.cart));
+  } catch {
+    // The cart still works for this page when browser storage is unavailable.
+  }
+}
 
 const aud = (jpy) => Math.round(jpy / AUD_JPY_RATE);
 const audLabel = (value) => `A$${new Intl.NumberFormat("en-AU", { maximumFractionDigits: 0 }).format(value)}`;
@@ -1305,6 +1331,7 @@ async function submitRegistration(event) {
 }
 
 function renderCart() {
+  persistCart();
   const entries = Object.entries(state.cart).filter(([, quantity]) => quantity > 0);
   const count = entries.reduce((sum, [, quantity]) => sum + quantity, 0);
   const total = cartSubtotalAud();
@@ -1513,14 +1540,17 @@ async function loadCatalogProducts() {
       jpy: Number(product.jpy) || 0,
       stock: Number(product.stock ?? 1),
     }));
+    return true;
   } catch (error) {
     products = [];
     console.error("Catalog unavailable:", error);
+    return false;
   }
 }
 
 async function initialiseStorefront() {
-  await loadCatalogProducts();
+  const catalogLoaded = await loadCatalogProducts();
+  if (catalogLoaded) state.cart = restoreCart();
   renderRanking();
   renderProducts();
   renderCart();
