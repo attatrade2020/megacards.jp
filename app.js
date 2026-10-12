@@ -1089,9 +1089,10 @@ async function submitOrder(event) {
       shipping_carrier: rate.carrier,
       shipping_service: rate.service,
       items,
-      currency_code: "AUD",
-      currency_symbol: "A$",
-      currency_rate: 1 / AUD_JPY_RATE,
+      invoice_currency: "JPY",
+      display_currency_code: "AUD",
+      display_currency_symbol: "A$",
+      aud_jpy_rate: AUD_JPY_RATE,
       paypal_fee: amounts.fee,
       expiry_str: expiryString,
       ...(paymentMethod === "paypal" ? { paypal_pay_url: payUrl } : { wise_pay_url: payUrl })
