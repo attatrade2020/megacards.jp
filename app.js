@@ -333,6 +333,12 @@ const fallbackShippingProfiles = {
 };
 const state = { query: "", sort: "featured", category: "all", cart: {}, shippingProfiles: fallbackShippingProfiles, shippingQuote: null };
 
+function cartQuantityLimit(product) {
+  const stock = product?.stock;
+  if (stock === null || stock === undefined || stock === "") return 99;
+  return Math.max(0, Math.min(99, Math.trunc(Number(stock) || 0)));
+}
+
 function restoreCart() {
   let saved;
   try {
@@ -343,7 +349,7 @@ function restoreCart() {
   if (!saved || typeof saved !== "object" || Array.isArray(saved)) return {};
   return Object.fromEntries(Object.entries(saved).flatMap(([id, value]) => {
     const product = products.find((item) => item.id === id && item.status !== "hidden");
-    const stock = Math.max(0, Math.trunc(Number(product?.stock ?? 1)));
+    const stock = cartQuantityLimit(product);
     const quantity = Math.max(0, Math.trunc(Number(value) || 0));
     return product && stock > 0 && quantity > 0 ? [[id, Math.min(99, stock, quantity)]] : [];
   }));
@@ -1350,11 +1356,21 @@ function renderCart() {
   renderCustomsEstimate();
   cartItems.innerHTML = entries.length ? entries.map(([id, quantity]) => {
     const product = products.find((item) => item.id === id);
+    const maxQuantity = Math.max(1, cartQuantityLimit(product));
+    const quantityOptions = Array.from({ length: maxQuantity }, (_, index) => index + 1)
+      .map((value) => `<option value="${value}"${value === quantity ? " selected" : ""}>${value}</option>`)
+      .join("");
     return `
       <div class="cart-item">
-        <img src="${product.image}" alt="" width="74" height="74">
-        <div><strong>${product.title}</strong><span>${audLabel(aud(productPriceJpy(product)))} × ${quantity}</span></div>
-        <button type="button" data-remove="${id}">Remove</button>
+        <img src="${escapeHtml(product.image)}" alt="" width="74" height="74">
+        <div class="cart-item__content">
+          <strong>${escapeHtml(product.title)}</strong>
+          <div class="cart-item__meta">
+            <span class="cart-item__price">${audLabel(aud(productPriceJpy(product)))} each</span>
+            <label class="cart-item__quantity">Qty <select data-cart-quantity="${escapeHtml(id)}" aria-label="Quantity for ${escapeHtml(product.title)}">${quantityOptions}</select></label>
+          </div>
+          <button class="cart-item__remove" type="button" data-remove="${escapeHtml(id)}">Remove</button>
+        </div>
       </div>`;
   }).join("") : '<div class="cart-empty">Your cart is empty.<br>Add a box to get started.</div>';
   calculateShippingButton.disabled = entries.length === 0;
@@ -1408,6 +1424,18 @@ cartItems.addEventListener("click", (event) => {
   delete state.cart[button.dataset.remove];
   cartSuggestionStatus.textContent = "";
   resetShippingQuote(Object.keys(state.cart).length ? "Cart updated. Recalculate shipping for the new parcel." : "");
+  renderCart();
+});
+cartItems.addEventListener("change", (event) => {
+  const select = event.target.closest("[data-cart-quantity]");
+  if (!select) return;
+  const id = select.dataset.cartQuantity;
+  const product = products.find((item) => item.id === id);
+  if (!product) return;
+  const maxQuantity = Math.max(1, cartQuantityLimit(product));
+  state.cart[id] = Math.max(1, Math.min(maxQuantity, Math.trunc(Number(select.value) || 1)));
+  cartSuggestionStatus.textContent = "";
+  resetShippingQuote("Quantity updated. Recalculate shipping for the new parcel.");
   renderCart();
 });
 cartSuggestionButton.addEventListener("click", addPopularSuggestions);
@@ -1538,7 +1566,7 @@ async function loadCatalogProducts() {
       ...product,
       releaseOrder: Number(product.releaseOrder) || 0,
       jpy: Number(product.jpy) || 0,
-      stock: Number(product.stock ?? 1),
+      stock: product.stock === null || product.stock === undefined || product.stock === "" ? null : Number(product.stock),
     }));
     return true;
   } catch (error) {

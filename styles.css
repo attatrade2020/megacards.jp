@@ -220,11 +220,16 @@ button, input, select { font: inherit; }
 .cart-scrim { position: fixed; z-index: 90; inset: 0; border: 0; background: rgba(5,10,20,.55); backdrop-filter: blur(2px); }
 .cart-items { flex: 1; overflow-y: auto; padding-block: 16px; }
 .cart-empty { padding: 80px 20px; text-align: center; color: var(--ink-soft); }
-.cart-item { display: grid; grid-template-columns: 74px 1fr auto; gap: 14px; align-items: center; padding: 15px 0; border-bottom: 1px solid var(--line); }
+.cart-item { display: grid; grid-template-columns: 74px minmax(0,1fr); gap: 14px; align-items: start; padding: 15px 0; border-bottom: 1px solid var(--line); }
 .cart-item img { width: 74px; height: 74px; padding: 7px; object-fit: contain; border-radius: 10px; background: var(--paper); }
 .cart-item strong { display: block; font-size: .82rem; line-height: 1.35; }
-.cart-item span { display: block; margin-top: 5px; color: var(--blue); font-weight: 800; }
-.cart-item button { border: 0; background: transparent; color: var(--ink-soft); cursor: pointer; text-decoration: underline; }
+.cart-item__content { min-width:0; }
+.cart-item__meta { display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:8px 12px; margin-top:8px; }
+.cart-item__price { color:var(--blue); font-size:.76rem; font-weight:800; }
+.cart-item__quantity { display:inline-flex; align-items:center; gap:6px; color:var(--ink-soft); font-size:.7rem; font-weight:800; text-transform:uppercase; letter-spacing:.04em; }
+.cart-item__quantity select { width:58px; min-height:34px; padding:5px 7px; color:var(--ink); background:#fff; border:1px solid var(--line); border-radius:8px; font:700 .8rem "DM Sans",sans-serif; }
+.cart-item__quantity select:focus { outline:3px solid rgba(20,89,233,.13); border-color:var(--blue); }
+.cart-item__remove { margin-top:6px; padding:0; border:0; background:transparent; color:var(--ink-soft); cursor:pointer; font-size:.7rem; text-decoration:underline; text-underline-offset:2px; }
 .cart-panel__footer { padding-top: 20px; border-top: 1px solid var(--line); }
 .cart-suggestion { margin:12px 0; padding:13px; color:#fff; background:linear-gradient(135deg,#13264c,#174fae); border:1px solid rgba(255,255,255,.12); border-radius:14px; }
 .cart-suggestion[hidden] { display:none; }
