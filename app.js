@@ -762,8 +762,8 @@ function buildShipment() {
 
 const carrierLabels = { fedex: "FedEx", japanpost: "Japan Post", ups: "UPS", dhl: "DHL" };
 const carrierBadges = {
-  dhl: '<span class="carrier-logo carrier-logo--dhl" role="img" aria-label="DHL"><span>DHL</span></span>',
-  fedex: '<span class="carrier-logo carrier-logo--fedex" role="img" aria-label="FedEx"><span>Fed</span><b>Ex</b></span>'
+  dhl: '<span class="carrier-logo carrier-logo--dhl" role="img" aria-label="DHL"><svg viewBox="0 0 76 24" aria-hidden="true" focusable="false"><rect width="76" height="24" rx="3" fill="#ffcc00"/><text x="38" y="17.5" text-anchor="middle" fill="#d40511" font-family="Arial Black,Arial,sans-serif" font-size="15" font-style="italic" font-weight="900">DHL</text></svg></span>',
+  fedex: '<span class="carrier-logo carrier-logo--fedex" role="img" aria-label="FedEx"><svg viewBox="0 0 76 24" aria-hidden="true" focusable="false"><text x="2" y="18" fill="#4d148c" font-family="Arial Black,Arial,sans-serif" font-size="16" font-weight="900">Fed</text><text x="39" y="18" fill="#ff6600" font-family="Arial Black,Arial,sans-serif" font-size="16" font-weight="900">Ex</text></svg></span>'
 };
 const serviceLabels = {
   fedex_international_priority_express: "International Priority Express",
