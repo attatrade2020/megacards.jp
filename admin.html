@@ -988,6 +988,12 @@
         .quick-import-preview img { width:82px; height:82px; border-radius:8px; background:#f3f4f6; object-fit:contain; }
         .quick-import-preview h4 { margin:0 0 6px; color:#111827; font-size:.9rem; line-height:1.45; }
         .quick-import-preview p { margin:0; color:#6b7280; font-size:.75rem; line-height:1.55; }
+        .image-paste-zone { margin:8px 0; padding:14px 16px; border:2px dashed #b9c6d8; border-radius:10px; background:#f8fafc; color:#475569; text-align:center; cursor:text; transition:border-color .18s,background .18s,box-shadow .18s; outline:none; }
+        .image-paste-zone:hover, .image-paste-zone:focus { border-color:#3b82f6; background:#eff6ff; box-shadow:0 0 0 3px rgba(59,130,246,.12); }
+        .image-paste-zone.is-uploading { border-color:#3b82f6; background:#eff6ff; cursor:progress; }
+        .image-paste-zone.is-complete { border-color:#10b981; background:#ecfdf5; color:#047857; }
+        .image-paste-zone strong { display:block; margin-bottom:3px; font-size:.9rem; }
+        .image-paste-zone span { display:block; font-size:.76rem; line-height:1.5; }
         .quick-header-add__short { display:none; }
         @media(max-width:700px) {
             .topbar { min-height:58px; height:auto; padding:8px 12px; }
@@ -1854,6 +1860,10 @@
                         <div style="display:flex;gap:12px;align-items:flex-start;">
                             <div style="flex:1;">
                                 <input type="file" id="fImageFile" accept="image/jpeg,image/png,image/webp" onchange="uploadProductImage(this)" style="margin-bottom:8px;">
+                                <div class="image-paste-zone" id="imagePasteZone" tabindex="0" role="button" aria-label="クリップボードの画像を貼り付け" onclick="this.focus()">
+                                    <strong>クリップボードから画像を貼り付け</strong>
+                                    <span>ここをクリックしてから Ctrl+V（Macは Command+V）</span>
+                                </div>
                                 <input type="text" id="fImageUrl" placeholder="assets/products/example.webp" style="font-size:0.85rem;">
                                 <div class="form-hint" id="uploadStatus">画像はMegaCards内へ保存されます。</div>
                             </div>
@@ -3032,6 +3042,7 @@
             document.getElementById('fSort').value = allProducts.length + 1;
             document.getElementById('fImageUrl').value = '';
             document.getElementById('fImageFile').value = '';
+            resetImagePasteZone();
             document.getElementById('uploadStatus').textContent = '画像はMegaCards内へ保存されます。';
             updateImagePreview('');
             document.getElementById('fNotes').value = '';
@@ -3067,6 +3078,7 @@
             // Image preview
             updateImagePreview(p.image_url);
             document.getElementById('fImageFile').value = '';
+            resetImagePasteZone();
             document.getElementById('uploadStatus').textContent = '別画像を選ぶとローカル画像へ差し替えます。';
 
             document.getElementById('productModal').classList.add('open');
@@ -3090,12 +3102,48 @@
             }
         }
 
-        async function uploadProductImage(input) {
-            if (!input.files || !input.files[0]) return;
-            const file = input.files[0];
+        function resetImagePasteZone() {
+            const zone = document.getElementById('imagePasteZone');
+            if (!zone) return;
+            zone.classList.remove('is-uploading', 'is-complete');
+            zone.querySelector('strong').textContent = 'クリップボードから画像を貼り付け';
+            zone.querySelector('span').textContent = 'ここをクリックしてから Ctrl+V（Macは Command+V）';
+        }
+
+        async function handleProductImagePaste(event) {
+            const imageItem = Array.from(event.clipboardData?.items || [])
+                .find(item => item.kind === 'file' && item.type.startsWith('image/'));
+            if (!imageItem) return;
+            event.preventDefault();
+            const file = imageItem.getAsFile();
+            if (!file) return;
+            const zone = document.getElementById('imagePasteZone');
+            zone?.classList.add('is-uploading');
+            if (zone) {
+                zone.querySelector('strong').textContent = '貼り付けた画像を保存中...';
+                zone.querySelector('span').textContent = file.type || 'クリップボード画像';
+            }
+            const uploaded = await uploadProductImage(file);
+            zone?.classList.remove('is-uploading');
+            if (uploaded && zone) {
+                zone.classList.add('is-complete');
+                zone.querySelector('strong').textContent = '画像を貼り付けました';
+                zone.querySelector('span').textContent = '別の画像に変更する場合は、もう一度貼り付けてください。';
+            } else if (zone) {
+                resetImagePasteZone();
+            }
+        }
+
+        async function uploadProductImage(inputOrFile) {
+            const file = inputOrFile instanceof File ? inputOrFile : inputOrFile?.files?.[0];
+            if (!file) return false;
+            if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                showToast('JPG、PNG、WebP画像を使用してください', 'error');
+                return false;
+            }
             if (file.size > 5 * 1024 * 1024) {
                 showToast('ファイルサイズは5MB以下にしてください', 'error');
-                return;
+                return false;
             }
             const status = document.getElementById('uploadStatus');
             status.textContent = 'アップロード中...';
@@ -3113,11 +3161,15 @@
                 updateImagePreview(data.path);
                 status.textContent = 'アップロード完了';
                 status.style.color = '#10b981';
+                return true;
             } catch (e) {
                 status.textContent = 'アップロード失敗: ' + e.message;
                 status.style.color = '#ef4444';
+                return false;
             }
         }
+
+        document.getElementById('productModal').addEventListener('paste', handleProductImagePaste);
 
         async function uploadInlineImage(productId, input) {
             if (!input.files || !input.files[0]) return;
