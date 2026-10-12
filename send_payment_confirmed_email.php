@@ -57,14 +57,14 @@ if ($curCode === '' || $audJpyRate <= 0) {
 }
 if ($curCode === '') $curCode = 'AUD';
 if ($curSymbol === '') $curSymbol = 'A$';
+if ($audJpyRate <= 0) $audJpyRate = 110.04;
 function _mc_dual_price($jpy, $curCode, $curSymbol, $audJpyRate) {
     $jpy = intval($jpy);
-    $base = 'JPY ' . number_format($jpy);
     if ($curCode === 'AUD' && $audJpyRate > 0) {
         $conv = round($jpy / $audJpyRate);
-        return $base . "<br><span style='color:#6b7280;font-size:12px;line-height:18px;'>Approx. " . htmlspecialchars($curSymbol, ENT_QUOTES, 'UTF-8') . number_format($conv) . "</span>";
+        return htmlspecialchars($curSymbol, ENT_QUOTES, 'UTF-8') . number_format($conv);
     }
-    return $base;
+    return 'A$' . number_format(round($jpy / $audJpyRate));
 }
 
 // Build items table rows (with dual currency)
@@ -81,7 +81,6 @@ foreach ($items as $item) {
     </tr>";
 }
 
-$totalFormatted = number_format($totalJpy);
 $totalDual = _mc_dual_price($totalJpy, $curCode, $curSymbol, $audJpyRate);
 $methodLabel = $paymentMethod === 'paypal' ? 'PayPal' : 'Wise';
 $nameEsc = htmlspecialchars((string)$name, ENT_QUOTES, 'UTF-8');
@@ -168,7 +167,7 @@ $html = "<!DOCTYPE html>
                 <td class='mc-price' style='padding:12px;text-align:right;font-size:15px;font-weight:700;color:#1a1a2e;white-space:nowrap;'>{$totalDual}</td>
             </tr>
         </table>
-        <p style='font-size:12px;color:#6b7280;margin:8px 0 0;line-height:1.6;text-align:right;'>Payment was charged in JPY. The AUD amount is an estimate.</p>
+        <p style='font-size:12px;color:#6b7280;margin:8px 0 0;line-height:1.6;text-align:right;'>All prices above are displayed in Australian dollars (A$).</p>
 
         <p style='font-size:13px;color:#888;margin:20px 0 0;line-height:1.7;'>
             If you have any questions, please reply to this email or contact us at

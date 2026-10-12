@@ -138,7 +138,6 @@ function _mc_condition($p) {
 $allProducts = _mc_get_products();
 
 // The invoice is paid in JPY. AUD is an estimate for customer convenience.
-$invoiceCurrency = strtoupper(trim((string)($input['invoice_currency'] ?? 'JPY')));
 $curCode   = strtoupper(trim((string)($input['display_currency_code'] ?? ($input['currency_code'] ?? 'AUD'))));
 $curSymbol = (string)($input['display_currency_symbol'] ?? ($input['currency_symbol'] ?? 'A$'));
 $audJpyRate = floatval($input['aud_jpy_rate'] ?? 0);
@@ -147,14 +146,14 @@ if ($audJpyRate <= 0) {
     $legacyRate = floatval($input['currency_rate'] ?? 0);
     $audJpyRate = $legacyRate > 0 && $legacyRate < 1 ? 1 / $legacyRate : $legacyRate;
 }
+if ($audJpyRate <= 0) $audJpyRate = 110.04;
 function _mc_dual_price($jpy, $curCode, $curSymbol, $audJpyRate) {
     $jpy = intval($jpy);
-    $base = 'JPY ' . number_format($jpy);
     if ($curCode === 'AUD' && $audJpyRate > 0) {
         $conv = round($jpy / $audJpyRate);
-        return $base . "<br><span style='color:#6b7280;font-size:12px;line-height:18px;'>Approx. " . htmlspecialchars($curSymbol, ENT_QUOTES, 'UTF-8') . number_format($conv) . "</span>";
+        return htmlspecialchars($curSymbol, ENT_QUOTES, 'UTF-8') . number_format($conv);
     }
-    return $base;
+    return 'A$' . number_format(round($jpy / $audJpyRate));
 }
 
 // ISO-3166 alpha-2 → English name (subset; falls through for unknown / already-full names)
@@ -205,7 +204,6 @@ foreach ($items as $item) {
     $title = htmlspecialchars($item['title'] ?? '');
     $qty = intval($item['qty'] ?? 1);
     $itemJpy = intval($item['price_jpy'] ?? 0);
-    $price = number_format($itemJpy);
     $lineTotalJpy = $itemJpy * $qty;
     $lineTotal = _mc_dual_price($lineTotalJpy, $curCode, $curSymbol, $audJpyRate);
     $prod = _mc_find_product($item, $allProducts);
@@ -240,9 +238,6 @@ foreach ($items as $item) {
     </tr>";
 }
 
-$totalFormatted    = number_format($totalJpy);
-$subtotalFormatted = number_format($subtotal);
-$shippingFormatted = number_format($shipping);
 $totalDual    = _mc_dual_price($totalJpy, $curCode, $curSymbol, $audJpyRate);
 $subtotalDual = _mc_dual_price($subtotal, $curCode, $curSymbol, $audJpyRate);
 $shippingDual = _mc_dual_price($shipping, $curCode, $curSymbol, $audJpyRate);
@@ -265,7 +260,7 @@ if ($paymentMethod === 'paypal') {
         <p style='font-size:12px;color:#999;margin:0;'>Prices are based on live exchange rates and may change after expiry.</p>
     </div>
     <div style='text-align:center;margin:24px 0;'>
-        <a href='{$paypalPayUrlEsc}' target='_blank' style='display:inline-block;padding:16px 28px;background:#0070ba;color:#fff;font-weight:700;border-radius:10px;text-decoration:none;font-size:16px;'>Pay JPY {$totalFormatted} with PayPal &rarr;</a>
+        <a href='{$paypalPayUrlEsc}' target='_blank' style='display:inline-block;padding:16px 28px;background:#0070ba;color:#fff;font-weight:700;border-radius:10px;text-decoration:none;font-size:16px;'>Pay with PayPal &rarr;</a>
     </div>
     <p style='font-size:13px;color:#888;text-align:center;'>Click the button above to complete your payment via PayPal (Goods &amp; Services).</p>";
 } else {
@@ -276,7 +271,7 @@ if ($paymentMethod === 'paypal') {
         <p style='font-size:12px;color:#999;margin:0;'>Prices are based on live exchange rates and may change after expiry.</p>
     </div>
     <div style='text-align:center;margin:24px 0;'>
-        <a href='{$wisePayUrlEsc}' target='_blank' style='display:inline-block;padding:16px 28px;background:#9fe870;color:#000;font-weight:700;border-radius:10px;text-decoration:none;font-size:16px;'>Pay JPY {$totalFormatted} with Wise &rarr;</a>
+        <a href='{$wisePayUrlEsc}' target='_blank' style='display:inline-block;padding:16px 28px;background:#9fe870;color:#000;font-weight:700;border-radius:10px;text-decoration:none;font-size:16px;'>Pay with Wise &rarr;</a>
     </div>
     <p style='font-size:13px;color:#888;text-align:center;'>Click the button above to complete your payment via Wise.</p>";
 }
@@ -366,7 +361,7 @@ $html = "<!DOCTYPE html>
             </tr>
         </table>
 
-        <p style='font-size:12px;color:#6b7280;margin:8px 0 0;line-height:1.6;text-align:right;'>Payment is charged in JPY. AUD amounts are estimates and may differ from your payment provider's final conversion.</p>
+        <p style='font-size:12px;color:#6b7280;margin:8px 0 0;line-height:1.6;text-align:right;'>All prices above are displayed in Australian dollars (A$). Your payment provider may apply its own exchange rate.</p>
 
         {$paymentSection}
     </td></tr>
