@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/order_core.php';
+
 const MEGACARDS_ORDER_SESSION_TTL = 2592000;
 ini_set('session.gc_maxlifetime', (string) MEGACARDS_ORDER_SESSION_TTL);
 session_set_cookie_params([
@@ -233,6 +235,25 @@ if (!is_array($input) || ($input['action'] ?? '') !== 'record' || !is_array($inp
     member_orders_json(400, ['ok' => false, 'error' => 'Invalid order request.']);
 }
 $incoming = $input['order'];
+$secureToken = trim((string) ($incoming['order_token'] ?? ''));
+$secureNumber = trim((string) ($incoming['order_number'] ?? ''));
+if ($secureToken !== '') {
+    $secureOrder = mc_get_order($secureNumber, $secureToken);
+    if (!is_array($secureOrder) || !hash_equals(strtolower((string) $sessionMember['email']), strtolower((string) $secureOrder['email']))) {
+        member_orders_json(403, ['ok' => false, 'error' => 'Order authorization failed.']);
+    }
+    $incoming = [
+        'order_number' => $secureOrder['order_number'], 'name' => $secureOrder['name'], 'email' => $secureOrder['email'],
+        'address' => $secureOrder['address'],
+        'items' => array_map(static fn(array $item): array => [
+            'id' => $item['id'], 'title' => $item['title'], 'qty' => $item['qty'], 'price_jpy' => $item['unit_price_jpy'],
+        ], array_values(array_filter($secureOrder['items'] ?? [], 'is_array'))),
+        'subtotal_jpy' => $secureOrder['subtotal_jpy'], 'shipping_jpy' => $secureOrder['shipping']['price_jpy'],
+        'paypal_fee_jpy' => $secureOrder['processing_fee_jpy'], 'total_jpy' => $secureOrder['total_jpy'],
+        'shipping_carrier' => $secureOrder['shipping']['carrier'], 'shipping_service' => $secureOrder['shipping']['service'],
+        'payment_method' => $secureOrder['payment_method'],
+    ];
+}
 $orderNumber = trim((string) ($incoming['order_number'] ?? ''));
 if (!preg_match('/^[A-Za-z0-9_-]{6,40}$/', $orderNumber)) member_orders_json(422, ['ok' => false, 'error' => 'Invalid order number.']);
 $items = member_orders_clean_items($incoming['items'] ?? []);

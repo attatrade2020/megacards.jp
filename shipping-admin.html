@@ -80,12 +80,11 @@
       ['op13-carrying-on-his-will','ONE PIECE','CARRYING ON HIS WILL'],['op14-azure-seas-seven','ONE PIECE',"THE AZURE SEA'S SEVEN"],['eb04-egghead-crisis','ONE PIECE','EGGHEAD CRISIS'],['op11-fist-divine-speed','ONE PIECE','A Fist of Divine Speed'],
       ['yac1-original-artwork','Yu-Gi-Oh!','ORIGINAL ARTWORK COLLECTION'],['dbgv-glorious-victors','Yu-Gi-Oh!','Glorious Victors'],['26lp-world-championship','Yu-Gi-Oh!','WORLD CHAMPIONSHIP 2026'],['lpg2-ra-yellow','Yu-Gi-Oh!','Ra Yellow']
     ];
-    let adminPassword = '';
     let currentData = null;
     const $ = (id) => document.getElementById(id);
 
     async function api(action, extra = {}) {
-      const response = await fetch('shipping_products.php', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action,password:adminPassword,...extra}) });
+      const response = await fetch('shipping_products.php', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action,...extra}) });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || '通信に失敗しました');
       return data;
@@ -101,9 +100,11 @@
       }).join('');
     }
     async function login() {
-      adminPassword = $('password').value;
       $('loginStatus').textContent = '確認中…';
       try {
+        const authResponse = await fetch('admin_auth.php', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'login',password:$('password').value}) });
+        const auth = await authResponse.json().catch(() => ({}));
+        if (!authResponse.ok || !auth.ok) throw new Error(auth.error || 'ログインできませんでした');
         const result = await api('load_admin');
         render(result.data);
         $('loginPanel').hidden = true;
@@ -137,6 +138,10 @@
     $('password').addEventListener('keydown',(event) => { if (event.key === 'Enter') login(); });
     $('reloadButton').addEventListener('click',reload);
     $('saveButton').addEventListener('click',save);
+    fetch('admin_auth.php', { cache:'no-store' }).then(r=>r.json()).then(async auth=>{
+      if (!auth.authenticated) return;
+      const result = await api('load_admin'); render(result.data); $('loginPanel').hidden=true; $('editor').hidden=false;
+    }).catch(()=>{});
   </script>
 </body>
 </html>

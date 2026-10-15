@@ -2,6 +2,15 @@ DirectoryIndex index.php
 
 # HTTP to HTTPS redirect
 RewriteEngine On
+
+<IfModule mod_headers.c>
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=(self)"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://www.googletagmanager.com https://www.google-analytics.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://www.google-analytics.com; connect-src 'self' https://www.google-analytics.com https://*.google-analytics.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"
+</IfModule>
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
 
@@ -30,4 +39,9 @@ RewriteRule ^google-shopping\.xml$ /feed.php?country=AU [L,QSA]
     Header set Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
     Header set Pragma "no-cache"
     Header set Expires "0"
+    Header set X-Robots-Tag "noindex, nofollow, noarchive"
+</FilesMatch>
+
+<FilesMatch "^(order_core|exchange_rate_lib)\.php$">
+    Require all denied
 </FilesMatch>

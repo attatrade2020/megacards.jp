@@ -221,7 +221,7 @@
           <label class="payment-option">
             <input type="radio" name="paymentMethod" value="paypal">
             <span class="payment-option__brand payment-option__brand--paypal">PayPal</span>
-            <span><strong>Pay with PayPal</strong><small>A 5% transaction fee applies</small></span>
+            <span><strong>Pay with PayPal</strong><small>A 5% order processing fee applies</small></span>
           </label>
         </div>
       </section>
@@ -246,11 +246,12 @@
         <div id="checkoutItems"></div>
         <div class="checkout-summary__row"><span>Products</span><strong id="checkoutSubtotal">¥0</strong></div>
         <div class="checkout-summary__row"><span id="checkoutShippingLabel">Shipping</span><strong id="checkoutShipping">¥0</strong></div>
-        <div class="checkout-summary__row" id="checkoutFeeRow" hidden><span>PayPal transaction fee (5%)</span><strong id="checkoutFee">¥0</strong></div>
+        <div class="checkout-summary__row" id="checkoutFeeRow" hidden><span>Order processing fee (5%)</span><strong id="checkoutFee">¥0</strong></div>
         <div class="checkout-summary__row checkout-summary__row--total"><span>Total due in JPY<small id="checkoutAudEstimate">Approx. A$0</small></span><strong id="checkoutGrandTotal">¥0</strong></div>
       </section>
 
       <p class="checkout-status" id="checkoutStatus" role="status" aria-live="polite"></p>
+      <label class="checkout-terms"><input name="acceptedTerms" type="checkbox" required><span>I agree to the <a href="terms.html" target="_blank">Terms</a> and <a href="privacy.html" target="_blank">Privacy Policy</a>.</span></label>
       <button class="button button--checkout" id="submitOrder" type="submit">Submit order & pay with Wise</button>
       <p class="checkout-fineprint">By submitting, you confirm that the delivery details are correct. Your payment link is valid for 10 minutes. Orders cannot be cancelled after payment is completed.</p>
     </form>
@@ -341,12 +342,15 @@
     <div class="shell footer__inner">
       <a class="brand brand--footer" href="#top"><span class="brand__mark">M</span><span>MegaCards<span class="brand__suffix">.jp</span></span></a>
       <p><a href="faq.php">FAQ</a></p>
+      <p><a href="terms.html">Terms</a></p>
+      <p><a href="privacy.html">Privacy</a></p>
+      <p><a href="mailto:info@megacards.jp">Contact</a></p>
       <p><a href="https://www.instagram.com/magacards.jp/" target="_blank" rel="noopener noreferrer">Instagram</a></p>
       <p>© 2026 Atta Trade · Secondhand Dealer Permit #451460009881</p>
       <a class="footer__admin-link" href="admin.html?v=20261009-01" aria-label="Open administration page">Admin</a>
     </div>
   </footer>
 
-  <script src="app.js?v=20261012-06"></script>
+  <script src="app.js?v=20261015-01"></script>
 </body>
 </html>

@@ -1,22 +1,32 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+declare(strict_types=1);
+require_once __DIR__ . '/order_core.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { exit; }
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'POST only']);
-    exit;
-}
-
-$input = json_decode(file_get_contents('php://input'), true);
-if (!$input) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid JSON']);
-    exit;
-}
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') mc_json_response(405, ['error' => 'POST required.']);
+mc_require_same_origin();
+mc_rate_limit('order-email', 8, 600);
+$request = json_decode((string) file_get_contents('php://input'), true);
+if (!is_array($request)) mc_json_response(400, ['error' => 'Invalid request.']);
+$requestedNumber = trim((string) ($request['order_number'] ?? ''));
+$requestedToken = trim((string) ($request['order_token'] ?? ''));
+$secureOrder = mc_get_order($requestedNumber, $requestedToken);
+if (!is_array($secureOrder)) mc_json_response(403, ['error' => 'Order authorization failed.']);
+$gatedPayUrl = 'https://megacards.jp/pay.php?order=' . rawurlencode($requestedNumber) . '&token=' . rawurlencode($requestedToken);
+$secureItems = array_map(static fn(array $item): array => [
+    'id' => (string) ($item['id'] ?? ''), 'title' => (string) ($item['title'] ?? ''),
+    'qty' => (int) ($item['qty'] ?? 1), 'price_jpy' => (int) ($item['unit_price_jpy'] ?? 0),
+], array_values(array_filter($secureOrder['items'] ?? [], 'is_array')));
+$input = [
+    'email' => $secureOrder['email'], 'name' => $secureOrder['name'], 'order_number' => $secureOrder['order_number'],
+    'payment_method' => $secureOrder['payment_method'], 'country' => 'AU', 'contact' => $secureOrder['phone'],
+    'address' => $secureOrder['address'], 'total_jpy' => $secureOrder['total_jpy'], 'subtotal_jpy' => $secureOrder['subtotal_jpy'],
+    'shipping_price' => $secureOrder['shipping']['price_jpy'], 'shipping_carrier' => $secureOrder['shipping']['carrier'],
+    'shipping_service' => $secureOrder['shipping']['service'], 'items' => $secureItems,
+    'invoice_currency' => 'JPY', 'display_currency_code' => 'AUD', 'display_currency_symbol' => 'A$',
+    'aud_jpy_rate' => $secureOrder['aud_jpy_rate'] ?? 110.04, 'paypal_fee' => $secureOrder['processing_fee_jpy'] ?? 0,
+    'expiry_str' => date('j M Y, g:i a T', (int) $secureOrder['payment_expires_at']),
+    (($secureOrder['payment_method'] ?? '') === 'paypal' ? 'paypal_pay_url' : 'wise_pay_url') => $gatedPayUrl,
+];
 
 $to = filter_var(trim((string)($input['email'] ?? '')), FILTER_VALIDATE_EMAIL) ?: '';
 $name = $input['name'] ?? '';
@@ -276,11 +286,11 @@ if ($paymentMethod === 'paypal') {
     <p style='font-size:13px;color:#888;text-align:center;'>Click the button above to complete your payment via Wise.</p>";
 }
 
-// Fee row for PayPal
+// Order processing fee row
 $feeRow = '';
 if ($paymentMethod === 'paypal' && $paypalFee > 0) {
     $feeRow = "<tr>
-        <td colspan='3' style='padding:8px 12px;text-align:right;font-size:13px;color:#6b7280;'>PayPal fee (5%)</td>
+        <td colspan='3' style='padding:8px 12px;text-align:right;font-size:13px;color:#6b7280;'>Order processing fee</td>
         <td style='padding:8px 12px;text-align:right;font-size:13px;color:#374151;white-space:nowrap;'>{$feeDual}</td>
     </tr>";
 }

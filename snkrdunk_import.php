@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 // snkrdunk_import.php - Scrape Snkrdunk search results
 // Usage:
 //   GET /snkrdunk_import.php?action=fetch&url=<snkrdunk search URL>
@@ -6,9 +7,16 @@
 //   GET /snkrdunk_import.php?action=images&apparel_id=X&listing_id=Y
 //     -> returns JSON: { ok, image_urls: [...] }   (multi-image via Snkrdunk's internal v1 API)
 
+session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
+session_start();
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
 header('Cache-Control: no-store');
+
+if (empty($_SESSION['mc_admin_authenticated'])) {
+    http_response_code(401);
+    echo json_encode(['error' => 'Administrator login required.']);
+    exit;
+}
 
 $action = $_GET['action'] ?? 'fetch';
 

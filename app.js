@@ -1,7 +1,7 @@
-const AUD_JPY_RATE = 110.04;
+let AUD_JPY_RATE = 110.04;
 const JAPAN_DOMESTIC_SHIPPING_JPY = 990;
 const CART_SUGGESTION_LIMIT_AUD = 1000;
-const CART_SUGGESTION_LIMIT_JPY = Math.floor(CART_SUGGESTION_LIMIT_AUD * AUD_JPY_RATE);
+let CART_SUGGESTION_LIMIT_JPY = Math.floor(CART_SUGGESTION_LIMIT_AUD * AUD_JPY_RATE);
 const CART_STORAGE_KEY = "megacards.cart.v1";
 
 let products = [
@@ -609,13 +609,13 @@ function productCard(product) {
   const soldOut = Number(product.stock ?? 1) <= 0;
   return `
     <article class="product-card">
-      <div class="product-card__image">
+      <a class="product-card__image" href="/product/${encodeURIComponent(product.id)}" aria-label="View details for ${escapeHtml(product.title)}">
         <span class="product-card__tag">${soldOut ? "Sold out" : escapeHtml(product.tag)}</span>
         <img src="${product.image}" alt="${escapeHtml(product.title)}" width="480" height="420" loading="lazy" decoding="async">
-      </div>
+      </a>
       <div class="product-card__content">
         <p class="product-card__series">${escapeHtml(product.series)}</p>
-        <h3>${escapeHtml(product.title)}</h3>
+        <h3><a href="/product/${encodeURIComponent(product.id)}">${escapeHtml(product.title)}</a></h3>
         <div class="product-card__meta"><span>Japanese box</span><span>${escapeHtml(product.release)}</span></div>
         <div class="product-card__price-row">
           <div class="product-card__price">
@@ -856,6 +856,9 @@ async function calculateShipping() {
   }
 
   const shipment = buildShipment();
+  const cart = Object.entries(state.cart)
+    .filter(([, quantity]) => quantity > 0)
+    .map(([id, quantity]) => ({ id, quantity }));
   calculateShippingButton.disabled = true;
   calculateShippingButton.textContent = "Checking…";
   resetShippingQuote("Requesting live carrier rates…");
@@ -864,15 +867,12 @@ async function calculateShipping() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        country: "AU", zip: postcode, state: shippingState.value, city: "Australia", address1: "Shipping quote",
-        name: "MegaCards customer", phone: "+61000000000", email: "quote@megacards.jp",
-        weight: shipment.weight, width: shipment.width, depth: shipment.depth, height: shipment.height,
-        items: shipment.items, total_value: shipment.totalValue
+        country: "AU", zip: postcode, state: shippingState.value, cart
       })
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok || data.error) throw new Error(data.error || "Unable to retrieve shipping rates.");
-    renderShippingRates(data.rates || [], shipment);
+    renderShippingRates(data.rates || [], data.shipment || shipment);
   } catch (error) {
     resetShippingQuote();
     shippingStatus.classList.add("error");
@@ -941,10 +941,6 @@ function closeCheckout() {
   document.body.classList.remove("checkout-open");
 }
 
-function makeOrderNumber() {
-  return String(Math.floor(10000000 + Math.random() * 90000000));
-}
-
 async function parseJsonResponse(response, fallbackMessage) {
   const data = await response.json().catch(() => ({}));
   if (!response.ok || data.error) throw new Error(data.error || fallbackMessage);
@@ -978,73 +974,50 @@ async function submitOrder(event) {
     phone
   };
   const paymentMethod = selectedPaymentMethod();
-  const shipment = buildShipment();
   const rate = state.shippingQuote.rates[state.shippingQuote.selected];
-  const shippingInfo = { carrier: rate.carrier, service: rate.service, price: Number(rate.price) };
-  const amounts = checkoutAmounts();
-  const orderNumber = makeOrderNumber();
-  const now = new Date();
-  const items = shipment.items.map((item) => {
-    const product = products.find((entry) => entry.title === item.name);
-    return { id: product?.id || "", title: item.name, qty: item.quantity, price_jpy: item.price };
-  });
-  const payload = {
-    action: "order",
-    order_number: orderNumber,
-    name,
-    email,
-    country: "AU",
-    contact: phone,
-    address,
-    items,
-    subtotal_jpy: amounts.subtotal,
-    shipping: shippingInfo,
-    payment_method: paymentMethod,
-    paypal_fee: amounts.fee,
-    total_jpy: amounts.total,
-    invoice_currency: "JPY",
-    notes: "MegaCards storefront order",
-    timestamp: now.toISOString(),
-    status: "Pending_Payment"
-  };
+  const cart = Object.entries(state.cart)
+    .filter(([, quantity]) => quantity > 0)
+    .map(([id, quantity]) => ({ id, quantity }));
+  const acceptedTerms = formData.get("acceptedTerms") === "on";
 
   submitOrderButton.disabled = true;
   submitOrderButton.textContent = "Creating your order…";
   try {
-    const orderResponse = await fetch("api_proxy.php", {
+    const orderResponse = await fetch("checkout_create.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({
+        name, email, phone, address, payment_method: paymentMethod, cart,
+        quote_token: rate.quote_token, accepted_terms: acceptedTerms
+      })
     });
-    await parseJsonResponse(orderResponse, "The order service did not respond.");
+    const orderData = await parseJsonResponse(orderResponse, "The order service did not respond.");
+    const orderNumber = orderData.order_number;
+    const orderToken = orderData.order_token;
+    const items = (orderData.items || []).map((item) => ({
+      id: item.id, title: item.title, qty: item.qty, price_jpy: item.unit_price_jpy
+    }));
+    const amounts = {
+      subtotal: Number(orderData.subtotal_jpy) || 0,
+      shipping: Number(orderData.shipping_jpy) || 0,
+      fee: Number(orderData.processing_fee_jpy) || 0,
+      total: Number(orderData.total_jpy) || 0
+    };
 
-    let payUrl;
+    let payUrl = orderData.payment_link;
     if (paymentMethod === "paypal") {
       const paypalResponse = await fetch("paypal_invoice.php", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "create_invoice",
-          order_id: orderNumber,
-          customer_email: email,
-          customer_name: name,
-          items: [
-            ...items.map((item) => ({ name: item.title, quantity: item.qty, price: item.price_jpy })),
-            ...(amounts.fee ? [{ name: "PayPal transaction fee (5%)", quantity: 1, price: amounts.fee }] : [])
-          ],
-          shipping: amounts.shipping,
-          note: `MegaCards.jp Order: ${orderNumber}`
-        })
+        body: JSON.stringify({ action: "create_invoice", order_number: orderNumber, order_token: orderToken })
       });
       const paypalData = await parseJsonResponse(paypalResponse, "Could not create the PayPal invoice.");
       if (!paypalData.ok || !paypalData.payment_link) throw new Error(paypalData.error || "Could not create the PayPal payment link.");
       payUrl = paypalData.payment_link;
-    } else {
-      const description = `${orderNumber} - Valid for 10 minutes`;
-      payUrl = `https://wise.com/pay/business/q32cyu?amount=${amounts.total}&currency=JPY&description=${encodeURIComponent(description)}`;
     }
+    if (!payUrl) throw new Error("The payment link is not available.");
 
-    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    const expiresAt = new Date(orderData.expires_at || Date.now() + 10 * 60 * 1000);
     const expiryString = expiresAt.toLocaleString("en-AU", { day: "numeric", month: "short", hour: "numeric", minute: "2-digit", timeZoneName: "short" });
     if (currentMember) {
       try {
@@ -1055,6 +1028,7 @@ async function submitOrder(event) {
             action: "record",
             order: {
               order_number: orderNumber,
+              order_token: orderToken,
               name,
               email,
               address,
@@ -1075,39 +1049,25 @@ async function submitOrder(event) {
         console.error("Order history could not be saved:", historyError);
       }
     }
-    const emailPayload = {
-      email,
-      name,
-      order_number: orderNumber,
-      payment_method: paymentMethod,
-      country: "AU",
-      contact: phone,
-      address,
-      total_jpy: amounts.total,
-      subtotal_jpy: amounts.subtotal,
-      shipping_price: amounts.shipping,
-      shipping_carrier: rate.carrier,
-      shipping_service: rate.service,
-      items,
-      invoice_currency: "JPY",
-      display_currency_code: "AUD",
-      display_currency_symbol: "A$",
-      aud_jpy_rate: AUD_JPY_RATE,
-      paypal_fee: amounts.fee,
-      expiry_str: expiryString,
-      ...(paymentMethod === "paypal" ? { paypal_pay_url: payUrl } : { wise_pay_url: payUrl })
-    };
     fetch("send_order_email.php", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(emailPayload)
+      body: JSON.stringify({ order_number: orderNumber, order_token: orderToken })
     }).catch(() => {});
 
+    if (typeof gtag === "function") {
+      gtag("event", "add_payment_info", {
+        currency: "JPY", value: amounts.total, payment_type: paymentMethod,
+        items: items.map((item) => ({ item_id: item.id, item_name: item.title, price: item.price_jpy, quantity: item.qty }))
+      });
+    }
     checkoutForm.hidden = true;
     checkoutSuccess.hidden = false;
     checkoutSuccessMessage.textContent = `Order ${orderNumber} is ready. Pay ${jpyLabel(amounts.total)} with ${paymentMethod === "paypal" ? "PayPal" : "Wise"} by ${expiryString}.`;
     paymentLink.href = payUrl;
     paymentLink.textContent = `Pay ${jpyLabel(amounts.total)} with ${paymentMethod === "paypal" ? "PayPal" : "Wise"}`;
+    state.cart = {};
+    renderCart();
   } catch (error) {
     checkoutStatus.textContent = error.message || "We could not create your order. Please try again.";
   } finally {
@@ -1402,6 +1362,8 @@ productGrid.addEventListener("click", (event) => {
   const quantity = Math.min(99, Math.max(1, Math.trunc(Number(quantityInput?.value) || 1)));
   if (quantityInput) quantityInput.value = String(quantity);
   state.cart[id] = (state.cart[id] || 0) + quantity;
+  const addedProduct = products.find((product) => product.id === id);
+  if (addedProduct && typeof gtag === "function") gtag("event", "add_to_cart", { currency: "JPY", value: productPriceJpy(addedProduct) * quantity, items: [{ item_id: id, item_name: addedProduct.title, price: productPriceJpy(addedProduct), quantity }] });
   cartSuggestionStatus.textContent = "";
   resetShippingQuote("Cart updated. Recalculate shipping for the new parcel.");
   renderCart();
@@ -1413,6 +1375,8 @@ rankingGrid.addEventListener("click", (event) => {
   if (!button) return;
   const id = button.dataset.rankingAdd;
   state.cart[id] = (state.cart[id] || 0) + 1;
+  const addedProduct = products.find((product) => product.id === id);
+  if (addedProduct && typeof gtag === "function") gtag("event", "add_to_cart", { currency: "JPY", value: productPriceJpy(addedProduct), items: [{ item_id: id, item_name: addedProduct.title, price: productPriceJpy(addedProduct), quantity: 1 }] });
   cartSuggestionStatus.textContent = "";
   resetShippingQuote("Cart updated. Recalculate shipping for the new parcel.");
   renderCart();
@@ -1519,7 +1483,13 @@ document.addEventListener("visibilitychange", () => {
   }
 });
 calculateShippingButton.addEventListener("click", calculateShipping);
-checkoutButton.addEventListener("click", openCheckout);
+checkoutButton.addEventListener("click", () => {
+  if (typeof gtag === "function") {
+    const shipment = buildShipment();
+    gtag("event", "begin_checkout", { currency: "JPY", value: shipment.totalValue, items: shipment.items.map((item) => ({ item_name: item.name, price: item.price, quantity: item.quantity })) });
+  }
+  openCheckout();
+});
 closeCheckoutButton.addEventListener("click", closeCheckout);
 checkoutForm.addEventListener("submit", submitOrder);
 checkoutForm.addEventListener("change", (event) => {
@@ -1577,7 +1547,22 @@ async function loadCatalogProducts() {
   }
 }
 
+async function loadExchangeRate() {
+  try {
+    const response = await fetch(`exchange_rate.php?v=${Date.now()}`, { cache: "no-store" });
+    const data = await response.json();
+    if (!response.ok || !data.ok || !Number(data.rate)) return;
+    AUD_JPY_RATE = Number(data.rate);
+    CART_SUGGESTION_LIMIT_JPY = Math.floor(CART_SUGGESTION_LIMIT_AUD * AUD_JPY_RATE);
+    const pricingNote = document.getElementById("how-pricing-works");
+    if (pricingNote) pricingNote.textContent = `Every AUD product price includes ¥990 shipping within Japan per box and uses the ${data.date} reference rate of A$1 = ¥${AUD_JPY_RATE.toFixed(2)}. DHL or FedEx delivery, Australian GST, customs charges, and payment-provider conversion are calculated separately.`;
+  } catch (_) {
+    // Keep the most recent safe fallback rate when the rate service is unavailable.
+  }
+}
+
 async function initialiseStorefront() {
+  await loadExchangeRate();
   const catalogLoaded = await loadCatalogProducts();
   if (catalogLoaded) state.cart = restoreCart();
   renderRanking();

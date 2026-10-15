@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/order_core.php';
+
 session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
 session_start();
 
@@ -142,6 +144,12 @@ function normalizeProduct(array $input, array $existing = []): array {
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 if ($method === 'GET') {
     $products = array_values(array_filter(readCatalog($catalogFile), static fn(array $p): bool => ($p['status'] ?? 'active') === 'active'));
+    $availableStock = mc_available_stock_map();
+    foreach ($products as &$product) {
+        $id = (string) ($product['id'] ?? '');
+        $product['stock'] = max(0, (int) ($availableStock[$id] ?? ($product['stock'] ?? 1)));
+    }
+    unset($product);
     $publicFields = ['id','category','title','series','release','release_date','releaseOrder','jpy','tag','image','status','stock','weight_g','width_cm','depth_cm','height_cm','sort'];
     $products = array_map(static function (array $product) use ($publicFields): array {
         $public = [];

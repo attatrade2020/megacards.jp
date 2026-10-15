@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-const MC_AUD_JPY_RATE = 110.04;
+require_once __DIR__ . '/order_core.php';
+require_once __DIR__ . '/exchange_rate_lib.php';
+
 const MC_DOMESTIC_SHIPPING_JPY = 990;
 
 function mc_catalog_products(): array
@@ -30,12 +32,17 @@ function mc_product_price_jpy(array $product): int
 
 function mc_product_price_aud(array $product): int
 {
-    return (int) round(mc_product_price_jpy($product) / MC_AUD_JPY_RATE);
+    return (int) round(mc_product_price_jpy($product) / mc_aud_jpy_rate());
 }
 
 function mc_product_stock(array $product): int
 {
-    return max(0, (int) ($product['stock'] ?? 1));
+    static $available = null;
+    if (!is_array($available)) $available = mc_available_stock_map();
+    $id = (string) ($product['id'] ?? '');
+    return $id !== '' && array_key_exists($id, $available)
+        ? max(0, (int) $available[$id])
+        : max(0, (int) ($product['stock'] ?? 1));
 }
 
 function mc_product_image_url(array $product): string

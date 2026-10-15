@@ -6,6 +6,7 @@ Allow: /feed.php
 Allow: /google-shopping.xml
 Disallow: /admin.html
 Disallow: /admin_auth.php
+Disallow: /admin_gas_proxy.php
 Disallow: /admin_customers.php
 Disallow: /data/
 Disallow: /api_proxy.php
@@ -19,11 +20,12 @@ Disallow: /password_reset.php
 Disallow: /shipping_products.php
 Disallow: /shipping_rates.php
 Disallow: /snkrdunk_import.php
-
-User-agent: Googlebot
-Allow: /
-
-User-agent: Googlebot-Image
-Allow: /
+Disallow: /checkout_create.php
+Disallow: /pay.php
+Disallow: /paypal_invoice.php
+Disallow: /paypal_webhook.php
+Disallow: /send_order_email.php
+Disallow: /send_payment_confirmed_email.php
+Disallow: /send_shipped_email.php
 
 Sitemap: https://megacards.jp/sitemap.xml

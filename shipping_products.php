@@ -1,12 +1,14 @@
 <?php
 declare(strict_types=1);
 
+session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
+session_start();
+
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 header('X-Content-Type-Options: nosniff');
 
 $dataFile = __DIR__ . '/data/shipping_products.json';
-$adminPassword = 'Kumaiden9';
 
 function readProfiles(string $path): array {
     if (!is_file($path)) {
@@ -34,10 +36,9 @@ if (!is_array($input)) {
     exit;
 }
 
-$providedPassword = (string) ($input['password'] ?? '');
-if (!hash_equals($adminPassword, $providedPassword)) {
+if (empty($_SESSION['mc_admin_authenticated'])) {
     http_response_code(401);
-    echo json_encode(['error' => 'Invalid password']);
+    echo json_encode(['error' => 'Administrator login required.']);
     exit;
 }
 

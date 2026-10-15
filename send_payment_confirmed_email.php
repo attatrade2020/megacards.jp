@@ -1,21 +1,32 @@
 <?php
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
-
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { exit; }
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(['error' => 'POST only']);
-    exit;
-}
-
-$input = json_decode(file_get_contents('php://input'), true);
-if (!$input) {
-    http_response_code(400);
-    echo json_encode(['error' => 'Invalid JSON']);
-    exit;
+declare(strict_types=1);
+require_once __DIR__ . '/order_core.php';
+session_set_cookie_params(['lifetime' => 0, 'path' => '/', 'secure' => true, 'httponly' => true, 'samesite' => 'Strict']);
+if (session_status() !== PHP_SESSION_ACTIVE) session_start();
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') mc_json_response(405, ['error' => 'POST required.']);
+mc_require_same_origin();
+if (empty($_SESSION['mc_admin_authenticated'])) mc_json_response(401, ['error' => 'Administrator login required.']);
+$input = json_decode((string) file_get_contents('php://input'), true);
+if (!is_array($input)) mc_json_response(400, ['error' => 'Invalid request.']);
+$secureNumber = trim((string) ($input['order_number'] ?? ''));
+$secureOrder = mc_get_order($secureNumber, '', true);
+if (is_array($secureOrder)) {
+    try {
+        $secureOrder = mc_finalize_order_payment($secureNumber);
+    } catch (Throwable $error) {
+        error_log('MegaCards stock finalization error: ' . $error->getMessage());
+        mc_json_response(409, ['error' => 'Payment was recorded, but stock could not be updated. Check the order inventory.']);
+    }
+    if (!is_array($secureOrder)) mc_json_response(409, ['error' => 'The secure order could not be finalized.']);
+    $input = [
+        'email' => $secureOrder['email'], 'name' => $secureOrder['name'], 'order_number' => $secureOrder['order_number'],
+        'payment_method' => $secureOrder['payment_method'], 'total_jpy' => $secureOrder['total_jpy'],
+        'display_currency_code' => 'AUD', 'display_currency_symbol' => 'A$', 'aud_jpy_rate' => $secureOrder['aud_jpy_rate'] ?? 110.04,
+        'items' => array_map(static fn(array $item): array => [
+            'id' => (string) ($item['id'] ?? ''), 'title' => (string) ($item['title'] ?? ''),
+            'qty' => (int) ($item['qty'] ?? 1), 'price_jpy' => (int) ($item['unit_price_jpy'] ?? 0),
+        ], array_values(array_filter($secureOrder['items'] ?? [], 'is_array'))),
+    ];
 }
 
 $to = filter_var(trim((string)($input['email'] ?? '')), FILTER_VALIDATE_EMAIL) ?: '';

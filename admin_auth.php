@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/order_core.php';
+
 session_set_cookie_params([
     'lifetime' => 0,
     'path' => '/',
@@ -13,7 +15,8 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 header('X-Content-Type-Options: nosniff');
 
-$adminPassword = 'Kumaiden9';
+$adminPassword = (string) (mc_private_config()['admin_password'] ?? '');
+if ($adminPassword === '') mc_json_response(503, ['ok' => false, 'error' => '管理設定を読み込めません。']);
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
 if ($method === 'GET') {
@@ -25,6 +28,8 @@ if ($method !== 'POST') {
     echo json_encode(['ok' => false, 'error' => 'Method not allowed']);
     exit;
 }
+
+mc_require_same_origin();
 
 $input = json_decode((string) file_get_contents('php://input'), true);
 $action = is_array($input) ? (string) ($input['action'] ?? 'login') : 'login';
@@ -38,6 +43,8 @@ if ($action === 'logout') {
     echo json_encode(['ok' => true]);
     exit;
 }
+
+mc_rate_limit('admin-login', 10, 900);
 
 $now = time();
 $blockedUntil = (int) ($_SESSION['mc_admin_blocked_until'] ?? 0);

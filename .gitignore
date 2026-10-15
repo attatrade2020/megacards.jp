@@ -1,3 +1,7 @@
 data/geo_cache/
 data/member_rate_*.json
 data/members.json
+data/rate_*.json
+data/secure_orders.json
+data/aud_jpy_rate.json
+data/mc_order_status.json
