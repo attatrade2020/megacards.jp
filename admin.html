@@ -1150,24 +1150,56 @@
 
     <script>
         // ===== CONFIG =====
-        const ADMIN_PASSWORD = 'megacards2026'; // Change this
         const GAS_ADMIN_URL = 'https://script.google.com/macros/s/AKfycbyhZu5LMJPiG5VGmAz9ctJ2O6BHsrA7r3-Ej3WLoh6SqiQKzquWURAYG0BWV4GPEAMi/exec';
 
         // ===== AUTH =====
-        function doLogin() {
-            const pw = document.getElementById('authPassword').value;
-            if (pw === ADMIN_PASSWORD) {
-                sessionStorage.setItem('mc_auth', '1');
+        async function adminRequest(payload, password = sessionStorage.getItem('mc_admin_password')) {
+            if (!password) {
+                doLogout();
+                throw new Error('認証が必要です');
+            }
+            const response = await fetch(GAS_ADMIN_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+                body: JSON.stringify({ ...payload, password })
+            });
+            if (response.status === 401) {
+                doLogout();
+                throw new Error('認証に失敗しました。再ログインしてください');
+            }
+            const data = await response.json();
+            if (data.error === 'unauthorized' || data.status === 'unauthorized') {
+                doLogout();
+                throw new Error('認証に失敗しました。再ログインしてください');
+            }
+            if (!response.ok || data.error || data.success === false) {
+                throw new Error(data.error || 'リクエストに失敗しました');
+            }
+            return data;
+        }
+
+        async function doLogin(password = document.getElementById('authPassword').value) {
+            document.getElementById('authError').style.display = 'none';
+            try {
+                const data = await adminRequest({ action: 'verify' }, password);
+                if (data.success !== true) throw new Error('認証に失敗しました');
+                sessionStorage.setItem('mc_admin_password', password);
+                document.getElementById('authPassword').value = '';
                 showApp();
-            } else {
+            } catch (e) {
+                doLogout();
+                document.getElementById('authError').textContent = e.message;
                 document.getElementById('authError').style.display = 'block';
             }
         }
 
         function doLogout() {
             sessionStorage.removeItem('mc_auth');
+            sessionStorage.removeItem('mc_admin_password');
+            document.getElementById('authPassword').value = '';
             document.getElementById('app').style.display = 'none';
             document.getElementById('authScreen').style.display = 'flex';
+            document.querySelectorAll('.modal-overlay.open').forEach(el => el.classList.remove('open'));
         }
 
         function showApp() {
@@ -1440,14 +1472,9 @@
 
             try {
                 if (GAS_ADMIN_URL) {
-                    await fetch(GAS_ADMIN_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'save_product',
-                            product,
-                            password: ADMIN_PASSWORD
-                        })
+                    await adminRequest({
+                        action: 'save_product',
+                        product
                     });
                 }
 
@@ -1493,14 +1520,9 @@
 
             try {
                 if (GAS_ADMIN_URL) {
-                    await fetch(GAS_ADMIN_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'delete_product',
-                            id: deleteTarget,
-                            password: ADMIN_PASSWORD
-                        })
+                    await adminRequest({
+                        action: 'delete_product',
+                        id: deleteTarget
                     });
                 }
 
@@ -1612,8 +1634,7 @@
             showLoading(true);
             try {
                 if (GAS_ADMIN_URL) {
-                    const resp = await fetch(GAS_ADMIN_URL + '?action=orders');
-                    const data = await resp.json();
+                    const data = await adminRequest({ action: 'orders' });
                     allOrders = data.orders || [];
                 } else {
                     await new Promise(r => setTimeout(r, 200));
@@ -1760,26 +1781,21 @@
             if (viewingOrderIndex < 0) return;
 
             const newStatus = document.getElementById('orderStatusSelect').value;
-            allOrders[viewingOrderIndex].status = newStatus;
-            saveOrdersLocal();
-
             if (GAS_ADMIN_URL) {
                 try {
-                    await fetch(GAS_ADMIN_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'update_order_status',
-                            id: allOrders[viewingOrderIndex].id,
-                            status: newStatus,
-                            password: ADMIN_PASSWORD
-                        })
+                    await adminRequest({
+                        action: 'update_order_status',
+                        id: allOrders[viewingOrderIndex].id,
+                        status: newStatus
                     });
                 } catch (e) {
-                    console.error('GAS update error:', e);
+                    showToast('更新に失敗: ' + e.message, 'error');
+                    return;
                 }
             }
 
+            allOrders[viewingOrderIndex].status = newStatus;
+            saveOrdersLocal();
             closeOrderDetail();
             renderOrderTable();
             updateOrderStats();
@@ -1896,16 +1912,10 @@
                 let data;
                 if (GAS_ADMIN_URL) {
                     // Use GAS as a proxy to fetch SNKRDUNK page
-                    const resp = await fetch(GAS_ADMIN_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            action: 'fetch_snkrdunk',
-                            url: row.url.trim(),
-                            password: ADMIN_PASSWORD
-                        })
+                    const result = await adminRequest({
+                        action: 'fetch_snkrdunk',
+                        url: row.url.trim()
                     });
-                    const result = await resp.json();
                     if (result.error) throw new Error(result.error);
                     data = result;
                 } else {
@@ -1979,24 +1989,19 @@
                     notes: 'スニダンURL: ' + row.url
                 };
 
-                allProducts.push(product);
-
                 if (GAS_ADMIN_URL) {
                     try {
-                        await fetch(GAS_ADMIN_URL, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                action: 'save_product',
-                                product,
-                                password: ADMIN_PASSWORD
-                            })
+                        await adminRequest({
+                            action: 'save_product',
+                            product
                         });
                     } catch (e) {
-                        console.error('GAS save error:', e);
+                        showToast('登録に失敗: ' + e.message, 'error');
+                        return;
                     }
                 }
 
+                allProducts.push(product);
                 added++;
             }
 
@@ -2012,8 +2017,9 @@
         }
 
         // ===== INIT =====
-        if (sessionStorage.getItem('mc_auth') === '1') {
-            showApp();
+        sessionStorage.removeItem('mc_auth');
+        if (sessionStorage.getItem('mc_admin_password')) {
+            doLogin(sessionStorage.getItem('mc_admin_password'));
         }
     </script>
 </body>
