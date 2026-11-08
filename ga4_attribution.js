@@ -11,12 +11,19 @@
  * - Sends one custom event "traffic_source_detail" per session
  *   containing a human-readable channel label
  * - Adds channel as a custom parameter to every GA4 page_view
+ * - Internal navigation (same-site referrer, no new campaign
+ *   signal) reuses the session's attribution instead of being
+ *   re-classified as "direct"
+ * - Leaves GA4's own session source/medium/campaign untouched
+ *   (no campaign_* overrides), so GA4 and Google Ads attribution
+ *   keep working natively
  * ============================================================ */
 (function () {
   var GA_ID = 'G-SPWWT45MZF';
   var LS_FIRST = 'mc_first_touch';
   var LS_LAST  = 'mc_last_touch';
   var SS_KEY   = 'mc_session_tagged';
+  var SS_ATTR  = 'mc_session_attribution';
 
   // Ensure dataLayer + gtag exist even if this loads before the bootstrap block
   window.dataLayer = window.dataLayer || [];
@@ -29,6 +36,13 @@
       var u = new URL(window.location.href);
       return u.searchParams.get(name) || '';
     } catch (e) { return ''; }
+  }
+
+  function isInternalReferrer() {
+    try {
+      if (!document.referrer) return false;
+      return new URL(document.referrer).hostname === window.location.hostname;
+    } catch (e) { return false; }
   }
 
   function parseReferrerDomain() {
@@ -52,7 +66,7 @@
       { re: /yandex\./,    s: 'yandex',    m: 'organic', c: 'Organic Search' },
       { re: /facebook\.|fb\.me|fb\.com/,        s: 'facebook',  m: 'social', c: 'Social' },
       { re: /instagram\./, s: 'instagram', m: 'social',  c: 'Social' },
-      { re: /t\.co|twitter\.com|x\.com/,        s: 'twitter',   m: 'social', c: 'Social' },
+      { re: /(^|\.)(t\.co|twitter\.com|x\.com)$/,        s: 'twitter',   m: 'social', c: 'Social' },
       { re: /tiktok\./,    s: 'tiktok',    m: 'social',  c: 'Social' },
       { re: /reddit\./,    s: 'reddit',    m: 'social',  c: 'Social' },
       { re: /youtube\./,   s: 'youtube',   m: 'social',  c: 'Social' },
@@ -81,8 +95,20 @@
   var ttclid  = getParam('ttclid');
 
   var attribution;
+  var hasCampaignSignal = !!(utm.source || utm.medium || utm.campaign || gclid || msclkid || fbclid || ttclid);
+  var externalReferrer = parseReferrerDomain();
+  // Internal navigation (or a reload) with no new campaign signal is not a
+  // new touch: reuse this session's attribution, or the stored last touch
+  // when a new tab was opened from a MegaCards page.
+  var reused = null;
+  if (!hasCampaignSignal && !externalReferrer) {
+    reused = readSS(SS_ATTR) || (isInternalReferrer() ? readLS(LS_LAST) : null);
+  }
+  var isNewTouch = !reused;
 
-  if (utm.source || utm.medium || utm.campaign) {
+  if (reused) {
+    attribution = reused;
+  } else if (utm.source || utm.medium || utm.campaign) {
     // Explicit UTM tagging wins
     var ch = 'Other';
     var m = (utm.medium || '').toLowerCase();
@@ -119,16 +145,21 @@
     };
   }
 
-  attribution.landing_page = window.location.pathname + window.location.search;
-  attribution.first_seen_at = new Date().toISOString();
+  if (isNewTouch) {
+    attribution.landing_page = window.location.pathname + window.location.search;
+    attribution.first_seen_at = new Date().toISOString();
+  }
 
   // ---------- persist first + last touch ----------
   function readLS(k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } }
   function writeLS(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
+  function readSS(k) { try { return JSON.parse(sessionStorage.getItem(k) || 'null'); } catch (e) { return null; } }
+  function writeSS(k, v) { try { sessionStorage.setItem(k, JSON.stringify(v)); } catch (e) {} }
 
   var firstTouch = readLS(LS_FIRST);
   if (!firstTouch) { firstTouch = attribution; writeLS(LS_FIRST, firstTouch); }
-  writeLS(LS_LAST, attribution);
+  if (isNewTouch) writeLS(LS_LAST, attribution);
+  writeSS(SS_ATTR, attribution);
 
   // ---------- push to GA4 ----------
   gtag('js', new Date());
@@ -141,12 +172,9 @@
     traffic_medium_detail:  attribution.medium,
     traffic_campaign_detail: attribution.campaign,
     detection_method:       attribution.method,
-    // GA4 reserved params (recognized by the property)
-    campaign_source:  attribution.source,
-    campaign_medium:  attribution.medium,
-    campaign_name:    attribution.campaign,
-    campaign_term:    attribution.term || undefined,
-    campaign_content: attribution.content || undefined,
+    // No campaign_source/medium/name overrides: GA4 reads UTM tags,
+    // gclid and the referrer itself. Forcing them here made every
+    // referrer-less page view report "(direct) / (none)".
   });
 
   // Persistent user properties (first-touch — never overwritten once set)
