@@ -31,9 +31,11 @@ tmp/
 backup/
 backups/
 deploy-backups/
+.deploy-backups/
 deployment-backups/
 audit-output/
 audit/holographic-redesign/
+audit/white-showroom/
 outputs/
 artifacts/
 .sites-*/

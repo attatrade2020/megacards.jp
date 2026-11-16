@@ -20,7 +20,9 @@ The storefront includes an accessible three-slide hero rotation and a member-reg
 
 ## Visual system
 
-The storefront uses the MCJ holographic brand system in `brand-theme.css`, with progressive motion enhancements in `brand-motion.js`. The current implementation reference is stored at `design/mcj-holographic-arena-reference.png`; production brand artwork is stored under `assets/brand`.
+The storefront uses the white MCJ Collector Showroom layer in `white-showroom.css` on top of the shared `brand-theme.css` tokens, with progressive motion enhancements in `brand-motion.js`. The selected implementation reference is stored at `design/mcj-white-showroom-reference.png`; production brand artwork and optimized showroom illustrations are stored under `assets/brand`.
+
+The visual layer is portable: it uses repository-relative asset paths, standard web fonts with fallbacks, CSS breakpoints, and `prefers-reduced-motion`. No machine-specific paths or credentials are required.
 
 Fonts are loaded from Google Fonts and interface icons use the pinned Phosphor Icons Web 2.1.2 stylesheet from jsDelivr with subresource integrity checking. The production content security policy explicitly permits that pinned icon stylesheet and its font files. If either service is unavailable, the store remains usable with system fonts, visible labels, and critical button fallbacks. No build step is required.
 
