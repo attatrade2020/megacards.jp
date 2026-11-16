@@ -359,10 +359,29 @@ body::before { display: none; }
 .legal-update { color: #43506a; background: #eefaff; border-left-color: #16cfe3; }
 
 footer { color: #7a859b; background: #fff; border-top: 1px solid #dfe6f0; }
+.footer__inner { min-height: 178px; flex-wrap: wrap; row-gap: 16px; }
 .brand--footer { color: #101938; }
 .footer__inner p,
 .footer__inner a { color: #68748b; }
 .footer__inner a:hover { color: #075dc0; }
+.footer__socials { display: flex; align-items: center; gap: 10px; }
+.footer__inner .footer-social {
+  display: flex;
+  min-height: 54px;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 13px;
+  color: #14203e;
+  background: #f7f9fe;
+  border: 1px solid #d7e0ee;
+  border-radius: 14px;
+  text-decoration: none;
+  transition: transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+.footer__inner .footer-social:hover { color: #14203e; border-color: #8dbfe4; box-shadow: 0 10px 24px rgba(51,74,126,.1); transform: translateY(-2px); }
+.footer-social i { display: grid; width: 34px; height: 34px; flex: 0 0 auto; place-items: center; color: #08152d; background: linear-gradient(135deg, #55e9f1, #c990f5); border-radius: 10px; font-size: 1.15rem; }
+.footer-social span { display: flex; flex-direction: column; color: #14203e; font-size: .72rem; font-weight: 800; line-height: 1.25; white-space: nowrap; }
+.footer-social small { color: #5f6b82; font-size: .65rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
 
 @media (max-width: 1240px) {
   .product-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
@@ -417,8 +436,11 @@ footer { color: #7a859b; background: #fff; border-top: 1px solid #dfe6f0; }
   .product-grid { grid-template-columns: 1fr; }
   .product-card h3 { min-height: 0; font-size: .96rem; }
   .shipping__visual { min-height: 315px; }
+  .footer__socials { width: 100%; align-items: stretch; flex-direction: column; }
+  .footer__inner .footer-social { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .reveal-on-scroll { opacity: 1; transform: none; }
+  .footer__inner .footer-social:hover { transform: none; }
 }
