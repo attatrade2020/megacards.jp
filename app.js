@@ -467,11 +467,13 @@ let currentMember = null;
 const heroSlides = [
   {
     category: "pokemon",
-    eyebrow: "Pokémon · New drop",
-    title: "Japan’s newest Pokémon.",
-    accent: "Ready to ship.",
-    lead: "Authentic Japanese booster boxes, packed in Japan and tracked to your door.",
-    action: "Explore Pokémon",
+    filterCategory: "all",
+    sort: "newest",
+    eyebrow: "The MCJ collector showroom",
+    title: "Japanese boxes.",
+    accent: "Collector ready.",
+    lead: "Authentic Japanese booster boxes, shipped from Japan to Australian collectors.",
+    action: "Shop new releases",
     badge: "Latest Pokémon",
     front: "m6a-30th-celebration",
     back: "m6-storm-emeralda",
@@ -481,8 +483,8 @@ const heroSlides = [
   {
     category: "onepiece",
     eyebrow: "ONE PIECE · Japan lineup",
-    title: "Set sail for the latest.",
-    accent: "Direct from Japan.",
+    title: "ONE PIECE boxes.",
+    accent: "Ready to collect.",
     lead: "Japanese ONE PIECE booster boxes with clear pricing and tracked delivery.",
     action: "Explore ONE PIECE",
     badge: "ONE PIECE pick",
@@ -494,8 +496,8 @@ const heroSlides = [
   {
     category: "yugioh",
     eyebrow: "Yu-Gi-Oh! OCG · Japan",
-    title: "Enter the OCG arena.",
-    accent: "Built for collectors.",
+    title: "Japanese OCG.",
+    accent: "Showroom ready.",
     lead: "Original Japanese OCG releases, securely packed and tracked to Australia.",
     action: "Explore Yu-Gi-Oh!",
     badge: "Yu-Gi-Oh! OCG",
@@ -508,7 +510,7 @@ const heroSlides = [
     category: "pokemon",
     eyebrow: "Pokémon",
     title: "High-class Pokémon.",
-    accent: "Fresh from Japan.",
+    accent: "Made to display.",
     lead: "High-class and expansion boxes sourced locally in Japan.",
     action: "Explore Pokémon boxes",
     badge: "Collector rotation",
@@ -520,7 +522,7 @@ const heroSlides = [
   {
     category: "onepiece",
     eyebrow: "ONE PIECE Card Game",
-    title: "More ONE PIECE.",
+    title: "Extra boosters.",
     accent: "More adventure.",
     lead: "Booster and extra-booster boxes dispatched direct from Japan.",
     action: "Explore ONE PIECE boxes",
@@ -534,7 +536,7 @@ const heroSlides = [
     category: "yugioh",
     eyebrow: "Yu-Gi-Oh! OCG",
     title: "Limited OCG drops.",
-    accent: "Collector ready.",
+    accent: "Direct from Japan.",
     lead: "Limited Japanese OCG boxes with tracked dispatch to Australia.",
     action: "Explore Yu-Gi-Oh! boxes",
     badge: "Value OCG pick",
@@ -570,6 +572,8 @@ function renderHeroSlide(index, animate = true) {
     actionIcon.setAttribute("aria-hidden", "true");
     heroPrimaryAction.replaceChildren(document.createTextNode(`${slide.action} `), actionIcon);
     heroPrimaryAction.dataset.category = slide.category;
+    heroPrimaryAction.dataset.filterCategory = slide.filterCategory || slide.category;
+    heroPrimaryAction.dataset.sort = slide.sort || "featured";
     heroBadge.textContent = slide.badge;
     heroProductName.textContent = slide.name;
     if (front) {
@@ -663,7 +667,8 @@ function rankingCard(product, index) {
 function renderRanking() {
   const rankedProducts = rankedProductIds
     .map((id) => products.find((product) => product.id === id))
-    .filter(Boolean);
+    .filter(Boolean)
+    .slice(0, 3);
   rankingGrid.innerHTML = rankedProducts.map(rankingCard).join("");
 }
 
@@ -677,6 +682,17 @@ function renderProducts() {
   if (state.sort === "price-low") filtered.sort((a, b) => productPriceJpy(a) - productPriceJpy(b));
   if (state.sort === "price-high") filtered.sort((a, b) => productPriceJpy(b) - productPriceJpy(a));
   productGrid.innerHTML = filtered.length ? filtered.map(productCard).join("") : '<div class="empty-state">No boxes match your search.</div>';
+}
+
+function updateCategoryCounts() {
+  categoryTabs.querySelectorAll("[data-category]").forEach((tab) => {
+    const category = tab.dataset.category;
+    const count = category === "all"
+      ? products.length
+      : products.filter((product) => product.category === category).length;
+    const badge = tab.querySelector("span");
+    if (badge) badge.textContent = String(count);
+  });
 }
 
 function cartSubtotalJpy() {
@@ -747,7 +763,7 @@ function renderCustomsEstimate() {
   if (productValueAud <= 1000) {
     customsIndicator.dataset.status = "low";
     customsTitle.textContent = "Customs duty generally not charged";
-    customsMessage.textContent = `${audLabel(productValueAud)} product value is within the ABF low-value threshold of A$1,000. GST may still apply at sale; ABF makes the final assessment.`;
+    customsMessage.textContent = `${audLabel(productValueAud)} product value is within the ABF low-value threshold of A$1,000. Australian Border Force makes the final assessment of any import requirements.`;
   } else {
     customsIndicator.dataset.status = "high";
     customsTitle.textContent = "Import charges may apply";
@@ -1482,8 +1498,11 @@ heroSliderDots.addEventListener("click", (event) => {
   restartHeroTimer();
 });
 heroPrimaryAction.addEventListener("click", () => {
-  const tab = categoryTabs.querySelector(`[data-category="${heroPrimaryAction.dataset.category}"]`);
+  const tab = categoryTabs.querySelector(`[data-category="${heroPrimaryAction.dataset.filterCategory}"]`);
   if (tab) tab.click();
+  state.sort = heroPrimaryAction.dataset.sort || "featured";
+  sortSelect.value = state.sort;
+  renderProducts();
 });
 document.addEventListener("visibilitychange", () => {
   if (document.hidden && heroSlideTimer) {
@@ -1566,7 +1585,7 @@ async function loadExchangeRate() {
     AUD_JPY_RATE = Number(data.rate);
     CART_SUGGESTION_LIMIT_JPY = Math.floor(CART_SUGGESTION_LIMIT_AUD * AUD_JPY_RATE);
     const pricingNote = document.getElementById("how-pricing-works");
-    if (pricingNote) pricingNote.textContent = `Every AUD product price includes ¥990 shipping within Japan per box and uses the ${data.date} reference rate of A$1 = ¥${AUD_JPY_RATE.toFixed(2)}. DHL or FedEx delivery, Australian GST, customs charges, and payment-provider conversion are calculated separately.`;
+    if (pricingNote) pricingNote.textContent = `Every AUD product price includes ¥990 shipping within Japan per box and uses the ${data.date} reference rate of A$1 = ¥${AUD_JPY_RATE.toFixed(2)}. DHL or FedEx delivery, customs charges, and payment-provider conversion are calculated separately.`;
   } catch (_) {
     // Keep the most recent safe fallback rate when the rate service is unavailable.
   }
@@ -1576,6 +1595,7 @@ async function initialiseStorefront() {
   await loadExchangeRate();
   const catalogLoaded = await loadCatalogProducts();
   if (catalogLoaded) state.cart = restoreCart();
+  updateCategoryCounts();
   renderRanking();
   renderProducts();
   renderCart();

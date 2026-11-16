@@ -130,7 +130,7 @@ header('Cache-Control: public, max-age=900');
           <input id="quantity" type="number" min="1" max="<?= max(1, min(99, $stock)) ?>" value="1" aria-label="Quantity" <?= $stock > 0 ? '' : 'disabled' ?>>
           <button type="submit" <?= $stock > 0 ? '' : 'disabled' ?>><?= $stock > 0 ? 'Add to cart' : 'Currently sold out' ?></button>
         </form>
-        <p class="fine">Product prices are in Australian dollars. International shipping, Australian GST, customs charges and payment-provider conversion are separate where applicable. Returns and cancellations are not accepted after payment.</p>
+        <p class="fine">Product prices are in Australian dollars. International shipping, customs charges and payment-provider conversion are separate where applicable. Returns and cancellations are not accepted after payment.</p>
         <div class="links"><a href="/faq.php">FAQ</a><a href="/terms.html">Terms</a></div>
       </div>
     </article>

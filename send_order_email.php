@@ -379,7 +379,7 @@ $html = "<!DOCTYPE html>
     <!-- Footer -->
     <tr><td style='background:#f8f8f8;padding:24px 32px;border-top:1px solid #eee;'>
         <p style='font-size:12px;color:#999;margin:0 0 8px;line-height:1.6;'>
-            <strong>Important:</strong> Import duties, GST, VAT, or customs fees may apply. These charges are the buyer's responsibility.
+            <strong>Important:</strong> Import duties or customs fees may apply. These charges are the buyer's responsibility.
         </p>
         <p style='font-size:12px;color:#bbb;margin:0;text-align:center;'>
             © " . date('Y') . " MegaCards.jp — Atta Trade | Licensed Dealer #451460009881

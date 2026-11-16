@@ -145,7 +145,7 @@ $html = "<!DOCTYPE html>
                 <li>Your order will be packed and shipped within <strong>3–10 business days</strong> (handling time).</li>
                 <li>Once shipped, you will receive another email with the <strong>tracking number</strong>.</li>
                 <li>All items are shipped directly from Japan. Only the carrier's <strong>standard insurance</strong> is included.</li>
-                <li>Import duties, GST, VAT, or customs fees (if any) are the buyer's responsibility.</li>
+                <li>Import duties or customs fees (if any) are the buyer's responsibility.</li>
             </ul>
         </div>
 

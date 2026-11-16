@@ -127,7 +127,7 @@ $html = "<!DOCTYPE html>
             <ul style='margin:0;padding-left:20px;font-size:13px;color:#555;line-height:1.7;'>
                 <li>Tracking information may take <strong>24–48 hours</strong> to appear online after dispatch.</li>
                 <li>Delivery time varies by destination, typically <strong>5–14 business days</strong>.</li>
-                <li>Import duties, GST, VAT, or customs fees (if any) are the buyer's responsibility upon delivery.</li>
+                <li>Import duties or customs fees (if any) are the buyer's responsibility upon delivery.</li>
                 <li>Please ensure someone is available at the delivery address to sign for the package if required.</li>
                 <li>This shipment is covered <strong>only by the carrier's standard insurance</strong>. No additional insurance is included.</li>
             </ul>
