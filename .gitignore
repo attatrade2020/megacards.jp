@@ -33,6 +33,7 @@ backups/
 deploy-backups/
 deployment-backups/
 audit-output/
+audit/holographic-redesign/
 outputs/
 artifacts/
 .sites-*/
