@@ -6,9 +6,23 @@ Static storefront prototype for Japanese Pokemon, ONE PIECE, and Yu-Gi-Oh! boxes
 
 Open `index.html` directly, or start any static HTTP server in this directory.
 
+For a production-like local preview with PHP installed:
+
+```bash
+php -S 127.0.0.1:8787 -t .
+```
+
+Then open `http://127.0.0.1:8787/index.html`. The frontend is portable and does not contain machine-specific paths or credentials.
+
 Production requests enter through `index.php` and `faq.php`. `access_gate.php` checks the visitor country from the server-side IP address, caches only the country result under `data/geo_cache`, and requires a password-backed 12-hour session for access from Japan. Direct requests for the public HTML files are redirected through the PHP gate by `.htaccess`.
 
 The storefront includes an accessible three-slide hero rotation and a member-registration dialog. `member_register.php` validates and rate-limits registrations, then stores member records with one-way password hashes in the web-blocked `data/members.json` file.
+
+## Visual system
+
+The storefront uses the MCJ holographic brand system in `brand-theme.css`, with progressive motion enhancements in `brand-motion.js`. The current implementation reference is stored at `design/mcj-holographic-arena-reference.png`; production brand artwork is stored under `assets/brand`.
+
+Fonts are loaded from Google Fonts and interface icons use the pinned Phosphor Icons Web 2.1.2 stylesheet from jsDelivr with subresource integrity checking. The production content security policy explicitly permits that pinned icon stylesheet and its font files. If either service is unavailable, the store remains usable with system fonts, visible labels, and critical button fallbacks. No build step is required.
 
 ## Product data
 

@@ -467,10 +467,11 @@ let currentMember = null;
 const heroSlides = [
   {
     category: "pokemon",
-    eyebrow: "Pokémon",
-    title: "Japanese Pokémon boxes",
-    lead: "Sealed boxes with tracked DHL or FedEx delivery.",
-    action: "Shop Pokémon boxes",
+    eyebrow: "Pokémon · New drop",
+    title: "Japan’s newest Pokémon.",
+    accent: "Ready to ship.",
+    lead: "Authentic Japanese booster boxes, packed in Japan and tracked to your door.",
+    action: "Explore Pokémon",
     badge: "Latest Pokémon",
     front: "m6a-30th-celebration",
     back: "m6-storm-emeralda",
@@ -479,10 +480,11 @@ const heroSlides = [
   },
   {
     category: "onepiece",
-    eyebrow: "ONE PIECE Card Game",
-    title: "Japanese ONE PIECE boxes",
-    lead: "Booster boxes with tracked DHL or FedEx delivery.",
-    action: "Shop ONE PIECE boxes",
+    eyebrow: "ONE PIECE · Japan lineup",
+    title: "Set sail for the latest.",
+    accent: "Direct from Japan.",
+    lead: "Japanese ONE PIECE booster boxes with clear pricing and tracked delivery.",
+    action: "Explore ONE PIECE",
     badge: "ONE PIECE pick",
     front: "op13-carrying-on-his-will",
     back: "op14-azure-seas-seven",
@@ -491,10 +493,11 @@ const heroSlides = [
   },
   {
     category: "yugioh",
-    eyebrow: "Yu-Gi-Oh! OCG",
-    title: "Japanese Yu-Gi-Oh! boxes",
-    lead: "OCG boxes with tracked DHL or FedEx delivery.",
-    action: "Shop Yu-Gi-Oh! boxes",
+    eyebrow: "Yu-Gi-Oh! OCG · Japan",
+    title: "Enter the OCG arena.",
+    accent: "Built for collectors.",
+    lead: "Original Japanese OCG releases, securely packed and tracked to Australia.",
+    action: "Explore Yu-Gi-Oh!",
     badge: "Yu-Gi-Oh! OCG",
     front: "yac1-original-artwork",
     back: "26lp-world-championship",
@@ -504,8 +507,9 @@ const heroSlides = [
   {
     category: "pokemon",
     eyebrow: "Pokémon",
-    title: "More Pokémon sets",
-    lead: "High-class and expansion boxes from Japan.",
+    title: "High-class Pokémon.",
+    accent: "Fresh from Japan.",
+    lead: "High-class and expansion boxes sourced locally in Japan.",
     action: "Explore Pokémon boxes",
     badge: "Collector rotation",
     front: "m2-inferno-x",
@@ -516,8 +520,9 @@ const heroSlides = [
   {
     category: "onepiece",
     eyebrow: "ONE PIECE Card Game",
-    title: "More ONE PIECE sets",
-    lead: "Booster and extra-booster boxes from Japan.",
+    title: "More ONE PIECE.",
+    accent: "More adventure.",
+    lead: "Booster and extra-booster boxes dispatched direct from Japan.",
     action: "Explore ONE PIECE boxes",
     badge: "Extra booster pick",
     front: "eb04-egghead-crisis",
@@ -528,8 +533,9 @@ const heroSlides = [
   {
     category: "yugioh",
     eyebrow: "Yu-Gi-Oh! OCG",
-    title: "More Yu-Gi-Oh! sets",
-    lead: "Limited and OCG boxes from Japan.",
+    title: "Limited OCG drops.",
+    accent: "Collector ready.",
+    lead: "Limited Japanese OCG boxes with tracked dispatch to Australia.",
     action: "Explore Yu-Gi-Oh! boxes",
     badge: "Value OCG pick",
     front: "dbgv-glorious-victors",
@@ -555,9 +561,14 @@ function renderHeroSlide(index, animate = true) {
   const apply = () => {
     hero.dataset.heroTheme = slide.category;
     heroEyebrow.textContent = slide.eyebrow;
-    heroTitle.textContent = slide.title;
+    const heroAccent = document.createElement("span");
+    heroAccent.textContent = slide.accent;
+    heroTitle.replaceChildren(document.createTextNode(`${slide.title} `), heroAccent);
     heroLead.textContent = slide.lead;
-    heroPrimaryAction.textContent = slide.action;
+    const actionIcon = document.createElement("i");
+    actionIcon.className = "ph ph-arrow-up-right";
+    actionIcon.setAttribute("aria-hidden", "true");
+    heroPrimaryAction.replaceChildren(document.createTextNode(`${slide.action} `), actionIcon);
     heroPrimaryAction.dataset.category = slide.category;
     heroBadge.textContent = slide.badge;
     heroProductName.textContent = slide.name;
@@ -623,7 +634,7 @@ function productCard(product) {
           </div>
           <div class="product-card__actions">
             <label class="product-card__quantity"><span>Qty</span><input type="number" min="1" max="99" step="1" value="1" inputmode="numeric" data-quantity="${product.id}" aria-label="Quantity for ${escapeHtml(product.title)}" ${soldOut ? "disabled" : ""}></label>
-            <button class="add-button" type="button" data-add="${product.id}" aria-label="Add selected quantity of ${escapeHtml(product.title)} to cart" ${soldOut ? "disabled" : ""}>${soldOut ? "×" : "+"}</button>
+            <button class="add-button" type="button" data-add="${product.id}" aria-label="Add selected quantity of ${escapeHtml(product.title)} to cart" ${soldOut ? "disabled" : ""}><span aria-hidden="true">${soldOut ? "×" : "+"}</span></button>
           </div>
         </div>
       </div>
@@ -643,7 +654,7 @@ function rankingCard(product, index) {
         <h3>${escapeHtml(product.title)}</h3>
         <div class="ranking-card__footer">
           <div><small>Price per box</small><strong>${audLabel(aud(productPriceJpy(product)))}</strong></div>
-          <button type="button" data-ranking-add="${product.id}" aria-label="Add one ${escapeHtml(product.title)} to cart" ${soldOut ? "disabled" : ""}>${soldOut ? "Sold out" : "Add to cart"}</button>
+          <button type="button" data-ranking-add="${product.id}" aria-label="Add one ${escapeHtml(product.title)} to cart" ${soldOut ? "disabled" : ""}>${soldOut ? "Sold out" : "Add to cart"}${soldOut ? "" : ' <i class="ph ph-plus" aria-hidden="true"></i>'}</button>
         </div>
       </div>
     </article>`;

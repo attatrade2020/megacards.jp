@@ -11,25 +11,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.2/src/regular/style.css" integrity="sha384-6p9AefaqUhEVheRlj1mpAkbngHXy9mbYMrIdcIt4Jlc9lOLIablJq3bBsLOjGwZ7" crossorigin="anonymous">
   <link rel="stylesheet" href="styles.css?v=20261012-02">
+  <link rel="stylesheet" href="brand-theme.css?v=20261116-01">
 </head>
 <body>
   <div class="announcement">
     <div class="shell announcement__inner">
-      <span>Shipped from Japan</span>
-      <a href="#shipping">Shipping info</a>
+      <span><i class="ph ph-lightning" aria-hidden="true"></i> Direct from Japan · Tracked to Australia</span>
+      <a href="#shipping">See how shipping works <i class="ph ph-arrow-right" aria-hidden="true"></i></a>
     </div>
   </div>
 
   <header class="site-header">
     <div class="shell header__inner">
       <a class="brand" href="#top" aria-label="MegaCards home">
-        <span class="brand__mark" aria-hidden="true">M</span>
-        <span>MegaCards<span class="brand__suffix">.jp</span></span>
+        <img class="brand__logo" src="assets/brand/mcj-logo.png" alt="" width="72" height="72">
+        <span class="brand__wordmark">MEGACARDS<span class="brand__suffix">.JP</span></span>
       </a>
       <nav class="main-nav" aria-label="Main navigation">
-        <a href="#shop">Shop boxes</a>
-        <a href="#ranking">Ranking</a>
+        <a href="#shop">New releases</a>
+        <a href="#ranking">Top picks</a>
         <a href="#shipping">Shipping</a>
         <a href="faq.php">FAQ</a>
       </nav>
@@ -45,7 +47,8 @@
         <button class="member-summary__logout" id="memberLogout" type="button">Log out</button>
       </div>
       <button class="cart-button" id="cartButton" type="button" aria-label="Shopping cart, 0 items" aria-expanded="false" aria-controls="cartPanel">
-        <svg class="cart-button__icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2.2 10.1a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 1.9-1.4L21 8H7M10 20a1 1 0 1 1-2 0 1 1 0 0 1 2 0Zm9 0a1 1 0 1 1-2 0 1 1 0 0 1 2 0Z"/></svg>
+        <i class="ph ph-shopping-bag cart-button__icon" aria-hidden="true"></i>
+        <span class="cart-button__label">Cart</span>
         <span id="cartCount" aria-hidden="true">0</span>
       </button>
     </div>
@@ -55,13 +58,19 @@
     <section class="hero">
       <div class="shell hero__grid">
         <div class="hero__content">
-          <p class="eyebrow" id="heroEyebrow">Pokémon</p>
-          <h1 id="heroTitle">Japanese Pokémon boxes</h1>
-          <p class="hero__lead" id="heroLead">Sealed boxes with tracked DHL or FedEx delivery.</p>
+          <p class="eyebrow" id="heroEyebrow">Japanese TCG · New drop</p>
+          <h1 id="heroTitle">Japan’s newest boxes. <span>Ready to ship.</span></h1>
+          <p class="hero__lead" id="heroLead">Authentic Japanese booster boxes, packed in Japan and tracked to your door.</p>
           <div class="hero__actions">
-            <a class="button button--primary" id="heroPrimaryAction" href="#shop">Shop latest boxes</a>
-            <button class="button button--secondary" id="heroRegisterAction" type="button">Create free account</button>
+            <a class="button button--primary" id="heroPrimaryAction" href="#shop">Explore the lineup <i class="ph ph-arrow-up-right" aria-hidden="true"></i></a>
+            <a class="button button--secondary" href="#shipping">How shipping works <i class="ph ph-play" aria-hidden="true"></i></a>
+            <button id="heroRegisterAction" type="button" hidden>Create free account</button>
           </div>
+          <ul class="hero__trust" aria-label="Store highlights">
+            <li><i class="ph ph-seal-check" aria-hidden="true"></i> Authentic Japanese stock</li>
+            <li><i class="ph ph-package" aria-hidden="true"></i> Securely packed in Japan</li>
+            <li><i class="ph ph-airplane-tilt" aria-hidden="true"></i> DHL / FedEx tracking</li>
+          </ul>
         </div>
         <div class="hero__visual" aria-label="Rotating selection of featured Japanese trading card boxes">
           <div class="hero__live-pill"><span aria-hidden="true"></span> Live Japan lineup</div>
@@ -89,11 +98,19 @@
       </div>
     </section>
 
+    <section class="release-track" aria-label="Release journey">
+      <div class="shell release-track__inner">
+        <div><span>01</span><i class="ph ph-sparkle" aria-hidden="true"></i><strong>New in Japan</strong><small>Fresh releases sourced locally</small></div>
+        <div><span>02</span><i class="ph ph-shield-check" aria-hidden="true"></i><strong>Prepared &amp; packed</strong><small>Securely prepared for dispatch</small></div>
+        <div><span>03</span><i class="ph ph-globe-hemisphere-east" aria-hidden="true"></i><strong>Tracked to you</strong><small>DHL or FedEx international delivery</small></div>
+      </div>
+    </section>
+
     <section class="value-strip" id="why-us">
       <div class="shell value-strip__grid">
-        <div><span class="value-strip__index">01</span><strong>Ships from Japan</strong><small>Packed in Japan for direct export</small></div>
-        <div><span class="value-strip__index">02</span><strong>Japanese boxes</strong><small>Product condition shown clearly</small></div>
-        <div><span class="value-strip__index">03</span><strong>Tracked delivery</strong><small>DHL & FedEx shipping</small></div>
+        <div><span class="value-strip__index"><i class="ph ph-map-pin" aria-hidden="true"></i></span><strong>Ships from Japan</strong><small>Packed in Japan for direct export</small></div>
+        <div><span class="value-strip__index"><i class="ph ph-cards" aria-hidden="true"></i></span><strong>Japanese boxes</strong><small>Product condition shown clearly</small></div>
+        <div><span class="value-strip__index"><i class="ph ph-radar" aria-hidden="true"></i></span><strong>Tracked delivery</strong><small>DHL &amp; FedEx shipping</small></div>
       </div>
     </section>
 
@@ -101,8 +118,8 @@
       <div class="shell">
         <div class="section-heading ranking__heading">
           <div>
-            <p class="eyebrow eyebrow--dark">Current sales ranking</p>
-            <h2>Pokémon box sales ranking</h2>
+            <p class="eyebrow eyebrow--dark">Arena ranking · Collector picks</p>
+            <h2>Collectors’ top picks</h2>
           </div>
         </div>
         <div class="ranking-grid" id="rankingGrid" aria-live="polite"></div>
@@ -111,38 +128,47 @@
 
     <section class="catalog" id="shop">
       <div class="shell">
-        <div class="category-tabs" id="categoryTabs" role="tablist" aria-label="Trading card game">
-          <button class="category-tab active" type="button" role="tab" aria-selected="true" data-category="all">All <span>26</span></button>
-          <button class="category-tab" type="button" role="tab" aria-selected="false" data-category="pokemon">Pokémon <span>18</span></button>
-          <button class="category-tab" type="button" role="tab" aria-selected="false" data-category="onepiece">ONE PIECE <span>4</span></button>
-          <button class="category-tab" type="button" role="tab" aria-selected="false" data-category="yugioh">Yu-Gi-Oh! <span>4</span></button>
+        <div class="section-heading catalog__heading">
+          <div><p class="eyebrow eyebrow--dark">The Japan lineup</p><h2>Find your next box</h2></div>
+          <p>Browse authentic Japanese releases across today’s biggest trading card games.</p>
         </div>
-
-        <div class="catalog-tools">
-          <label class="search-field">
-            <span class="sr-only">Search boxes</span>
-            <input id="searchInput" type="search" placeholder="Search by set name" autocomplete="off">
-          </label>
-          <label class="sort-field">
-            <span>Sort</span>
-            <select id="sortSelect">
-              <option value="featured">Featured</option>
-              <option value="newest">Newest release</option>
-              <option value="price-low">Price: low to high</option>
-              <option value="price-high">Price: high to low</option>
-            </select>
-          </label>
+        <div class="catalog__workspace">
+          <div class="category-tabs" id="categoryTabs" role="tablist" aria-label="Trading card game">
+            <p>Browse games</p>
+            <button class="category-tab active" type="button" role="tab" aria-selected="true" data-category="all"><i class="ph ph-squares-four" aria-hidden="true"></i> All <span>26</span></button>
+            <button class="category-tab" type="button" role="tab" aria-selected="false" data-category="pokemon"><i class="ph ph-lightning" aria-hidden="true"></i> Pokémon <span>18</span></button>
+            <button class="category-tab" type="button" role="tab" aria-selected="false" data-category="onepiece"><i class="ph ph-anchor" aria-hidden="true"></i> ONE PIECE <span>4</span></button>
+            <button class="category-tab" type="button" role="tab" aria-selected="false" data-category="yugioh"><i class="ph ph-pyramid" aria-hidden="true"></i> Yu-Gi-Oh! <span>4</span></button>
+          </div>
+          <div class="catalog__main">
+            <div class="catalog-tools">
+              <label class="search-field">
+                <i class="ph ph-magnifying-glass" aria-hidden="true"></i><span class="sr-only">Search boxes</span>
+                <input id="searchInput" type="search" placeholder="Search by set name" autocomplete="off">
+              </label>
+              <label class="sort-field">
+                <span>Sort</span>
+                <select id="sortSelect">
+                  <option value="featured">Featured</option>
+                  <option value="newest">Newest release</option>
+                  <option value="price-low">Price: low to high</option>
+                  <option value="price-high">Price: high to low</option>
+                </select>
+              </label>
+            </div>
+            <div class="product-grid" id="productGrid" aria-live="polite"></div>
+            <p class="catalog-note" id="how-pricing-works">Every AUD product price includes ¥990 shipping within Japan per box and uses the 8 October 2026 mid-market rate of A$1 = ¥110.04. DHL or FedEx delivery, Australian GST, customs charges, and payment-provider conversion are calculated separately.</p>
+          </div>
         </div>
-
-        <div class="product-grid" id="productGrid" aria-live="polite"></div>
-        <p class="catalog-note" id="how-pricing-works">Every AUD product price includes ¥990 shipping within Japan per box and uses the 8 October 2026 mid-market rate of A$1 = ¥110.04. DHL or FedEx delivery, Australian GST, customs charges, and payment-provider conversion are calculated separately.</p>
       </div>
     </section>
 
     <section class="shipping" id="shipping">
       <div class="shell shipping__grid">
-        <div>
-          <h2>Every order ships from Japan.</h2>
+        <div class="shipping__visual">
+          <img src="assets/brand/mcj-orbit-banner.jpg" alt="MegaCards Japan neon orbit artwork" width="1500" height="500" loading="lazy">
+          <div><i class="ph ph-airplane-takeoff" aria-hidden="true"></i><span>Japan</span><b></b><i class="ph ph-map-pin" aria-hidden="true"></i><span>Australia</span></div>
+          <h2>Japan to your collection.</h2>
         </div>
         <div class="shipping__details">
           <p>MegaCards is based in Japan. Every box is packed in Japan and dispatched directly to your Australian delivery address using tracked DHL or FedEx shipping. Delivery estimates and the exact shipping charge are confirmed before payment.</p>
@@ -340,16 +366,17 @@
 
   <footer>
     <div class="shell footer__inner">
-      <a class="brand brand--footer" href="#top"><span class="brand__mark">M</span><span>MegaCards<span class="brand__suffix">.jp</span></span></a>
+      <a class="brand brand--footer" href="#top"><img class="brand__logo" src="assets/brand/mcj-logo.png" alt="" width="72" height="72"><span class="brand__wordmark">MEGACARDS<span class="brand__suffix">.JP</span></span></a>
       <p><a href="faq.php">FAQ</a></p>
       <p><a href="terms.html">Terms</a></p>
       <p><a href="privacy.html">Privacy</a></p>
       <p><a href="mailto:info@megacards.jp">Contact</a></p>
-      <p><a href="https://www.instagram.com/megacards.jp/" target="_blank" rel="noopener noreferrer">Instagram</a></p>
+      <p><a href="https://www.instagram.com/magacards.jp/" target="_blank" rel="noopener noreferrer">Instagram</a></p>
       <p>© 2026 Atta Trade · Secondhand Dealer Permit #451460009881</p>
     </div>
   </footer>
 
-  <script src="app.js?v=20261015-01"></script>
+  <script src="app.js?v=20261116-01"></script>
+  <script src="brand-motion.js?v=20261116-01"></script>
 </body>
 </html>
