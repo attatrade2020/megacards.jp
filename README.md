@@ -42,4 +42,4 @@ The cart also estimates the Australian low-value import treatment from the produ
 
 Checkout supports Wise payment links and PayPal invoices. PayPal orders include the existing 5% transaction fee, itemised before the order is submitted. Both methods are invoiced in JPY and reuse the production order and confirmation-email endpoints.
 
-The Australia-focused customer FAQ is served through `faq.php` and covers ordering, shipping, GST and customs, Japanese product details, and support.
+The Australia-focused customer FAQ is served through `faq.php` and covers ordering, shipping and customs, Japanese product details, and support.

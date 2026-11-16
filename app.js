@@ -763,7 +763,7 @@ function renderCustomsEstimate() {
   if (productValueAud <= 1000) {
     customsIndicator.dataset.status = "low";
     customsTitle.textContent = "Customs duty generally not charged";
-    customsMessage.textContent = `${audLabel(productValueAud)} product value is within the ABF low-value threshold of A$1,000. GST may still apply at sale; ABF makes the final assessment.`;
+    customsMessage.textContent = `${audLabel(productValueAud)} product value is within the ABF low-value threshold of A$1,000. Australian Border Force makes the final assessment of any import requirements.`;
   } else {
     customsIndicator.dataset.status = "high";
     customsTitle.textContent = "Import charges may apply";
@@ -1585,7 +1585,7 @@ async function loadExchangeRate() {
     AUD_JPY_RATE = Number(data.rate);
     CART_SUGGESTION_LIMIT_JPY = Math.floor(CART_SUGGESTION_LIMIT_AUD * AUD_JPY_RATE);
     const pricingNote = document.getElementById("how-pricing-works");
-    if (pricingNote) pricingNote.textContent = `Every AUD product price includes ¥990 shipping within Japan per box and uses the ${data.date} reference rate of A$1 = ¥${AUD_JPY_RATE.toFixed(2)}. DHL or FedEx delivery, Australian GST, customs charges, and payment-provider conversion are calculated separately.`;
+    if (pricingNote) pricingNote.textContent = `Every AUD product price includes ¥990 shipping within Japan per box and uses the ${data.date} reference rate of A$1 = ¥${AUD_JPY_RATE.toFixed(2)}. DHL or FedEx delivery, customs charges, and payment-provider conversion are calculated separately.`;
   } catch (_) {
     // Keep the most recent safe fallback rate when the rate service is unavailable.
   }
